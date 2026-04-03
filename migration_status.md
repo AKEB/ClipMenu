@@ -3,7 +3,7 @@
 > **Every agent that completes a migration step MUST update this file before committing.**
 > See `.github/copilot-instructions.md` for the full rule.
 
-**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete — Phase 4 complete (actions execution path implemented end-to-end: default action seeding, bundled scripts resources, contextual modifier-click popup dispatch inside clip-menu context, JS require path compatibility, numeric key equivalents in native popup, dedicated actions shortcut/menu while preserving snippets shortcut UX, Actions preferences CRUD editor with balanced native macOS UX, and drag/drop tree organization; build passes)
+**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete — Phase 4 complete (actions execution path implemented end-to-end: default action seeding, bundled scripts resources, contextual modifier-click popup dispatch inside clip-menu context, JS require path compatibility, numeric key equivalents in native popup, dedicated actions shortcut/menu while preserving snippets shortcut UX, Actions preferences CRUD editor with balanced native macOS UX, drag/drop tree organization, and folder-grouped JavaScript catalog browsing in Actions preferences; build passes)
 
 ---
 
@@ -19,6 +19,7 @@
  - [x] Phase 4 modifier behavior picker parity: modifier-click pickers now include direct "Run <action>" options backed by serialized action payloads (builtin and JavaScript), in addition to no-action and popup-menu modes
  - [x] Action popup context fix: modifier-triggered action menus from clip rows are now anchored to the active clip-menu event/window content view rather than detached screen-position popups
  - [x] Hotkey parity extension: added a dedicated global shortcut/menu for actions (`⌘⇧A`) and integrated it in `HotkeyService` + `ShortcutsPrefsView` while preserving existing snippets shortcut UX (`⌘⇧B`)
+ - [x] JavaScript catalog folder parity: `ActionsPrefsView` now renders JavaScript/User script catalogs as hierarchical folder trees (instead of a flat list) so insertion browsing matches bundled script structure
  - [x] Snippets styling refinement: panel backgrounds normalized to `black.opacity(0.1)` and content editor made visually unified with the same card background by hiding the default scroll/content fill
  - [x] Snippets editor controls aligned to macOS conventions: folder/snippet add/remove actions now use compact `+`/`−` controls positioned under each list instead of text buttons
  - [x] Snippets editor visual refresh: removed harsh split dividers and restyled the three-column editor into rounded, darker panel cards for folders, snippet titles, and content while preserving existing rename/selection/edit behaviors

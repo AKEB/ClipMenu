@@ -39,6 +39,18 @@ struct ActionsPrefsView: View {
         var scriptPath: String?
     }
 
+    private struct CatalogNode: Identifiable, Hashable {
+        var id: String
+        var name: String
+        var isLeaf: Bool
+        var item: AvailableActionItem?
+        var children: [CatalogNode]
+
+        var visibleChildren: [CatalogNode]? {
+            children.isEmpty ? nil : children
+        }
+    }
+
     var body: some View {
         @Bindable var s = settings
         VStack(spacing: 12) {
@@ -229,9 +241,13 @@ struct ActionsPrefsView: View {
             .pickerStyle(.segmented)
 
             List(selection: $selectedCatalogID) {
-                ForEach(availableItems) { item in
-                    Text(item.name)
-                        .tag(item.id)
+                OutlineGroup(catalogNodes, children: \.visibleChildren) { node in
+                    HStack(spacing: 8) {
+                        Image(systemName: node.isLeaf ? "bolt.fill" : "folder.fill")
+                            .foregroundStyle(node.isLeaf ? .orange : .accentColor)
+                        Text(node.name)
+                    }
+                    .tag(node.id)
                 }
             }
             .listStyle(.sidebar)
@@ -253,7 +269,25 @@ struct ActionsPrefsView: View {
 
     private var selectedCatalogItem: AvailableActionItem? {
         guard let selectedCatalogID else { return nil }
-        return availableItems.first { $0.id == selectedCatalogID }
+        return catalogLeafItemsByID[selectedCatalogID]
+    }
+
+    private var catalogLeafItemsByID: [String: AvailableActionItem] {
+        var result: [String: AvailableActionItem] = [:]
+
+        func collect(_ nodes: [CatalogNode]) {
+            for node in nodes {
+                if let item = node.item {
+                    result[item.id] = item
+                }
+                if !node.children.isEmpty {
+                    collect(node.children)
+                }
+            }
+        }
+
+        collect(catalogNodes)
+        return result
     }
 
     private var clickBehaviorOptions: [ClickBehaviorOption] {
@@ -280,29 +314,59 @@ struct ActionsPrefsView: View {
         return options
     }
 
-    private var availableItems: [AvailableActionItem] {
+    private var catalogNodes: [CatalogNode] {
         switch rightTab {
         case .builtin:
             return [
-                AvailableActionItem(id: "builtin:pasteAsPlainText", name: "Paste as Plain Text", actionType: "builtin", actionName: "pasteAsPlainText"),
-                AvailableActionItem(id: "builtin:pasteAsFilePath", name: "Paste as File Path", actionType: "builtin", actionName: "pasteAsFilePath"),
-                AvailableActionItem(id: "builtin:pasteAsHFSFilePath", name: "Paste as HFS File Path", actionType: "builtin", actionName: "pasteAsHFSFilePath"),
-                AvailableActionItem(id: "builtin:removeAction", name: "Remove", actionType: "builtin", actionName: "removeAction"),
+                CatalogNode(
+                    id: "builtin:pasteAsPlainText",
+                    name: "Paste as Plain Text",
+                    isLeaf: true,
+                    item: AvailableActionItem(id: "builtin:pasteAsPlainText", name: "Paste as Plain Text", actionType: "builtin", actionName: "pasteAsPlainText"),
+                    children: []
+                ),
+                CatalogNode(
+                    id: "builtin:pasteAsFilePath",
+                    name: "Paste as File Path",
+                    isLeaf: true,
+                    item: AvailableActionItem(id: "builtin:pasteAsFilePath", name: "Paste as File Path", actionType: "builtin", actionName: "pasteAsFilePath"),
+                    children: []
+                ),
+                CatalogNode(
+                    id: "builtin:pasteAsHFSFilePath",
+                    name: "Paste as HFS File Path",
+                    isLeaf: true,
+                    item: AvailableActionItem(id: "builtin:pasteAsHFSFilePath", name: "Paste as HFS File Path", actionType: "builtin", actionName: "pasteAsHFSFilePath"),
+                    children: []
+                ),
+                CatalogNode(
+                    id: "builtin:removeAction",
+                    name: "Remove",
+                    isLeaf: true,
+                    item: AvailableActionItem(id: "builtin:removeAction", name: "Remove", actionType: "builtin", actionName: "removeAction"),
+                    children: []
+                ),
             ]
         case .javaScript:
             let bundleURL = Bundle.main.resourceURL?.appendingPathComponent("scripts/action")
-            return scriptItems(in: bundleURL)
+            return scriptCatalogNodes(in: bundleURL)
         case .users:
             let userURL = FileManager.default
                 .urls(for: .applicationSupportDirectory, in: .userDomainMask)
                 .first?
                 .appendingPathComponent("ClipMenu/script/action")
-            return scriptItems(in: userURL)
+            return scriptCatalogNodes(in: userURL)
         }
     }
 
-    private func scriptItems(in root: URL?) -> [AvailableActionItem] {
+    private func scriptCatalogNodes(in root: URL?) -> [CatalogNode] {
         guard let root else { return [] }
+
+        struct ScriptRecord {
+            let relativePath: String
+            let fullPath: String
+        }
+
         let fm = FileManager.default
         guard let enumerator = fm.enumerator(
             at: root,
@@ -312,21 +376,94 @@ struct ActionsPrefsView: View {
             return []
         }
 
-        var items: [AvailableActionItem] = []
+        var records: [ScriptRecord] = []
         for case let url as URL in enumerator {
             guard url.pathExtension.lowercased() == "js" else { continue }
             let relative = url.path.replacingOccurrences(of: root.path + "/", with: "")
-            let display = relative.replacingOccurrences(of: ".js", with: "")
-            items.append(AvailableActionItem(
-                id: "script:\(url.path)",
-                name: display,
-                actionType: "javaScript",
-                actionName: nil,
-                scriptPath: url.path
-            ))
+            records.append(ScriptRecord(relativePath: relative, fullPath: url.path))
         }
 
-        return items.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        final class MutableNode {
+            let id: String
+            let name: String
+            var isLeaf: Bool
+            var item: AvailableActionItem?
+            var children: [String: MutableNode] = [:]
+
+            init(id: String, name: String, isLeaf: Bool, item: AvailableActionItem? = nil) {
+                self.id = id
+                self.name = name
+                self.isLeaf = isLeaf
+                self.item = item
+            }
+        }
+
+        let rootNode = MutableNode(id: "root", name: "root", isLeaf: false)
+
+        for record in records {
+            let parts = record.relativePath.split(separator: "/").map(String.init)
+            guard !parts.isEmpty else { continue }
+
+            var cursor = rootNode
+            for (idx, part) in parts.enumerated() {
+                let isLast = idx == parts.count - 1
+                if isLast {
+                    let name = part.replacingOccurrences(of: ".js", with: "")
+                    let item = AvailableActionItem(
+                        id: "script:\(record.fullPath)",
+                        name: name,
+                        actionType: "javaScript",
+                        actionName: nil,
+                        scriptPath: record.fullPath
+                    )
+                    cursor.children[name] = MutableNode(
+                        id: item.id,
+                        name: name,
+                        isLeaf: true,
+                        item: item
+                    )
+                } else {
+                    if cursor.children[part] == nil {
+                        cursor.children[part] = MutableNode(
+                            id: "folder:\(parts.prefix(idx + 1).joined(separator: "/"))",
+                            name: part,
+                            isLeaf: false
+                        )
+                    }
+                    if let next = cursor.children[part] {
+                        cursor = next
+                    }
+                }
+            }
+        }
+
+        func freeze(_ node: MutableNode) -> CatalogNode {
+            let sortedChildren = node.children.values
+                .sorted { lhs, rhs in
+                    if lhs.isLeaf != rhs.isLeaf {
+                        return lhs.isLeaf && !rhs.isLeaf ? false : true
+                    }
+                    return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+                }
+                .map(freeze)
+
+            return CatalogNode(
+                id: node.id,
+                name: node.name,
+                isLeaf: node.isLeaf,
+                item: node.item,
+                children: sortedChildren
+            )
+        }
+
+        return rootNode.children.values
+            .sorted { lhs, rhs in
+                if lhs.isLeaf != rhs.isLeaf {
+                    return lhs.isLeaf && !rhs.isLeaf ? false : true
+                }
+                return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+            }
+            .map(freeze)
     }
 
     private func addSelectedCatalogAction() {
