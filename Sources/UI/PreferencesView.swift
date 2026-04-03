@@ -1,11 +1,33 @@
 import SwiftUI
 
-enum PreferencesTab: Hashable {
+enum PreferencesTab: Hashable, CaseIterable, Identifiable {
     case general
     case menu
     case snippets
     case actions
     case shortcuts
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .general: return "General"
+        case .menu: return "Menu"
+        case .snippets: return "Snippets"
+        case .actions: return "Actions"
+        case .shortcuts: return "Shortcuts"
+        }
+    }
+
+    var symbolName: String {
+        switch self {
+        case .general: return "gearshape"
+        case .menu: return "list.bullet"
+        case .snippets: return "text.badge.plus"
+        case .actions: return "bolt"
+        case .shortcuts: return "keyboard"
+        }
+    }
 }
 
 /// Root of the Settings scene — tabbed preferences window.
@@ -20,28 +42,50 @@ struct PreferencesView: View {
     }
 
     var body: some View {
-        TabView(selection: $selection) {
-            GeneralPrefsView()
-                .tag(PreferencesTab.general)
-                .tabItem { Label("General", systemImage: "gearshape") }
+        VStack(spacing: 12) {
+            HStack(spacing: 6) {
+                ForEach(PreferencesTab.allCases) { tab in
+                    Button {
+                        selection = tab
+                    } label: {
+                        Label(tab.title, systemImage: tab.symbolName)
+                            .font(.system(size: 13, weight: .medium))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                    }
+                    .buttonStyle(.plain)
+                    .focusable(false)
+                    .foregroundStyle(selection == tab ? .white : .primary)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(selection == tab ? Color.accentColor : Color.clear)
+                    )
+                }
+            }
+            .padding(6)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color(nsColor: .controlBackgroundColor))
+            )
 
-            MenuPrefsView()
-                .tag(PreferencesTab.menu)
-                .tabItem { Label("Menu", systemImage: "list.bullet") }
-
-            SnippetsPrefsView()
-                .tag(PreferencesTab.snippets)
-                .tabItem { Label("Snippets", systemImage: "text.badge.plus") }
-
-            ActionsPrefsView()
-                .tag(PreferencesTab.actions)
-                .tabItem { Label("Actions", systemImage: "bolt") }
-
-            ShortcutsPrefsView()
-                .tag(PreferencesTab.shortcuts)
-                .tabItem { Label("Shortcuts", systemImage: "keyboard") }
+            Group {
+                switch selection {
+                case .general:
+                    GeneralPrefsView()
+                case .menu:
+                    MenuPrefsView()
+                case .snippets:
+                    SnippetsPrefsView()
+                case .actions:
+                    ActionsPrefsView()
+                case .shortcuts:
+                    ShortcutsPrefsView()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
         .frame(minWidth: 680, minHeight: 500)
+        .padding(12)
     }
 }
 

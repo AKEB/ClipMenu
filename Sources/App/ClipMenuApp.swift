@@ -30,7 +30,10 @@ struct ClipMenuApp: App {
                 .environment(\.snippetService, runtime.snippetService)
                 .environment(\.actionService, runtime.actionService)
         } label: {
-            Image(systemName: "doc.on.clipboard")
+            Image(systemName: "clipboard.fill")
+                .symbolRenderingMode(.monochrome)
+                .font(.system(size: 13, weight: .semibold))
+                .accessibilityLabel("ClipMenu")
         }
         .menuBarExtraStyle(.menu)
         .modelContainer(modelContainer)

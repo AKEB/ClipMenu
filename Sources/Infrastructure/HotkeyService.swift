@@ -161,20 +161,24 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
             menu.addItem(.separator())
             let clear = NSMenuItem(title: "Clear History", action: #selector(HotkeyPopupActionTarget.clearHistory(_:)), keyEquivalent: "")
             clear.target = actionTarget
+            clear.image = NSImage(systemSymbolName: "trash", accessibilityDescription: nil)
             menu.addItem(clear)
         }
 
         menu.addItem(.separator())
         let editSnippets = NSMenuItem(title: "Edit Snippets…", action: #selector(HotkeyPopupActionTarget.openSnippetsEditor(_:)), keyEquivalent: "")
         editSnippets.target = actionTarget
+        editSnippets.image = NSImage(systemSymbolName: "text.badge.plus", accessibilityDescription: nil)
         menu.addItem(editSnippets)
 
         let prefs = NSMenuItem(title: "Preferences…", action: #selector(HotkeyPopupActionTarget.openPreferences(_:)), keyEquivalent: "")
         prefs.target = actionTarget
+        prefs.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)
         menu.addItem(prefs)
 
         let quit = NSMenuItem(title: "Quit ClipMenu", action: #selector(HotkeyPopupActionTarget.quit(_:)), keyEquivalent: "")
         quit.target = actionTarget
+        quit.image = NSImage(systemSymbolName: "power", accessibilityDescription: nil)
         menu.addItem(quit)
 
         return menu
@@ -230,6 +234,9 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
                                   keyEquivalent: "")
             item.target = actionTarget
             item.representedObject = clip
+            if let thumbnail = thumbnailImage(for: clip, settings: settings) {
+                item.image = thumbnail
+            }
             menu.addItem(item)
         }
 
@@ -251,6 +258,9 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
                                       keyEquivalent: "")
                 item.target = actionTarget
                 item.representedObject = clip
+                if let thumbnail = thumbnailImage(for: clip, settings: settings) {
+                    item.image = thumbnail
+                }
                 submenu.addItem(item)
             }
 
@@ -285,6 +295,8 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
         let trimmed: String
         if firstLine.count > maxLen {
             trimmed = String(firstLine.prefix(max(maxLen - 3, 0))) + "..."
+        } else if firstLine.isEmpty, clip.imageData != nil {
+            trimmed = "(Image)"
         } else {
             trimmed = firstLine.isEmpty ? "(binary)" : firstLine
         }
@@ -293,6 +305,27 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
             return "\(listNumber). \(trimmed)"
         }
         return trimmed
+    }
+
+    private func thumbnailImage(for clip: ClipEntry, settings: ClipMenuSettings) -> NSImage? {
+        guard settings.showImageInMenu,
+              let imageData = clip.imageData,
+              let image = NSImage(data: imageData)
+        else { return nil }
+
+        let targetSize = NSSize(width: CGFloat(settings.thumbnailWidth),
+                                height: CGFloat(settings.thumbnailHeight))
+        return scaledImage(image, to: targetSize)
+    }
+
+    private func scaledImage(_ image: NSImage, to size: NSSize) -> NSImage {
+        let ratio = min(size.width / image.size.width, size.height / image.size.height)
+        let newSize = NSSize(width: image.size.width * ratio, height: image.size.height * ratio)
+        let scaled = NSImage(size: newSize)
+        scaled.lockFocus()
+        image.draw(in: NSRect(origin: .zero, size: newSize))
+        scaled.unlockFocus()
+        return scaled
     }
 }
 

@@ -8,8 +8,7 @@
 ---
 
 ## Completed
-
-### Repository restructure
+ - [x] Image clip rendering parity improved: image-only clips now use `(Image)` fallback title and show scaled thumbnails in both SwiftUI menu rows and native hotkey popup history menus
 - [x] All legacy Objective-C source moved to `legacy/` for reference
   - `legacy/Source/` — 40+ ObjC `.h`/`.m` files
   - `legacy/English.lproj/`, `legacy/Japanese.lproj/` — XIB + strings
@@ -87,6 +86,12 @@ No tasks currently in progress.
 - [x] Snippets settings UX improved: selected folder can now be renamed directly in `SnippetsPrefsView`
 - [x] Snippets settings parity pass: `SnippetsPrefsView` now uses a classic 3-column macOS layout (Folders / Titles / Content), supports folder rename on double-click, and exposes snippet-position placement (above/below/hidden) directly in the Snippets tab
 - [x] Snippets rename/edit parity improved: snippet titles now support inline rename on double-click (same interaction model as folders), and the Snippets tab layout is now responsive with adaptive top controls and resizable split columns
+- [x] Preferences/navigation polish: custom preferences tabs now use explicit SF Symbol icons in the tab strip for consistent icon visibility in the AppKit-hosted settings window
+- [x] Menu bar icon polish: switched MenuBarExtra label to a cleaner SF Symbol with explicit menu-bar sizing/weight for better visual fit
+- [x] Main app menu icon polish: added SF Symbol icons for top-level command items (Clear History, Edit Snippets, Preferences, Quit) in both SwiftUI status menu and native hotkey popup menu
+- [x] Preferences tab-strip focus polish: replaced custom button row with native segmented control using SF Symbols to eliminate distracting focus outline artifacts
+- [x] Preferences tab-strip icon parity restored: reintroduced SF Symbol icons in the custom tab strip while suppressing focus-ring artifacts via non-focusable plain tab buttons
+- [x] Menu grouping icon parity: history range groups and snippet folder groups now show folder icons in the main SwiftUI status menu
 
 ---
 

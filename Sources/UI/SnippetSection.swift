@@ -17,10 +17,12 @@ struct SnippetSection: View {
                 .filter(\.isEnabled)
                 .sorted { $0.sortIndex < $1.sortIndex }
             if !enabled.isEmpty {
-                Menu(folder.title) {
+                Menu {
                     ForEach(enabled) { snippet in
                         snippetButton(snippet)
                     }
+                } label: {
+                    Label(folder.title, systemImage: "folder")
                 }
             }
         }

@@ -33,16 +33,28 @@ struct ClipMenuView: View {
         // Clear History
         if settings.showClearHistoryItem {
             Divider()
-            Button("Clear History") { clearHistory() }
+            Button(action: clearHistory) {
+                Label("Clear History", systemImage: "trash")
+            }
         }
 
         Divider()
 
-        Button("Edit Snippets…") {
+        Button {
             runtime.showPreferences(tab: .snippets)
+        } label: {
+            Label("Edit Snippets…", systemImage: "text.badge.plus")
         }
-        Button("Preferences…") { runtime.showPreferences() }
-        Button("Quit ClipMenu") { NSApp.terminate(nil) }
+        Button {
+            runtime.showPreferences()
+        } label: {
+            Label("Preferences…", systemImage: "gearshape")
+        }
+        Button {
+            NSApp.terminate(nil)
+        } label: {
+            Label("Quit ClipMenu", systemImage: "power")
+        }
     }
 
     // MARK: - Clips section
@@ -79,13 +91,15 @@ struct ClipMenuView: View {
         ForEach(Array(folderGroups.enumerated()), id: \.offset) { groupIndex, group in
             let start = inlineCount + groupIndex * groupSize + 1
             let end   = start + group.count - 1
-            Menu("\(start) – \(end)") {
+            Menu {
                 ForEach(Array(group.enumerated()), id: \.element.id) { idx, clip in
                     ClipMenuItem(
                         entry: clip,
                         listNumber: listNumber(for: inlineCount + groupIndex * groupSize + idx)
                     )
                 }
+            } label: {
+                Label("\(start) – \(end)", systemImage: "folder")
             }
         }
     }

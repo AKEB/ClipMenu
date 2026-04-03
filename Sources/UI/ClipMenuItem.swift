@@ -80,7 +80,13 @@ struct ClipMenuItem: View {
         if firstLine.count > maxLen {
             return String(firstLine.prefix(max(maxLen - 3, 0))) + "..."
         }
-        return firstLine.isEmpty ? "(binary)" : firstLine
+        if !firstLine.isEmpty {
+            return firstLine
+        }
+        if entry.imageData != nil {
+            return "(Image)"
+        }
+        return "(binary)"
     }
 
     // MARK: - Visual properties
