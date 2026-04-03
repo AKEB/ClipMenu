@@ -72,24 +72,34 @@ final class ScriptEngine {
     }
 
     private func libSource(for relativePath: String) -> String? {
-        // Bundle resources first, then user support folder
-        let bundleLegacyURL = Bundle.main.resourceURL?
-            .appendingPathComponent("script/lib")
-            .appendingPathComponent(relativePath)
-        let bundleModernURL = Bundle.main.resourceURL?
-            .appendingPathComponent("scripts/lib")
-            .appendingPathComponent(relativePath)
-        let userURL = FileManager.default
-            .urls(for: .applicationSupportDirectory, in: .userDomainMask)
-            .first?
-            .appendingPathComponent("ClipMenu/script/lib")
-            .appendingPathComponent(relativePath)
+        let pathsToTry: [String]
+        if relativePath.lowercased().hasSuffix(".js") {
+            pathsToTry = [relativePath]
+        } else {
+            pathsToTry = [relativePath, "\(relativePath).js"]
+        }
 
-        for url in [bundleLegacyURL, bundleModernURL, userURL].compactMap({ $0 }) {
-            if let source = try? String(contentsOf: url, encoding: .utf8) {
-                return source
+        // Bundle resources first, then user support folder
+        for path in pathsToTry {
+            let bundleLegacyURL = Bundle.main.resourceURL?
+                .appendingPathComponent("script/lib")
+                .appendingPathComponent(path)
+            let bundleModernURL = Bundle.main.resourceURL?
+                .appendingPathComponent("scripts/lib")
+                .appendingPathComponent(path)
+            let userURL = FileManager.default
+                .urls(for: .applicationSupportDirectory, in: .userDomainMask)
+                .first?
+                .appendingPathComponent("ClipMenu/script/lib")
+                .appendingPathComponent(path)
+
+            for url in [bundleLegacyURL, bundleModernURL, userURL].compactMap({ $0 }) {
+                if let source = try? String(contentsOf: url, encoding: .utf8) {
+                    return source
+                }
             }
         }
+
         return nil
     }
 }
