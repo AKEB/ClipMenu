@@ -71,6 +71,12 @@ No tasks currently in progress.
 - [x] Settings reload now uses typed fallback defaults (`object(forKey:)` with explicit defaults) rather than raw `bool/integer` reads, improving launch-time hydration correctness when keys are missing or malformed
 - [x] SwiftData environment wiring hardened for menu startup: `ClipMenuApp` now injects `.modelContainer(modelContainer)` directly into `ClipMenuView` and `PreferencesView` roots to avoid `@Query` modelContext-missing errors on initial load
 - [x] Paste actions no longer force Accessibility permission prompts on each click; `PasteService` now checks `AXIsProcessTrusted()` without opening System Settings, preventing repetitive prompt spam during menu usage
+- [x] Hotkey registration reliability improved: `HotkeyService` now dispatches menu activation on the main thread and uses resilient status-item lookup (`statusItems`/`_statusItems`) so Cmd+Shift+V / Cmd+Shift+B consistently open the menu
+- [x] Hotkey bootstrap hardening: `HotkeyService.register()` now restores default shortcuts when persisted entries are missing/disabled, preventing inactive Cmd+Shift+V / Cmd+Shift+B on launch
+- [x] Hotkey trigger path hardened further: switched handlers to key-down events and made menu activation retry on main-thread with app activation before status-item click, improving global shortcut responsiveness when app is backgrounded
+- [x] Launch-order fix: `AppDelegate` now registers hotkeys independently of SwiftData readiness and retries data-service startup until `modelContainer.mainContext` exists, preventing silent startup paths where shortcuts/services were skipped
+- [x] Hotkey menu presentation refined: shortcuts now trigger on key-up, menu activation is deferred to next runloop, forced app activation was removed, and status-item targeting/click fallback logic was strengthened to prevent focus-steal without menu display
+- [x] Hotkey resilience fallback: when status-item click injection does not open a menu, a lightweight floating panel hosting `ClipMenuView` is presented near cursor, ensuring keyboard shortcuts still reveal clipboard UI
 
 ---
 
