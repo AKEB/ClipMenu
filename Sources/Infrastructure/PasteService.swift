@@ -12,7 +12,7 @@ import os
 actor PasteService {
     private static let log = Logger(subsystem: "com.naotaka.ClipMenu", category: "PasteService")
     private var cachedVKeyCode: CGKeyCode?
-    private var requestedAXPromptThisSession = false
+    private var loggedMissingAXThisSession = false
 
     init() {
         NotificationCenter.default.addObserver(
@@ -54,18 +54,16 @@ actor PasteService {
             return true
         }
 
-        // Dev builds can end up with stale/mismatched TCC rows. Ask macOS to
-        // re-surface the permission affordance once per app session.
-        if !requestedAXPromptThisSession {
-            requestedAXPromptThisSession = true
-            let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
-            _ = AXIsProcessTrustedWithOptions(options)
+        // Avoid OS permission prompts on launch/session boundaries. We only
+        // report missing permission and let users grant it from Settings.
+        if !loggedMissingAXThisSession {
+            loggedMissingAXThisSession = true
             let bundleID = Bundle.main.bundleIdentifier ?? "<nil>"
             let execPath = Bundle.main.executableURL?.path ?? "<unknown>"
-            Self.log.error("Requested Accessibility prompt; trust still false. bundleID=\(bundleID, privacy: .public) execPath=\(execPath, privacy: .public)")
+            Self.log.error("Accessibility permission missing. bundleID=\(bundleID, privacy: .public) execPath=\(execPath, privacy: .public)")
         }
 
-        return AXIsProcessTrusted()
+        return false
     }
 
     private func invalidateCachedKeyCode() {

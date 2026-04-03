@@ -3,11 +3,12 @@
 > **Every agent that completes a migration step MUST update this file before committing.**
 > See `.github/copilot-instructions.md` for the full rule.
 
-**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete (hotkeys wired, snippets settings/menu parity improved, preferences window made larger/resizable, settings persistence/startup hydration hardened, history-cap/paste crash regressions fixed, build passes)
+**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete (hotkeys wired, snippets settings/menu parity improved, preferences window made larger/resizable, settings persistence/startup hydration hardened, history-cap/paste crash regressions fixed, permission prompt behavior refined, build passes)
 
 ---
 
 ## Completed
+ - [x] Permission prompt behavior refined: `PasteService` no longer invokes `AXIsProcessTrustedWithOptions` re-prompts each app session; it now checks trust only and logs missing permission once per session, avoiding repeated prompt popups on app open
  - [x] Regression fix: history menus now honor configured history cap in both SwiftUI status menu and native hotkey popup (capped to `maxHistorySize`), and startup now enforces trimming immediately
  - [x] Regression fix: `ClipsService` moved to `@MainActor` isolation so pasteboard + SwiftData `mainContext` operations execute on the correct thread, preventing menu-selection paste crash path
  - [x] Image clip rendering parity improved: image-only clips now use `(Image)` fallback title and show scaled thumbnails in both SwiftUI menu rows and native hotkey popup history menus

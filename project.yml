@@ -40,10 +40,12 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: app.eetr.ClipMenu
         PRODUCT_NAME: ClipMenu
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: YES
         CODE_SIGN_STYLE: Automatic
         ENABLE_HARDENED_RUNTIME: YES
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: ClipMenu
+        INFOPLIST_KEY_CFBundleIconName: AppIcon
         INFOPLIST_KEY_LSUIElement: YES
         INFOPLIST_KEY_NSPrincipalClass: NSApplication
         MARKETING_VERSION: "1.0.0"
