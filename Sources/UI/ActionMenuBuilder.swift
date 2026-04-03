@@ -38,7 +38,7 @@ enum ActionMenuBuilder {
         postAction: (@MainActor () async -> Void)?
     ) -> NSMenuItem {
         if node.isLeaf {
-            let item = NSMenuItem(title: node.title, action: #selector(ActionMenuTarget.perform(_:)), keyEquivalent: "")
+            let item = NSMenuItem(title: node.title, action: #selector(ActionMenuTarget.handleMenuItemAction(_:)), keyEquivalent: "")
             item.target = ActionMenuTarget.shared
             item.representedObject = ActionMenuInvocation {
                 Task {
@@ -78,7 +78,8 @@ enum ActionMenuBuilder {
 final class ActionMenuTarget: NSObject {
     static let shared = ActionMenuTarget()
 
-    @objc func perform(_ sender: NSMenuItem) {
+    @objc(handleMenuItemAction:)
+    func handleMenuItemAction(_ sender: NSMenuItem) {
         guard let invocation = sender.representedObject as? ActionMenuInvocation else { return }
         invocation.invoke()
     }
