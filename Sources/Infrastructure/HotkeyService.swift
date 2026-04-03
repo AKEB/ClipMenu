@@ -16,6 +16,9 @@ extension KeyboardShortcuts.Name {
     /// Opens the snippets view (legacy: "SnippetsMenu", Cmd+Shift+B).
     static let openSnippets = Self("openSnippets",
                                    default: .init(.b, modifiers: [.command, .shift]))
+    /// Opens the actions menu for the most recent clip (Cmd+Shift+A).
+    static let openActions = Self("openActions",
+                                  default: .init(.a, modifiers: [.command, .shift]))
 }
 
 // MARK: - HotkeyService
@@ -39,6 +42,7 @@ final class HotkeyService {
         KeyboardShortcuts.onKeyUp(for: .openClipMenu) { [weak self] in self?.presentFromHotkey(name: "openClipMenu", kind: .main) }
         KeyboardShortcuts.onKeyUp(for: .openHistory)  { [weak self] in self?.presentFromHotkey(name: "openHistory", kind: .history) }
         KeyboardShortcuts.onKeyUp(for: .openSnippets) { [weak self] in self?.presentFromHotkey(name: "openSnippets", kind: .snippets) }
+        KeyboardShortcuts.onKeyUp(for: .openActions)  { [weak self] in self?.presentFromHotkey(name: "openActions", kind: .actions) }
     }
 
     func unregister() {
@@ -49,7 +53,7 @@ final class HotkeyService {
     // MARK: - Private
 
     private func ensureDefaultShortcutsIfMissing() {
-        let names: [KeyboardShortcuts.Name] = [.openClipMenu, .openHistory, .openSnippets]
+        let names: [KeyboardShortcuts.Name] = [.openClipMenu, .openHistory, .openSnippets, .openActions]
 
         for name in names {
             // KeyboardShortcuts can persist disabled shortcuts as `nil`.
@@ -75,6 +79,7 @@ private enum HotkeyMenuKind {
     case main
     case history
     case snippets
+    case actions
 }
 
 private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
@@ -149,7 +154,7 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
         ))) ?? []
 
         let showSnippetsInMain = kind == .main
-        let showHistory = kind != .snippets
+        let showHistory = kind != .snippets && kind != .actions
 
         if showSnippetsInMain && settings.positionOfSnippets == 0 {
             addSnippets(to: menu, folders: folders, settings: settings)
@@ -158,6 +163,10 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
 
         if kind == .snippets {
             addSnippets(to: menu, folders: folders, settings: settings)
+        }
+
+        if kind == .actions {
+            addActions(to: menu, clips: clips, context: context, runtime: runtime)
         }
 
         if showHistory {
@@ -194,6 +203,37 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
         menu.addItem(quit)
 
         return menu
+    }
+
+    private func addActions(to menu: NSMenu, clips: [ClipEntry], context: ModelContext, runtime: AppRuntime) {
+        guard let targetClip = clips.first else {
+            let empty = NSMenuItem(title: "No clips available", action: nil, keyEquivalent: "")
+            empty.isEnabled = false
+            menu.addItem(empty)
+            return
+        }
+
+        let titleItem = NSMenuItem(title: "Actions for Most Recent Clip", action: nil, keyEquivalent: "")
+        titleItem.isEnabled = false
+        menu.addItem(titleItem)
+        menu.addItem(.separator())
+
+        let roots = (try? context.fetch(FetchDescriptor<ActionNode>(
+            predicate: #Predicate<ActionNode> { $0.parent == nil },
+            sortBy: [SortDescriptor(\ActionNode.sortIndex)]
+        ))) ?? []
+
+        let actionsMenu = ActionMenuBuilder.makeMenu(from: roots, target: targetClip, service: runtime.actionService)
+        if actionsMenu.items.isEmpty {
+            let empty = NSMenuItem(title: "No actions configured", action: nil, keyEquivalent: "")
+            empty.isEnabled = false
+            menu.addItem(empty)
+            return
+        }
+
+        for item in actionsMenu.items {
+            menu.addItem(item)
+        }
     }
 
     private func addSnippets(to menu: NSMenu, folders: [SnippetFolder], settings: ClipMenuSettings) {

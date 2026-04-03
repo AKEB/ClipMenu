@@ -13,8 +13,9 @@ struct ShortcutsPrefsView: View {
                 KeyboardShortcuts.Recorder("Clipboard menu", name: .openClipMenu)
                 KeyboardShortcuts.Recorder("History menu", name: .openHistory)
                 KeyboardShortcuts.Recorder("Snippets menu", name: .openSnippets)
+                KeyboardShortcuts.Recorder("Actions menu", name: .openActions)
             } footer: {
-                Text("These shortcuts open the ClipMenu status-bar menu. Defaults: ⌘⇧V, ⌘⌃V, ⌘⇧B.")
+                Text("These shortcuts open the ClipMenu status-bar menu. Defaults: ⌘⇧V, ⌘⌃V, ⌘⇧B, ⌘⇧A.")
                     .foregroundStyle(.secondary)
                     .font(.footnote)
             }

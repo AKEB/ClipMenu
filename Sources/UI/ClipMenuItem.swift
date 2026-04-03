@@ -238,7 +238,14 @@ struct ClipMenuItem: View {
 
             await MainActor.run {
                 let menu = ActionMenuBuilder.makeMenu(from: enabledRoots, target: entry, service: actionService)
-                menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+                let event = NSApp.currentEvent
+                if let view = event?.window?.contentView {
+                    let pointInWindow = event?.locationInWindow ?? .zero
+                    let pointInView = view.convert(pointInWindow, from: nil)
+                    menu.popUp(positioning: nil, at: pointInView, in: view)
+                } else {
+                    menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+                }
             }
         }
     }
