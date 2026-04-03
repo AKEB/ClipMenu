@@ -24,6 +24,22 @@ This applies to any work that:
 - Build system: XcodeGen — edit `project.yml`, then run `xcodegen generate` to regenerate `ClipMenu.xcodeproj`.
 - The `.xcodeproj` is generated output; never hand-edit `project.pbxproj`.
 
+## SwiftUI View Rule
+
+**Every SwiftUI `View` in `Sources/UI/` MUST have at least one `#Preview` block.**
+
+- The preview must compile and render without requiring a live app or device.
+- Use in-memory `ModelContainer` when SwiftData models are needed:
+  ```swift
+  .modelContainer(for: [ClipEntry.self, ...], inMemory: true)
+  ```
+- Inject required environment values using test instances:
+  ```swift
+  .environment(ClipMenuSettings())
+  .environment(\.clipsService, ClipsService(settings: ClipMenuSettings()))
+  ```
+- A view file without a `#Preview` block must not be marked completed in `migration_status.md`.
+
 ## Build & Verify
 
 ```sh
