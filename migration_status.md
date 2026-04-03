@@ -76,7 +76,10 @@ No tasks currently in progress.
 - [x] Hotkey trigger path hardened further: switched handlers to key-down events and made menu activation retry on main-thread with app activation before status-item click, improving global shortcut responsiveness when app is backgrounded
 - [x] Launch-order fix: `AppDelegate` now registers hotkeys independently of SwiftData readiness and retries data-service startup until `modelContainer.mainContext` exists, preventing silent startup paths where shortcuts/services were skipped
 - [x] Hotkey menu presentation refined: shortcuts now trigger on key-up, menu activation is deferred to next runloop, forced app activation was removed, and status-item targeting/click fallback logic was strengthened to prevent focus-steal without menu display
-- [x] Hotkey resilience fallback: when status-item click injection does not open a menu, a lightweight floating panel hosting `ClipMenuView` is presented near cursor, ensuring keyboard shortcuts still reveal clipboard UI
+- [x] Hotkey presentation simplified to one UI path: shortcuts now always open a native `NSMenu` popup at cursor (no status-item click injection, no secondary fallback UI), matching legacy interaction and arrow-key navigation expectations
+- [x] Added structured hotkey diagnostics logging (`Logger`) across registration, trigger handling, status-item lookup retries, menu-open detection, and fallback-popup presentation to accelerate runtime troubleshooting
+- [x] Fixed hotkey retry exhaustion path: when no status-item button is found after all retries, `HotkeyService` now calls completion with failure so fallback panel presentation always executes
+- [x] Fallback panel presentation polished: replaced collapsed non-activating panel layout with a fixed-size utility panel and wrapped SwiftUI root (`FallbackPanelRootView`) so hotkey fallback UI renders at readable width/height
 
 ---
 

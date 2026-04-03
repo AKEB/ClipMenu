@@ -1,7 +1,8 @@
 import AppKit
 import KeyboardShortcuts
 import Foundation
-import SwiftUI
+import os
+import SwiftData
 
 // MARK: - Shortcut Names
 
@@ -26,19 +27,22 @@ extension KeyboardShortcuts.Name {
 /// +_defaultHotKeyCombos` (keyCode 9 = V, 11 = B; modifiers 768 = ⌘⇧,
 /// 4352 = ⌘⌃).
 final class HotkeyService {
-    private let fallbackPanel = HotkeyMenuPanelController()
+    fileprivate static let log = Logger(subsystem: "com.naotaka.ClipMenu", category: "Hotkeys")
+    private let popupMenu = HotkeyPopupMenuPresenter()
 
     func register() {
+        Self.log.info("Registering global shortcuts")
         ensureDefaultShortcutsIfMissing()
 
         // Trigger on key-up to avoid interacting with the menu while modifier
         // keys are still held down.
-        KeyboardShortcuts.onKeyUp(for: .openClipMenu) { [weak self] in self?.presentFromHotkey() }
-        KeyboardShortcuts.onKeyUp(for: .openHistory)  { [weak self] in self?.presentFromHotkey() }
-        KeyboardShortcuts.onKeyUp(for: .openSnippets) { [weak self] in self?.presentFromHotkey() }
+        KeyboardShortcuts.onKeyUp(for: .openClipMenu) { [weak self] in self?.presentFromHotkey(name: "openClipMenu", kind: .main) }
+        KeyboardShortcuts.onKeyUp(for: .openHistory)  { [weak self] in self?.presentFromHotkey(name: "openHistory", kind: .history) }
+        KeyboardShortcuts.onKeyUp(for: .openSnippets) { [weak self] in self?.presentFromHotkey(name: "openSnippets", kind: .snippets) }
     }
 
     func unregister() {
+        Self.log.info("Unregistering global shortcuts")
         KeyboardShortcuts.removeAllHandlers()
     }
 
@@ -52,129 +56,277 @@ final class HotkeyService {
             // Restore the built-in default when no active shortcut exists.
             if KeyboardShortcuts.getShortcut(for: name) == nil,
                let fallback = name.defaultShortcut {
+                Self.log.notice("Restoring missing shortcut for \(name.rawValue, privacy: .public)")
                 KeyboardShortcuts.setShortcut(fallback, for: name)
             }
         }
     }
 
-    private func presentFromHotkey() {
+    private func presentFromHotkey(name: String, kind: HotkeyMenuKind) {
+        Self.log.info("Hotkey triggered: \(name, privacy: .public)")
         DispatchQueue.main.async {
-            // Defer to the next runloop turn so the global shortcut event
-            // finishes before we ask MenuBarExtra to open.
-            self.activateMenu(retryCount: 3) { shown in
-                guard !shown else { return }
-                self.fallbackPanel.show(using: AppRuntime.shared)
-            }
+            // Single hotkey UX path: always show the native popup menu.
+            self.popupMenu.show(using: AppRuntime.shared, kind: kind)
         }
-    }
-
-    /// Programmatically opens the MenuBarExtra by performing a click on its
-    /// status-bar button. `NSStatusBar` does not expose a public `statusItems`
-    /// array, so we access it via Objective-C KVC — a stable, widely-used
-    /// pattern on macOS 10.x–14.
-    private func activateMenu(retryCount: Int, completion: @escaping (Bool) -> Void) {
-        guard let button = Self.statusItemButton() else {
-            guard retryCount > 0 else { return }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                self.activateMenu(retryCount: retryCount - 1, completion: completion)
-            }
-            return
-        }
-
-        var didOpenAnyMenu = false
-        let observer = NotificationCenter.default.addObserver(
-            forName: NSMenu.didBeginTrackingNotification,
-            object: nil,
-            queue: .main
-        ) { _ in
-            didOpenAnyMenu = true
-        }
-
-        button.performClick(nil)
-
-        // Fallback for cases where performClick does not open the menu due to
-        // event-ordering differences.
-        if let action = button.action {
-            NSApp.sendAction(action, to: button.target, from: button)
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
-            NotificationCenter.default.removeObserver(observer)
-            completion(didOpenAnyMenu)
-        }
-    }
-
-    private static func statusItemButton() -> NSStatusBarButton? {
-        let statusBar = NSStatusBar.system
-        let items = (statusBar.value(forKey: "statusItems") as? [NSStatusItem])
-            ?? (statusBar.value(forKey: "_statusItems") as? [NSStatusItem])
-            ?? []
-
-        let buttons = items.compactMap(\.button)
-        if let menuBarExtraButton = buttons.first(where: {
-            String(describing: type(of: $0.target as Any)).contains("MenuBarExtra")
-        }) {
-            return menuBarExtraButton
-        }
-
-        if let actionableButton = buttons.first(where: { $0.action != nil }) {
-            return actionableButton
-        }
-
-        return buttons.first
     }
 }
 
-@MainActor
-private final class HotkeyMenuPanelController: NSWindowController, NSWindowDelegate {
-    func show(using runtime: AppRuntime) {
-        guard let modelContainer = runtime.modelContainer else { return }
+private enum HotkeyMenuKind {
+    case main
+    case history
+    case snippets
+}
 
-        let window = window ?? makeWindow()
-        let rootView = ClipMenuView()
-            .modelContainer(modelContainer)
-            .environment(runtime.settings)
-            .environment(\.clipsService, runtime.clipsService)
-            .environment(\.snippetService, runtime.snippetService)
-            .environment(\.actionService, runtime.actionService)
-
-        window.contentViewController = NSHostingController(rootView: rootView)
-        positionWindowNearMouse(window)
-        window.makeKeyAndOrderFront(nil)
-        window.orderFrontRegardless()
-        NSApp.activate(ignoringOtherApps: true)
-    }
-
-    func windowDidResignKey(_ notification: Notification) {
-        window?.orderOut(nil)
-    }
-
-    private func makeWindow() -> NSWindow {
-        let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 420, height: 560),
-            styleMask: [.titled, .closable, .nonactivatingPanel],
+private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
+    private let actionTarget = HotkeyPopupActionTarget()
+    private lazy var anchorWindow: NSWindow = {
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 1, height: 1),
+            styleMask: [.borderless],
             backing: .buffered,
             defer: false
         )
-        panel.title = "ClipMenu"
-        panel.hidesOnDeactivate = true
-        panel.isFloatingPanel = true
-        panel.level = .statusBar
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        panel.delegate = self
-        self.window = panel
-        return panel
+        window.isReleasedWhenClosed = false
+        window.hasShadow = false
+        window.backgroundColor = .clear
+        window.alphaValue = 0.001
+        window.ignoresMouseEvents = true
+        window.level = .statusBar
+        return window
+    }()
+
+    @MainActor
+    func show(using runtime: AppRuntime, kind: HotkeyMenuKind) {
+        guard let context = runtime.modelContainer?.mainContext else {
+            HotkeyService.log.error("Fallback popup requested but modelContext is nil")
+            return
+        }
+
+        let menu = buildMenu(runtime: runtime, context: context, kind: kind)
+        actionTarget.runtime = runtime
+        menu.delegate = self
+
+        let mouse = NSEvent.mouseLocation
+        anchorWindow.setFrameOrigin(mouse)
+        anchorWindow.makeKeyAndOrderFront(nil)
+
+        if let contentView = anchorWindow.contentView {
+            menu.popUp(positioning: nil, at: NSPoint(x: 0, y: 0), in: contentView)
+        } else {
+            menu.popUp(positioning: nil, at: mouse, in: nil)
+        }
+
+        anchorWindow.orderOut(nil)
+        HotkeyService.log.notice("Presented fallback NSMenu popup")
     }
 
-    private func positionWindowNearMouse(_ window: NSWindow) {
-        let mouse = NSEvent.mouseLocation
-        let screen = NSScreen.screens.first(where: { NSMouseInRect(mouse, $0.frame, false) }) ?? NSScreen.main
-        let frame = screen?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
+    func menuDidClose(_ menu: NSMenu) {
+        anchorWindow.orderOut(nil)
+    }
 
-        var origin = NSPoint(x: mouse.x - window.frame.width / 2,
-                             y: mouse.y - window.frame.height / 2)
-        origin.x = max(frame.minX, min(origin.x, frame.maxX - window.frame.width))
-        origin.y = max(frame.minY, min(origin.y, frame.maxY - window.frame.height))
-        window.setFrameOrigin(origin)
+    private func buildMenu(runtime: AppRuntime, context: ModelContext, kind: HotkeyMenuKind) -> NSMenu {
+        let menu = NSMenu(title: "ClipMenu")
+        let settings = runtime.settings
+
+        let clips = (try? context.fetch(FetchDescriptor<ClipEntry>(
+            sortBy: [SortDescriptor(\ClipEntry.lastUsedAt, order: .reverse)]
+        ))) ?? []
+
+        let folders = (try? context.fetch(FetchDescriptor<SnippetFolder>(
+            sortBy: [SortDescriptor(\SnippetFolder.sortIndex, order: .forward)]
+        ))) ?? []
+
+        let showSnippetsInMain = kind == .main
+        let showHistory = kind != .snippets
+
+        if showSnippetsInMain && settings.positionOfSnippets == 0 {
+            addSnippets(to: menu, folders: folders, settings: settings)
+            if showHistory { menu.addItem(.separator()) }
+        }
+
+        if kind == .snippets {
+            addSnippets(to: menu, folders: folders, settings: settings)
+        }
+
+        if showHistory {
+            addHistory(to: menu, clips: clips, settings: settings)
+        }
+
+        if showSnippetsInMain && settings.positionOfSnippets == 1 {
+            if showHistory { menu.addItem(.separator()) }
+            addSnippets(to: menu, folders: folders, settings: settings)
+        }
+
+        if showHistory && settings.showClearHistoryItem {
+            menu.addItem(.separator())
+            let clear = NSMenuItem(title: "Clear History", action: #selector(HotkeyPopupActionTarget.clearHistory(_:)), keyEquivalent: "")
+            clear.target = actionTarget
+            menu.addItem(clear)
+        }
+
+        menu.addItem(.separator())
+        let prefs = NSMenuItem(title: "Preferences…", action: #selector(HotkeyPopupActionTarget.openPreferences(_:)), keyEquivalent: "")
+        prefs.target = actionTarget
+        menu.addItem(prefs)
+
+        let quit = NSMenuItem(title: "Quit ClipMenu", action: #selector(HotkeyPopupActionTarget.quit(_:)), keyEquivalent: "")
+        quit.target = actionTarget
+        menu.addItem(quit)
+
+        return menu
+    }
+
+    private func addSnippets(to menu: NSMenu, folders: [SnippetFolder], settings: ClipMenuSettings) {
+        let enabledFolders = folders.filter(\.isEnabled)
+        guard !enabledFolders.isEmpty else { return }
+
+        if settings.showLabelsInMenu {
+            let label = NSMenuItem(title: "Snippets", action: nil, keyEquivalent: "")
+            label.isEnabled = false
+            menu.addItem(label)
+        }
+
+        for folder in enabledFolders {
+            let snippets = folder.snippets
+                .filter(\.isEnabled)
+                .sorted { $0.sortIndex < $1.sortIndex }
+
+            guard !snippets.isEmpty else { continue }
+
+            if snippets.count == 1, let snippet = snippets.first {
+                let item = NSMenuItem(title: snippet.title, action: #selector(HotkeyPopupActionTarget.selectSnippet(_:)), keyEquivalent: "")
+                item.target = actionTarget
+                item.representedObject = snippet
+                menu.addItem(item)
+            } else {
+                let folderItem = NSMenuItem(title: folder.title, action: nil, keyEquivalent: "")
+                folderItem.image = NSImage(named: NSImage.folderName)
+                let submenu = NSMenu(title: folder.title)
+                for snippet in snippets {
+                    let item = NSMenuItem(title: snippet.title, action: #selector(HotkeyPopupActionTarget.selectSnippet(_:)), keyEquivalent: "")
+                    item.target = actionTarget
+                    item.representedObject = snippet
+                    submenu.addItem(item)
+                }
+                folderItem.submenu = submenu
+                menu.addItem(folderItem)
+            }
+        }
+    }
+
+    private func addHistory(to menu: NSMenu, clips: [ClipEntry], settings: ClipMenuSettings) {
+        if settings.showLabelsInMenu {
+            let label = NSMenuItem(title: "History", action: nil, keyEquivalent: "")
+            label.isEnabled = false
+            menu.addItem(label)
+        }
+
+        let inlineCount = max(settings.numberOfItemsInline, 0)
+        let perFolder = max(settings.numberOfItemsInsideFolder, 1)
+
+        let inlineClips = inlineCount == 0 ? [] : Array(clips.prefix(inlineCount))
+        let folderClips = inlineCount == 0 ? clips : Array(clips.dropFirst(inlineCount))
+
+        for (idx, clip) in inlineClips.enumerated() {
+            let item = NSMenuItem(title: clipTitle(for: clip, settings: settings, listNumber: listNumber(for: idx, settings: settings)),
+                                  action: #selector(HotkeyPopupActionTarget.selectClip(_:)),
+                                  keyEquivalent: "")
+            item.target = actionTarget
+            item.representedObject = clip
+            menu.addItem(item)
+        }
+
+        let groups = stride(from: 0, to: folderClips.count, by: perFolder).map {
+            Array(folderClips[$0..<min($0 + perFolder, folderClips.count)])
+        }
+
+        for (groupIndex, group) in groups.enumerated() {
+            let start = inlineCount + groupIndex * perFolder + 1
+            let end = start + group.count - 1
+            let folderItem = NSMenuItem(title: "\(start) - \(end)", action: nil, keyEquivalent: "")
+            folderItem.image = NSImage(named: NSImage.folderName)
+
+            let submenu = NSMenu(title: folderItem.title)
+            for (idx, clip) in group.enumerated() {
+                let absoluteIndex = inlineCount + groupIndex * perFolder + idx
+                let item = NSMenuItem(title: clipTitle(for: clip, settings: settings, listNumber: listNumber(for: absoluteIndex, settings: settings)),
+                                      action: #selector(HotkeyPopupActionTarget.selectClip(_:)),
+                                      keyEquivalent: "")
+                item.target = actionTarget
+                item.representedObject = clip
+                submenu.addItem(item)
+            }
+
+            folderItem.submenu = submenu
+            menu.addItem(folderItem)
+        }
+    }
+
+    private func listNumber(for index: Int, settings: ClipMenuSettings) -> Int {
+        if settings.numberingStartsAtZero {
+            return index % 10
+        }
+        let n = index + 1
+        return n > 10 ? n % 10 : n
+    }
+
+    private func clipTitle(for clip: ClipEntry, settings: ClipMenuSettings, listNumber: Int) -> String {
+        let source = clip.stringValue
+            ?? clip.filenames?.first
+            ?? clip.urlStrings?.first
+            ?? ""
+
+        let stripped = source.trimmingCharacters(in: .whitespacesAndNewlines)
+        let firstLine: String
+        if let nl = stripped.firstIndex(of: "\n") {
+            firstLine = String(stripped[..<nl])
+        } else {
+            firstLine = stripped
+        }
+
+        let maxLen = max(settings.maxMenuItemTitleLength, 1)
+        let trimmed: String
+        if firstLine.count > maxLen {
+            trimmed = String(firstLine.prefix(max(maxLen - 3, 0))) + "..."
+        } else {
+            trimmed = firstLine.isEmpty ? "(binary)" : firstLine
+        }
+
+        if settings.numberedMenuItems {
+            return "\(listNumber). \(trimmed)"
+        }
+        return trimmed
+    }
+}
+
+private final class HotkeyPopupActionTarget: NSObject {
+    weak var runtime: AppRuntime?
+
+    @objc func selectClip(_ sender: NSMenuItem) {
+        guard let runtime,
+              let clip = sender.representedObject as? ClipEntry else { return }
+        Task { await runtime.clipsService.select(clip) }
+    }
+
+    @objc func selectSnippet(_ sender: NSMenuItem) {
+        guard let runtime,
+              let snippet = sender.representedObject as? Snippet else { return }
+        Task { await runtime.clipsService.copyStringToPasteboard(snippet.content) }
+    }
+
+    @objc func clearHistory(_ sender: NSMenuItem) {
+        guard let runtime else { return }
+        Task { try? await runtime.clipsService.clearAll() }
+    }
+
+    @objc func openPreferences(_ sender: NSMenuItem) {
+        guard let runtime else { return }
+        Task { @MainActor in
+            runtime.showPreferences()
+        }
+    }
+
+    @objc func quit(_ sender: NSMenuItem) {
+        NSApp.terminate(nil)
     }
 }
