@@ -2,6 +2,15 @@ import SwiftData
 import AppKit
 import Foundation
 
+enum ActionExecutionContext {
+    case pasteContext
+    case transformOnly
+
+    var shouldPaste: Bool {
+        self == .pasteContext
+    }
+}
+
 /// Manages the action tree and dispatches script execution.
 ///
 /// Reference: `legacy/Source/ActionController.{h,m}`,
@@ -44,9 +53,9 @@ actor ActionService {
     }
 
     /// Dispatches an action node against a clip entry.
-    /// After a successful builtin or script action the result is placed on the
-    /// pasteboard and Cmd+V is synthesised.
-    func perform(action node: ActionNode, on entry: ClipEntry) async {
+    /// The selected clip is replaced with the action result before the result
+    /// is copied to pasteboard. Paste synthesis happens only in paste context.
+    func perform(action node: ActionNode, on entry: ClipEntry, executionContext: ActionExecutionContext = .pasteContext) async {
         guard node.isEnabled else { return }
 
         switch node.actionType {
@@ -55,13 +64,10 @@ actor ActionService {
             guard let script = scriptSource(for: node) else { return }
             let scriptableClip = ScriptableClip(entry: entry)
             guard let resultText = engine.run(script: script, clip: scriptableClip) else { return }
-            let pboard = NSPasteboard.general
-            pboard.clearContents()
-            pboard.setString(resultText, forType: .string)
-            await paste.paste()
+            await replaceClipWithString(resultText, for: entry, shouldPaste: executionContext.shouldPaste)
 
         case "builtin":
-            await performBuiltin(name: node.actionName ?? "", on: entry)
+            await performBuiltin(name: node.actionName ?? "", on: entry, executionContext: executionContext)
 
         default:
             break
@@ -71,27 +77,23 @@ actor ActionService {
     // MARK: - Built-in actions
     // Keep in sync with legacy/Source/BuiltInActionController.m
 
-    private func performBuiltin(name: String, on entry: ClipEntry) async {
-        let pboard = NSPasteboard.general
-
+    private func performBuiltin(name: String, on entry: ClipEntry, executionContext: ActionExecutionContext) async {
         switch name {
         case "removeAction":
             guard let context else { return }
-            context.delete(entry)
-            try? context.save()
+            await MainActor.run {
+                context.delete(entry)
+                try? context.save()
+            }
 
         case "pasteAsPlainText":
             guard let text = entry.stringValue else { return }
-            pboard.clearContents()
-            pboard.setString(text, forType: .string)
-            await paste.paste()
+            await replaceClipWithString(text, for: entry, shouldPaste: executionContext.shouldPaste)
 
         case "pasteAsFilePath":
             guard let files = entry.filenames, !files.isEmpty else { return }
             let text = files.joined(separator: "\n")
-            pboard.clearContents()
-            pboard.setString(text, forType: .string)
-            await paste.paste()
+            await replaceClipWithString(text, for: entry, shouldPaste: executionContext.shouldPaste)
 
         case "pasteAsHFSFilePath":
             guard let files = entry.filenames, !files.isEmpty else { return }
@@ -100,12 +102,36 @@ actor ActionService {
                 return CFURLCopyFileSystemPath(url, CFURLPathStyle(rawValue: 1)!) as String?
             }
             let text = hfsPaths.joined(separator: "\n")
-            pboard.clearContents()
-            pboard.setString(text, forType: .string)
-            await paste.paste()
+            await replaceClipWithString(text, for: entry, shouldPaste: executionContext.shouldPaste)
 
         default:
             break
+        }
+    }
+
+    private func replaceClipWithString(_ string: String, for entry: ClipEntry, shouldPaste: Bool) async {
+        guard let context else { return }
+
+        await MainActor.run {
+            entry.types = [NSPasteboard.PasteboardType.string.rawValue]
+            entry.stringValue = string
+            entry.rtfData = nil
+            entry.isRTFD = false
+            entry.pdfData = nil
+            entry.filenames = nil
+            entry.urlStrings = nil
+            entry.imageData = nil
+            entry.lastUsedAt = .now
+
+            try? context.save()
+
+            let pboard = NSPasteboard.general
+            pboard.clearContents()
+            pboard.setString(string, forType: .string)
+        }
+
+        if shouldPaste {
+            await paste.paste()
         }
     }
 

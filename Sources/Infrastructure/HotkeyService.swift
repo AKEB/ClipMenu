@@ -230,7 +230,15 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
             sortBy: [SortDescriptor(\ActionNode.sortIndex)]
         ))) ?? []
 
-        let actionMenu = ActionMenuBuilder.makeMenu(from: roots, target: targetClip, service: runtime.actionService)
+            let actionMenu = ActionMenuBuilder.makeMenu(
+                from: roots,
+                target: targetClip,
+                service: runtime.actionService,
+                executionContext: .transformOnly,
+                postAction: { [weak self] in
+                    await self?.pasteAfterActionIfNeeded(runtime: runtime)
+                }
+            )
         if actionMenu.items.isEmpty {
             let submenu = NSMenu(title: "Actions")
             let empty = NSMenuItem(title: "No actions configured", action: nil, keyEquivalent: "")
@@ -262,7 +270,15 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
             sortBy: [SortDescriptor(\ActionNode.sortIndex)]
         ))) ?? []
 
-        let actionsMenu = ActionMenuBuilder.makeMenu(from: roots, target: targetClip, service: runtime.actionService)
+            let actionsMenu = ActionMenuBuilder.makeMenu(
+                from: roots,
+                target: targetClip,
+                service: runtime.actionService,
+                executionContext: .transformOnly,
+                postAction: { [weak self] in
+                    await self?.pasteAfterActionIfNeeded(runtime: runtime)
+                }
+            )
         if actionsMenu.items.isEmpty {
             let empty = NSMenuItem(title: "No actions configured", action: nil, keyEquivalent: "")
             empty.isEnabled = false
@@ -276,6 +292,13 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
         }
     }
 
+        @MainActor
+        private func pasteAfterActionIfNeeded(runtime: AppRuntime) async {
+            guard runtime.settings.autoPasteAfterSelection else { return }
+            targetAppForPaste?.activate(options: [])
+            try? await Task.sleep(nanoseconds: 180_000_000)
+            await actionTarget.pasteFromHotkeyAction()
+        }
     private func addSnippets(to menu: NSMenu, folders: [SnippetFolder], settings: ClipMenuSettings) {
         let enabledFolders = folders.filter(\.isEnabled)
         guard !enabledFolders.isEmpty else { return }
@@ -533,5 +556,10 @@ private final class HotkeyPopupActionTarget: NSObject {
 
     @objc func quit(_ sender: NSMenuItem) {
         NSApp.terminate(nil)
+    }
+
+    @MainActor
+    func pasteFromHotkeyAction() async {
+        await pasteService.paste()
     }
 }

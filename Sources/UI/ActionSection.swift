@@ -39,7 +39,7 @@ struct ActionSection: View {
 
     private func performAction(_ node: ActionNode) {
         Task {
-            await actionService.perform(action: node, on: target)
+            await actionService.perform(action: node, on: target, executionContext: .pasteContext)
         }
     }
 }

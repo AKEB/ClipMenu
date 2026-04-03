@@ -3,25 +3,50 @@ import AppKit
 /// Builds a native NSMenu from an ActionNode tree for modifier-click popups.
 enum ActionMenuBuilder {
 
-    static func makeMenu(from roots: [ActionNode], target: ClipEntry, service: ActionService) -> NSMenu {
+    static func makeMenu(
+        from roots: [ActionNode],
+        target: ClipEntry,
+        service: ActionService,
+        executionContext: ActionExecutionContext = .pasteContext,
+        postAction: (@MainActor () async -> Void)? = nil
+    ) -> NSMenu {
         let menu = NSMenu()
         let sortedRoots = roots
             .filter(\.isEnabled)
             .sorted { $0.sortIndex < $1.sortIndex }
 
         for node in sortedRoots {
-            menu.addItem(makeItem(for: node, target: target, service: service))
+            menu.addItem(
+                makeItem(
+                    for: node,
+                    target: target,
+                    service: service,
+                    executionContext: executionContext,
+                    postAction: postAction
+                )
+            )
         }
 
         return menu
     }
 
-    private static func makeItem(for node: ActionNode, target: ClipEntry, service: ActionService) -> NSMenuItem {
+    private static func makeItem(
+        for node: ActionNode,
+        target: ClipEntry,
+        service: ActionService,
+        executionContext: ActionExecutionContext,
+        postAction: (@MainActor () async -> Void)?
+    ) -> NSMenuItem {
         if node.isLeaf {
             let item = NSMenuItem(title: node.title, action: #selector(ActionMenuTarget.perform(_:)), keyEquivalent: "")
             item.target = ActionMenuTarget.shared
             item.representedObject = ActionMenuInvocation {
-                Task { await service.perform(action: node, on: target) }
+                Task {
+                    await service.perform(action: node, on: target, executionContext: executionContext)
+                    if let postAction {
+                        await postAction()
+                    }
+                }
             }
             return item
         }
@@ -33,7 +58,15 @@ enum ActionMenuBuilder {
             .sorted { $0.sortIndex < $1.sortIndex }
 
         for child in sortedChildren {
-            submenu.addItem(makeItem(for: child, target: target, service: service))
+            submenu.addItem(
+                makeItem(
+                    for: child,
+                    target: target,
+                    service: service,
+                    executionContext: executionContext,
+                    postAction: postAction
+                )
+            )
         }
 
         item.submenu = submenu

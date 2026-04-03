@@ -200,7 +200,7 @@ struct ClipMenuItem: View {
             }
 
             if let configuredNode = configuredActionNode(from: behavior) {
-                Task { await actionService.perform(action: configuredNode, on: entry) }
+                Task { await actionService.perform(action: configuredNode, on: entry, executionContext: .pasteContext) }
                 return
             }
         }
@@ -232,7 +232,7 @@ struct ClipMenuItem: View {
                enabledRoots.count == 1,
                let only = enabledRoots.first,
                only.isLeaf {
-                await actionService.perform(action: only, on: entry)
+                await actionService.perform(action: only, on: entry, executionContext: .pasteContext)
                 return
             }
 
