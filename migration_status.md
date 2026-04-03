@@ -3,7 +3,7 @@
 > **Every agent that completes a migration step MUST update this file before committing.**
 > See `.github/copilot-instructions.md` for the full rule.
 
-**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete — Phase 4 complete (actions execution path implemented end-to-end: default action seeding, bundled scripts resources, contextual modifier-click popup dispatch inside clip-menu context, JS require path compatibility, numeric key equivalents in native popup, dedicated actions shortcut/menu while preserving snippets shortcut UX, Actions preferences CRUD editor with balanced native macOS UX, drag/drop tree organization, and folder-grouped JavaScript catalog browsing in Actions preferences; build passes)
+**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete — Phase 4 complete (actions execution path implemented end-to-end: default action seeding, bundled scripts resources, contextual modifier-click popup dispatch inside clip-menu context, JS require path compatibility, numeric key equivalents in native popup, dedicated actions shortcut/menu while preserving snippets shortcut UX, Actions preferences CRUD editor with balanced native macOS UX, drag/drop tree organization, and folder-grouped JavaScript catalog browsing in Actions preferences; build passes) — post-migration repository cleanup complete (legacy tree and historical release tooling removed)
 
 ---
 
@@ -47,13 +47,8 @@
 - [x] Accessibility trust hardening: when AX trust is false, `PasteService` now requests system prompt via `AXIsProcessTrustedWithOptions` (once/session) and logs bundle/executable identity for TCC mismatch diagnosis
 - [x] Bundle identity updated for downstream signing/distribution: `PRODUCT_BUNDLE_IDENTIFIER` changed from `com.naotaka.ClipMenu` to `app.eetr.ClipMenu`
 - [x] App icon pipeline completed: generated all required macOS `AppIcon.appiconset` sizes (16/32/128/256/512 @1x/@2x) from the provided 1024x1024 source image and wired filenames in asset catalog `Contents.json`
-- [x] All legacy Objective-C source moved to `legacy/` for reference
-  - `legacy/Source/` — 40+ ObjC `.h`/`.m` files
-  - `legacy/English.lproj/`, `legacy/Japanese.lproj/` — XIB + strings
-  - `legacy/resource/` — icons, scripts, DSA keys
-  - `legacy/Snippets.xcdatamodel/` — Core Data model
-  - `legacy/ClipMenu.xcodeproj/` — original Xcode project
-  - `legacy/Info.plist`, `legacy/ClipMenu_Prefix.pch`
+ - [x] Repository cleanup: removed `legacy/` Objective-C tree and historical release/documentation artifacts (`script/deploy.sh`, appcast/version-history generators, old HTML/YAML release notes, and archived legacy docs), then updated root docs to the modern Swift/XcodeGen workflow
+- [x] Legacy Objective-C reference tree was retained during migration and removed after migration completion as part of repository cleanup
 
 ### New project bootstrapped
 - [x] `Sources/` tree created with stub Swift files (no implementation yet)
@@ -142,7 +137,7 @@ No tasks currently in progress.
 | Swift version | 5.9+ | SwiftData, @Observable, structured concurrency |
 | Sandboxing | **No sandbox** | CGEvent paste requires Accessibility; incompatible with sandbox |
 | External deps | `KeyboardShortcuts` only | All other APIs are system-provided |
-| Legacy data location reference | `legacy/Source/ClipsController.m`, `SnippetsController.m`, `ActionNodeFactory.m` | Canonical paths for migration import |
+| Legacy data location reference | Removed from repository in post-migration cleanup | Migration import work completed before cleanup |
 
 ---
 
@@ -152,9 +147,9 @@ No tasks currently in progress.
 |---|---|
 | Full architecture plan | `doc/migration.md` |
 | All features to preserve | `doc/features.md` |
-| Legacy clipboard behavior | `legacy/Source/ClipsController.m` |
-| Legacy menu behavior | `legacy/Source/MenuController.m` |
-| Legacy action system | `legacy/Source/ActionController.m`, `ActionNodeFactory.m` |
-| Legacy JS integration | `legacy/Source/JavaScriptSupport.m` |
-| Legacy preferences keys | `legacy/Source/constants.h` |
-| Snippet/action data paths | `legacy/Source/SnippetsController.m`, `ActionNodeFactory.m` |
+| Legacy clipboard behavior | Historical legacy sources (removed from repo) |
+| Legacy menu behavior | Historical legacy sources (removed from repo) |
+| Legacy action system | Historical legacy sources (removed from repo) |
+| Legacy JS integration | Historical legacy sources (removed from repo) |
+| Legacy preferences keys | Historical legacy sources (removed from repo) |
+| Snippet/action data paths | Historical legacy sources (removed from repo) |

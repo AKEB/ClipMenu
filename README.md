@@ -1,45 +1,52 @@
-ClipMenu
-========
-A clipboard manager for Mac OS X.
+# ClipMenu
 
-**New ClipMenu, completely rebuilt using Swift language, is now under development. Further information is coming soon!**
+ClipMenu is a macOS clipboard manager rebuilt in Swift (SwiftUI + SwiftData).
 
-![ClipMenu](./screenshot.jpg)
+## Current Stack
 
-## Distribution
+- Language: Swift 5.9+
+- Platform: macOS 14+
+- Build system: XcodeGen (`project.yml`)
+- App type: menu bar app (`LSUIElement`)
+- Dependency: `KeyboardShortcuts`
 
-If you distribute derived work, especially in the Mac App Store, I ask you to follow two rules:
+## Build
 
-1. **Don't use "ClipMenu" as your product name.**
-2. **Follow the MIT license terms.**
+Prerequisites:
 
-Thank you for your cooperation.
+```sh
+xcode-select -p
+brew install xcodegen
+```
 
-Target environments
--------------------
+Generate project:
 
-* Mac OS X 10.5 - 10.6
-* Xcode 3.2
-* Manual reference counting
+```sh
+xcodegen generate
+```
 
-Dependencies
-------------
-The source code is dependent on some libraries. You have to download and install them if you want to compile, run, or test the source code.
+Build (Debug):
 
-* [PTHotKey](http://www.rogueamoeba.com/utm/posts/Random/Homegrown_Developer_Tools-2004-07-14-12-00) by Quentin D. Carnicelli
-* [Shortcut Recorder](http://code.google.com/p/shortcutrecorder/) by contributors to ShortcutRecorder
-* [Sparkle](http://sparkle.andymatuschak.org/) by Andy Matuschak
-* [DBPrefsWindowController](http://www.mere-mortal-software.com/blog/sourcecode.php) by Dave Batton
-* [Google Toolbox for Mac](http://code.google.com/p/google-toolbox-for-mac/) by Google Inc.
-* [BWToolkit](http://www.brandonwalkin.com/bwtoolkit/) by Brandon Walkin
+```sh
+xcodebuild -project ClipMenu.xcodeproj -scheme ClipMenu -configuration Debug build \
+	CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+```
 
-Author
-------
+For detailed commands and troubleshooting, see `BUILD.md`.
 
-Naotaka Morimoto ([@naotakaM](http://twitter.com/naotakaM))
+## Repository Cleanup Status
 
-License
--------
-ClipMenu is available under the MIT license. See the LICENSE file for more info.
+- Legacy Objective-C source and historical release tooling were removed from the repository after migration completion.
+- Historical Sparkle/appcast release scripts are no longer part of this project.
+- Release and documentation flow is now maintained directly in Markdown docs in this repository.
 
-Icons are copyrighted by their respective authors.
+## Distribution Note
+
+If you distribute derived work:
+
+1. Do not use `ClipMenu` as your product name.
+2. Follow the MIT license terms.
+
+## License
+
+ClipMenu is available under the MIT license. See `LICENSE` for details.

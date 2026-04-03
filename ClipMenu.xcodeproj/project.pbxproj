@@ -72,15 +72,12 @@
 		3E9CBA111ACE835F326FE6AE /* showdown.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = showdown.js; sourceTree = "<group>"; };
 		419D60462A50E9A91E55BF47 /* [ ].js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "[ ].js"; sourceTree = "<group>"; };
 		42B59EEB0DCCE6D695636F67 /* LegacyMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyMigration.swift; sourceTree = "<group>"; };
-		49876023CA687002F8002CBC /* JavaScriptアクションの書き方.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "JavaScriptアクションの書き方.txt"; sourceTree = "<group>"; };
 		4ACF487AADDB8BB33F71BBDE /* fhconvert.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = fhconvert.js; sourceTree = "<group>"; };
 		4B34871F4041DDF5A7D98840 /* features.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = features.md; sourceTree = "<group>"; };
 		4ED996E53C34CFD8C7D0310C /* ClipMenuApp+Scenes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClipMenuApp+Scenes.swift"; sourceTree = "<group>"; };
-		5658921DF2A880EDEE8DFABB /* release_note_ja.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = release_note_ja.html; sourceTree = "<group>"; };
 		5669B9BE900EF523AAFE399F /* html.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = html.js; sourceTree = "<group>"; };
 		56CED544AE6F1EF258ED10D4 /* Collapse Spaces.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Collapse Spaces.js"; sourceTree = "<group>"; };
 		620B8F52759F74FEBF46E0F1 /* ScriptableClip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptableClip.swift; sourceTree = "<group>"; };
-		62662520F05129C2F1ECA59C /* ReadMe (Japanese).rtfd */ = {isa = PBXFileReference; lastKnownFileType = wrapper.rtfd; path = "ReadMe (Japanese).rtfd"; sourceTree = "<group>"; };
 		630C393A150A0A2DD37B2D11 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		65E27B62279E4C612E6FD0AC /* Convert Decimal to Character.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Convert Decimal to Character.js"; sourceTree = "<group>"; };
 		6669409568F7A199CA873CC3 /* Unescape HTML characters.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Unescape HTML characters.js"; sourceTree = "<group>"; };
@@ -106,22 +103,18 @@
 		AB521B6B2DB86D0ACD8DAFC7 /* Escape HTML characters.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Escape HTML characters.js"; sourceTree = "<group>"; };
 		AE6E1C2B11B47F58BD83816D /* ClipMenu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClipMenu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AE76319566DD96015EDF23BA /* Convert Katakana to Hiragana.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Convert Katakana to Hiragana.js"; sourceTree = "<group>"; };
-		AEC26F1A30437471626D2578 /* VersionHistory-ja.yaml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "VersionHistory-ja.yaml"; sourceTree = "<group>"; };
 		AF2E8D3A4198B0765F64E64C /* Decode URI component.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Decode URI component.js"; sourceTree = "<group>"; };
 		AFA02BDF56F7F5BF80C2E4AA /* < >.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "< >.js"; sourceTree = "<group>"; };
 		AFC2785BEDC95DB32BD21552 /* ClipMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipMenuView.swift; sourceTree = "<group>"; };
 		B11A04D2CD51A76FE707BEA1 /* project.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = project.yml; sourceTree = "<group>"; };
 		B2C402FC20A31058F679AC66 /* ［ ］.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "［ ］.js"; sourceTree = "<group>"; };
-		B4070C5C34CA29D0646E6606 /* ClipMenu website.webloc */ = {isa = PBXFileReference; path = "ClipMenu website.webloc"; sourceTree = "<group>"; };
 		B48E46B042ACC84B0F6F1766 /* LoginItemService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemService.swift; sourceTree = "<group>"; };
 		B4ADF0FD762FEE65EEE8DEBC /* inflection.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = inflection.js; sourceTree = "<group>"; };
 		B60996BF476330FFB6501381 /* Snippet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Snippet.swift; sourceTree = "<group>"; };
 		B9F2FC9E1D536A30571DAAAB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		BA400EEACE736B3818DA8A3E /* ReadMe.rtfd */ = {isa = PBXFileReference; lastKnownFileType = wrapper.rtfd; path = ReadMe.rtfd; sourceTree = "<group>"; };
 		BAD0F7706C0E03012259C58E /* SnippetFolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetFolder.swift; sourceTree = "<group>"; };
 		BB3D24622C12C3B43F770963 /* ｛ ｝.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "｛ ｝.js"; sourceTree = "<group>"; };
 		BF6C0BE229E6930FA608401B /* ClipMenu.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ClipMenu.entitlements; sourceTree = "<group>"; };
-		BFA3C0115DA1665C86E95348 /* release_note.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = release_note.html; sourceTree = "<group>"; };
 		BFFC088DE2CD462BD34AB520 /* 《 》.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "《 》.js"; sourceTree = "<group>"; };
 		C0C2DEA9193BEC16FD145658 /* 【 】.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "【 】.js"; sourceTree = "<group>"; };
 		C0F0FAA9BB77661670F28FA6 /* （ ）.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "（ ）.js"; sourceTree = "<group>"; };
@@ -143,7 +136,6 @@
 		E4A00A1E1A0D43947431A0E2 /* lowercase.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = lowercase.js; sourceTree = "<group>"; };
 		EBDD749FF754FE72E7DB47E6 /* HotkeyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyService.swift; sourceTree = "<group>"; };
 		EBF7A7C9E337640DC76B28CB /* Convert Zenkaku alphanumeric characters to Hankaku.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Convert Zenkaku alphanumeric characters to Hankaku.js"; sourceTree = "<group>"; };
-		EF4A999AFD48E89E62517C2E /* VersionHistory-en.yaml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "VersionHistory-en.yaml"; sourceTree = "<group>"; };
 		EFE2D0E62C25351BA06254E5 /* UPPERCASE.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = UPPERCASE.js; sourceTree = "<group>"; };
 		F04ADA9E33388D3B40D982F8 /* Strip Tags.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Strip Tags.js"; sourceTree = "<group>"; };
 		F0BC75442C797B6A536F1862 /* 「 」.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "「 」.js"; sourceTree = "<group>"; };
@@ -200,11 +192,6 @@
 				30F9D13D4936E1E652C416E4 /* enhancements.md */,
 				4B34871F4041DDF5A7D98840 /* features.md */,
 				179AF605EB49F693BF4AD85E /* migration.md */,
-				5658921DF2A880EDEE8DFABB /* release_note_ja.html */,
-				BFA3C0115DA1665C86E95348 /* release_note.html */,
-				EF4A999AFD48E89E62517C2E /* VersionHistory-en.yaml */,
-				AEC26F1A30437471626D2578 /* VersionHistory-ja.yaml */,
-				A5BC4BE3A9FF28E3F8AFAF47 /* archive_contents */,
 			);
 			path = doc;
 			sourceTree = "<group>";
@@ -377,17 +364,6 @@
 				29576F23AAFF791919F37AA2 /* ClipMenuSettings.swift */,
 			);
 			path = Settings;
-			sourceTree = "<group>";
-		};
-		A5BC4BE3A9FF28E3F8AFAF47 /* archive_contents */ = {
-			isa = PBXGroup;
-			children = (
-				B4070C5C34CA29D0646E6606 /* ClipMenu website.webloc */,
-				49876023CA687002F8002CBC /* JavaScriptアクションの書き方.txt */,
-				62662520F05129C2F1ECA59C /* ReadMe (Japanese).rtfd */,
-				BA400EEACE736B3818DA8A3E /* ReadMe.rtfd */,
-			);
-			path = archive_contents;
 			sourceTree = "<group>";
 		};
 		B291E9FCF52786571D3DFF2F /* lib */ = {

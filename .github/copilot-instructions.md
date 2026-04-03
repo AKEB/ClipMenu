@@ -8,7 +8,7 @@ This applies to any work that:
 - Implements or stubs a file listed in `Sources/`
 - Changes `project.yml` or regenerates `ClipMenu.xcodeproj`
 - Adds, removes, or modifies a package dependency
-- Makes a structural change to `Sources/` or `legacy/`
+- Makes a structural change to `Sources/`
 - Completes or partially completes any task listed under "Not Started" or "In Progress" in `migration_status.md`
 
 **How to update:**
@@ -20,7 +20,7 @@ This applies to any work that:
 ## Architecture
 
 - New Swift source lives in `Sources/` (see `doc/migration.md` for the full directory spec).
-- Legacy Objective-C source is in `legacy/Source/` — treat it as read-only reference; do not modify.
+- Legacy Objective-C source was removed from this repository after migration completion.
 - Build system: XcodeGen — edit `project.yml`, then run `xcodegen generate` to regenerate `ClipMenu.xcodeproj`.
 - The `.xcodeproj` is generated output; never hand-edit `project.pbxproj`.
 
@@ -52,15 +52,5 @@ Both commands must succeed with no errors before a task is marked completed.
 
 ## Behavior Reference
 
-When implementing any feature, consult the corresponding legacy file first:
-
-| Feature | Legacy reference |
-|---|---|
-| Clipboard capture | `legacy/Source/ClipsController.m` |
-| Menu construction | `legacy/Source/MenuController.m` |
-| Actions | `legacy/Source/ActionController.m`, `ActionNodeFactory.m` |
-| JavaScript scripting | `legacy/Source/JavaScriptSupport.m` |
-| Preferences keys | `legacy/Source/constants.h` |
-| Paste synthesis | `legacy/Source/AppController.m` |
-
-Do not invent behaviour — read the legacy source.
+Legacy source references are historical only and are no longer available in this repository.
+When implementing behavior changes, rely on the current Swift implementation and documented behavior in `doc/features.md`.
