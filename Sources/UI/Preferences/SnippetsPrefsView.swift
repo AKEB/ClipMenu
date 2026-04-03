@@ -238,14 +238,16 @@ struct SnippetsPrefsView: View {
                 }
             ))
             .frame(minHeight: 280, maxHeight: .infinity)
+            .scrollContentBackground(.hidden)
             .padding(8)
-            .background(panelBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             .disabled(selectedSnippet == nil)
         }
+        .padding(10)
+        .background(panelBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     private var panelBackground: Color {
-        Color.black.opacity(0.16)
+        Color.black.opacity(0.1)
     }
 
     private func addFolder() {

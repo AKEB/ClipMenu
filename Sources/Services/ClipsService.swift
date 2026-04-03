@@ -29,7 +29,7 @@ final class ClipsService {
         Task {
             await enforceHistoryLimitNow()
         }
-        monitor.start(interval: min(settings.pollingInterval, 1.0))
+        monitor.start()
         monitor.pasteboardChanged
             .sink { [weak self] pasteboard in
                 Task {

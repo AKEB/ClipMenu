@@ -20,12 +20,10 @@ final class ClipMenuSettings {
     var autoPasteAfterSelection: Bool = true { didSet { defaults.set(autoPasteAfterSelection, forKey: "inputPasteCommand") } }
     var reorderClipsAfterPasting: Bool = true { didSet { defaults.set(reorderClipsAfterPasting, forKey: "reorderClipsAfterPasting") } }
     var maxHistorySize: Int = 20 { didSet { defaults.set(maxHistorySize, forKey: "maxHistorySize") } }
-    var autosaveDelay: Int = 1_800 { didSet { defaults.set(autosaveDelay, forKey: "autosaveDelay") } }
     var saveHistoryOnQuit: Bool = true { didSet { defaults.set(saveHistoryOnQuit, forKey: "saveHistoryOnQuit") } }
     var exportHistoryAsSingleFile: Bool = true { didSet { defaults.set(exportHistoryAsSingleFile, forKey: "exportHistoryAsSingleFile") } }
     var exportSeparatorTag: Int = 1 { didSet { defaults.set(exportSeparatorTag, forKey: "tagOfSeparatorForExportHistoryToFile") } }
     var showStatusItem: Bool = true { didSet { defaults.set(showStatusItem, forKey: "showStatusItem") } }
-    var pollingInterval: Double = 0.75 { didSet { defaults.set(pollingInterval, forKey: "timeInterval") } }
     var storeTypes: [String: Bool] = [
         "String": true,
         "RTF": true,
@@ -121,10 +119,6 @@ final class ClipMenuSettings {
         (defaults.object(forKey: key) as? Int) ?? fallback
     }
 
-    private func doubleValue(_ key: String, default fallback: Double) -> Double {
-        (defaults.object(forKey: key) as? Double) ?? fallback
-    }
-
     private func stringValue(_ key: String, default fallback: String) -> String {
         (defaults.object(forKey: key) as? String) ?? fallback
     }
@@ -135,12 +129,10 @@ final class ClipMenuSettings {
         autoPasteAfterSelection = boolValue("inputPasteCommand", default: true)
         reorderClipsAfterPasting = boolValue("reorderClipsAfterPasting", default: true)
         maxHistorySize = intValue("maxHistorySize", default: 20)
-        autosaveDelay = intValue("autosaveDelay", default: 1_800)
         saveHistoryOnQuit = boolValue("saveHistoryOnQuit", default: true)
         exportHistoryAsSingleFile = boolValue("exportHistoryAsSingleFile", default: true)
         exportSeparatorTag = intValue("tagOfSeparatorForExportHistoryToFile", default: 1)
         showStatusItem = boolValue("showStatusItem", default: true)
-        pollingInterval = doubleValue("timeInterval", default: 0.75)
         storeTypes = (defaults.dictionary(forKey: "storeTypes") as? [String: Bool]) ?? Self.defaultStoreTypes
         excludeApps = (defaults.array(forKey: "excludeApps") as? [[String: String]]) ?? Self.defaultExcludeApps
 
@@ -198,8 +190,6 @@ final class ClipMenuSettings {
 
     private func sanitizeAndPersist() {
         maxHistorySize = max(maxHistorySize, 1)
-        autosaveDelay = max(autosaveDelay, 60)
-        pollingInterval = max(pollingInterval, 0.1)
 
         maxMenuItemTitleLength = max(maxMenuItemTitleLength, 1)
         numberOfItemsInline = max(numberOfItemsInline, 0)
@@ -223,12 +213,10 @@ final class ClipMenuSettings {
             "inputPasteCommand": true,
             "reorderClipsAfterPasting": true,
             "maxHistorySize": 20,
-            "autosaveDelay": 1_800,
             "saveHistoryOnQuit": true,
             "exportHistoryAsSingleFile": true,
             "tagOfSeparatorForExportHistoryToFile": 1,
             "showStatusItem": true,
-            "timeInterval": 0.75,
             "storeTypes": Self.defaultStoreTypes,
             "excludeApps": Self.defaultExcludeApps,
             "maxMenuItemTitleLength": 20,

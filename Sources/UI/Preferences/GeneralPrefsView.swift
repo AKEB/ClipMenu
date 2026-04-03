@@ -3,7 +3,7 @@ import AppKit
 
 /// General tab in the Preferences window.
 ///
-/// Covers: login item, paste command, reorder, history size, autosave,
+/// Covers: login item, paste command, reorder, history size,
 /// save-on-quit, status item, store types, app exclusions.
 /// Reference: `legacy/Source/PrefsWindowController.{h,m}` General tab.
 struct GeneralPrefsView: View {
@@ -33,15 +33,7 @@ struct GeneralPrefsView: View {
                     TextField("", value: $s.maxHistorySize, format: .number)
                         .frame(width: 60)
                 }
-                LabeledContent("Autosave interval (seconds)") {
-                    TextField("", value: $s.autosaveDelay, format: .number)
-                        .frame(width: 80)
-                }
                 Toggle("Save history when quitting", isOn: $s.saveHistoryOnQuit)
-                LabeledContent("Pasteboard polling interval (s)") {
-                    TextField("", value: $s.pollingInterval, format: .number)
-                        .frame(width: 80)
-                }
             }
 
             // MARK: Store Types
