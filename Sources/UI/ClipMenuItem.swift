@@ -1,12 +1,14 @@
 import SwiftUI
 import AppKit
 import UniformTypeIdentifiers
+import os
 
 /// A single row in the clipboard history menu.
 ///
 /// Rendering rules are taken from `legacy/Source/MenuController.m
 /// -_makeMenuItemForClip:withCount:andListNumber:`.
 struct ClipMenuItem: View {
+    private static let log = Logger(subsystem: "com.naotaka.ClipMenu", category: "ClipMenuItem")
 
     let entry: ClipEntry
     /// Numbering prefix (already computed by ClipMenuView).
@@ -26,9 +28,11 @@ struct ClipMenuItem: View {
 
     @ViewBuilder
     private var itemLabel: some View {
+        let thumb = settings.showImageInMenu ? thumbnail : nil
+
         HStack(spacing: 4) {
             // Type icon
-            if settings.showIconInMenu, let icon = typeIcon {
+            if thumb == nil, settings.showIconInMenu, let icon = typeIcon {
                 Image(nsImage: icon)
                     .resizable()
                     .frame(width: CGFloat(settings.menuIconSize),
@@ -36,7 +40,7 @@ struct ClipMenuItem: View {
             }
 
             // Image thumbnail
-            if settings.showImageInMenu, let thumb = thumbnail {
+            if let thumb {
                 Image(nsImage: thumb)
             }
 
@@ -92,8 +96,17 @@ struct ClipMenuItem: View {
     // MARK: - Visual properties
 
     private var thumbnail: NSImage? {
-        guard let data = entry.imageData else { return nil }
-        guard let img = NSImage(data: data) else { return nil }
+        guard let data = entry.imageData else {
+            if titleText.contains("(Image)") {
+                Self.log.debug("No imageData available for clip labeled as image")
+            }
+            return nil
+        }
+        guard let img = decodedImage(from: data) else {
+            Self.log.debug("Failed to decode thumbnail image data bytes=\(data.count, privacy: .public)")
+            return nil
+        }
+        Self.log.debug("Decoded thumbnail image size=\(Int(img.size.width), privacy: .public)x\(Int(img.size.height), privacy: .public) bytes=\(data.count, privacy: .public)")
         return scaledImage(img,
                            to: NSSize(width: CGFloat(settings.thumbnailWidth),
                                       height: CGFloat(settings.thumbnailHeight)))
@@ -176,13 +189,38 @@ struct ClipMenuItem: View {
     // MARK: - Helpers
 
     private func scaledImage(_ image: NSImage, to size: NSSize) -> NSImage {
+        guard image.size.width > 0, image.size.height > 0,
+              size.width > 0, size.height > 0 else {
+            return image
+        }
+
         let ratio = min(size.width / image.size.width, size.height / image.size.height)
-        let newSize = NSSize(width: image.size.width * ratio, height: image.size.height * ratio)
-        let scaled = NSImage(size: newSize)
+        let drawSize = NSSize(width: image.size.width * ratio, height: image.size.height * ratio)
+        let drawOrigin = NSPoint(x: (size.width - drawSize.width) / 2,
+                                 y: (size.height - drawSize.height) / 2)
+
+        let scaled = NSImage(size: size)
         scaled.lockFocus()
-        image.draw(in: NSRect(origin: .zero, size: newSize))
+        image.draw(in: NSRect(origin: drawOrigin, size: drawSize),
+                   from: .zero,
+                   operation: .sourceOver,
+                   fraction: 1.0)
         scaled.unlockFocus()
         return scaled
+    }
+
+    private func decodedImage(from data: Data) -> NSImage? {
+        if let image = NSImage(data: data), image.size.width > 0, image.size.height > 0 {
+            return image
+        }
+
+        if let rep = NSBitmapImageRep(data: data) {
+            let image = NSImage(size: rep.size)
+            image.addRepresentation(rep)
+            return image
+        }
+
+        return NSImage(data: data)
     }
 }
 

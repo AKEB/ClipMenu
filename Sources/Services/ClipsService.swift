@@ -1,12 +1,14 @@
 import SwiftData
 import AppKit
 import Combine
+import os
 
 /// Manages the clipboard history: monitors NSPasteboard, deduplicates entries,
 /// enforces the max-history limit, and writes ClipEntry records to SwiftData.
 ///
 /// Reference: `legacy/Source/ClipsController.{h,m}` and `Clip.{h,m}`.
 actor ClipsService {
+    private static let log = Logger(subsystem: "com.naotaka.ClipMenu", category: "ClipsService")
 
     private let monitor    = ClipboardMonitor()
     private let exclusion  = AppExclusionService()
@@ -105,14 +107,21 @@ actor ClipsService {
             let existing = try context.fetch(FetchDescriptor<ClipEntry>())
             if let matched = existing.first(where: { $0.contentHash == clip.contentHash }) {
                 matched.lastUsedAt = .now
+                if matched.imageData != nil || clip.imageData != nil {
+                    Self.log.debug("Matched existing image clip hash=\(clip.contentHash, privacy: .public) imageBytes=\(clip.imageData?.count ?? 0, privacy: .public)")
+                }
                 try context.save()
                 return
             }
 
             context.insert(clip)
+            if clip.imageData != nil {
+                Self.log.info("Inserted image clip hash=\(clip.contentHash, privacy: .public) imageBytes=\(clip.imageData?.count ?? 0, privacy: .public) types=\(clip.types.joined(separator: ","), privacy: .public)")
+            }
             trimHistoryIfNeeded(context: context)
             try context.save()
         } catch {
+            Self.log.error("Failed handling pasteboard change: \(error.localizedDescription, privacy: .public)")
             return
         }
     }
@@ -162,6 +171,11 @@ actor ClipsService {
                 clip.urlStrings = pboard.propertyList(forType: .URL) as? [String]
             case .tiff, .png:
                 clip.imageData = pboard.data(forType: .tiff) ?? pboard.data(forType: .png)
+                if clip.imageData == nil {
+                    Self.log.debug("Image type seen but no image bytes. pbTypes=\(filtered.map(\.rawValue).joined(separator: ","), privacy: .public)")
+                } else {
+                    Self.log.debug("Captured image bytes=\(clip.imageData?.count ?? 0, privacy: .public)")
+                }
             default:
                 break
             }

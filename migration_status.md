@@ -9,6 +9,8 @@
 
 ## Completed
  - [x] Image clip rendering parity improved: image-only clips now use `(Image)` fallback title and show scaled thumbnails in both SwiftUI menu rows and native hotkey popup history menus
+- [x] Image thumbnail robustness improved: thumbnail decoding now falls back to `NSBitmapImageRep` and uses fixed-canvas aspect-fit scaling, improving preview rendering for edge-case image clipboard data
+- [x] App-menu image preview parity fix: SwiftUI clip rows now prioritize thumbnail rendering over type icons, resolving cases where app menu showed only a document icon instead of the image preview
 - [x] All legacy Objective-C source moved to `legacy/` for reference
   - `legacy/Source/` — 40+ ObjC `.h`/`.m` files
   - `legacy/English.lproj/`, `legacy/Japanese.lproj/` — XIB + strings

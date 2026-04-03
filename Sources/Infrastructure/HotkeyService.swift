@@ -310,7 +310,7 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
     private func thumbnailImage(for clip: ClipEntry, settings: ClipMenuSettings) -> NSImage? {
         guard settings.showImageInMenu,
               let imageData = clip.imageData,
-              let image = NSImage(data: imageData)
+              let image = decodedImage(from: imageData)
         else { return nil }
 
         let targetSize = NSSize(width: CGFloat(settings.thumbnailWidth),
@@ -319,13 +319,38 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
     }
 
     private func scaledImage(_ image: NSImage, to size: NSSize) -> NSImage {
+        guard image.size.width > 0, image.size.height > 0,
+              size.width > 0, size.height > 0 else {
+            return image
+        }
+
         let ratio = min(size.width / image.size.width, size.height / image.size.height)
-        let newSize = NSSize(width: image.size.width * ratio, height: image.size.height * ratio)
-        let scaled = NSImage(size: newSize)
+        let drawSize = NSSize(width: image.size.width * ratio, height: image.size.height * ratio)
+        let drawOrigin = NSPoint(x: (size.width - drawSize.width) / 2,
+                                 y: (size.height - drawSize.height) / 2)
+
+        let scaled = NSImage(size: size)
         scaled.lockFocus()
-        image.draw(in: NSRect(origin: .zero, size: newSize))
+        image.draw(in: NSRect(origin: drawOrigin, size: drawSize),
+                   from: .zero,
+                   operation: .sourceOver,
+                   fraction: 1.0)
         scaled.unlockFocus()
         return scaled
+    }
+
+    private func decodedImage(from data: Data) -> NSImage? {
+        if let image = NSImage(data: data), image.size.width > 0, image.size.height > 0 {
+            return image
+        }
+
+        if let rep = NSBitmapImageRep(data: data) {
+            let image = NSImage(size: rep.size)
+            image.addRepresentation(rep)
+            return image
+        }
+
+        return NSImage(data: data)
     }
 }
 
