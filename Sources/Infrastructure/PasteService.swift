@@ -2,6 +2,7 @@ import CoreGraphics
 import AppKit
 import ApplicationServices
 import Carbon.HIToolbox
+import os
 
 /// Synthesises a Cmd+V key event to paste the current pasteboard contents
 /// into the frontmost application.
@@ -9,7 +10,9 @@ import Carbon.HIToolbox
 /// Requires Accessibility permission (`AXIsProcessTrusted()`).  The legacy
 /// implementation lives in `legacy/Source/AppController.m -pasteFromClipboard`.
 actor PasteService {
+    private static let log = Logger(subsystem: "com.naotaka.ClipMenu", category: "PasteService")
     private var cachedVKeyCode: CGKeyCode?
+    private var requestedAXPromptThisSession = false
 
     init() {
         NotificationCenter.default.addObserver(
@@ -22,9 +25,18 @@ actor PasteService {
     }
 
     func paste() async {
-        guard isAccessibilityTrusted() else { return }
-        guard let keyCode = vKeyCode() else { return }
-        guard let source = CGEventSource(stateID: .combinedSessionState) else { return }
+        guard isAccessibilityTrusted() else {
+            Self.log.error("Paste aborted: Accessibility permission not granted")
+            return
+        }
+        guard let keyCode = vKeyCode() else {
+            Self.log.error("Paste aborted: could not resolve V key code")
+            return
+        }
+        guard let source = CGEventSource(stateID: .combinedSessionState) else {
+            Self.log.error("Paste aborted: could not create CGEventSource")
+            return
+        }
 
         let keyDown = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: true)
         let keyUp = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: false)
@@ -34,10 +46,26 @@ actor PasteService {
 
         keyDown?.post(tap: .cghidEventTap)
         keyUp?.post(tap: .cghidEventTap)
+        Self.log.info("Posted Cmd+V events using keyCode=\(keyCode, privacy: .public)")
     }
 
     private func isAccessibilityTrusted() -> Bool {
-        AXIsProcessTrusted()
+        if AXIsProcessTrusted() {
+            return true
+        }
+
+        // Dev builds can end up with stale/mismatched TCC rows. Ask macOS to
+        // re-surface the permission affordance once per app session.
+        if !requestedAXPromptThisSession {
+            requestedAXPromptThisSession = true
+            let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+            _ = AXIsProcessTrustedWithOptions(options)
+            let bundleID = Bundle.main.bundleIdentifier ?? "<nil>"
+            let execPath = Bundle.main.executableURL?.path ?? "<unknown>"
+            Self.log.error("Requested Accessibility prompt; trust still false. bundleID=\(bundleID, privacy: .public) execPath=\(execPath, privacy: .public)")
+        }
+
+        return AXIsProcessTrusted()
     }
 
     private func invalidateCachedKeyCode() {

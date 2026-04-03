@@ -71,6 +71,7 @@ struct SnippetsPrefsView: View {
                 contentPane
                     .frame(minWidth: 220, idealWidth: 360, maxWidth: .infinity)
             }
+            .padding(.vertical, 8)
         }
         .padding()
         .onAppear { ensureSelection() }

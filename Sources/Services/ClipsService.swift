@@ -41,7 +41,7 @@ actor ClipsService {
     }
 
     /// Copies the given entry back onto the system pasteboard and triggers paste.
-    func select(_ entry: ClipEntry) async {
+    func select(_ entry: ClipEntry, pasteImmediately: Bool = true) async {
         let pboard = NSPasteboard.general
         pboard.clearContents()
 
@@ -89,8 +89,11 @@ actor ClipsService {
         entry.lastUsedAt = .now
         try? context?.save()
 
-        if settings.autoPasteAfterSelection {
+        if pasteImmediately && settings.autoPasteAfterSelection {
+            Self.log.debug("Auto-paste after clip selection is ON (immediate)")
             await paste.paste()
+        } else {
+            Self.log.debug("Clip selected without immediate paste (pasteImmediately=\(pasteImmediately, privacy: .public), setting=\(self.settings.autoPasteAfterSelection, privacy: .public))")
         }
     }
 
@@ -229,12 +232,15 @@ actor ClipsService {
     }
 
     /// Writes a plain string to the pasteboard and triggers paste.
-    func copyStringToPasteboard(_ string: String) async {
+    func copyStringToPasteboard(_ string: String, pasteImmediately: Bool = true) async {
         let pboard = NSPasteboard.general
         pboard.clearContents()
         pboard.setString(string, forType: .string)
-        if settings.autoPasteAfterSelection {
+        if pasteImmediately && settings.autoPasteAfterSelection {
+            Self.log.debug("Auto-paste after snippet selection is ON (immediate)")
             await paste.paste()
+        } else {
+            Self.log.debug("Snippet copied without immediate paste (pasteImmediately=\(pasteImmediately, privacy: .public), setting=\(self.settings.autoPasteAfterSelection, privacy: .public))")
         }
     }
 }

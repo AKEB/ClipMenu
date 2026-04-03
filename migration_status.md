@@ -11,6 +11,13 @@
  - [x] Image clip rendering parity improved: image-only clips now use `(Image)` fallback title and show scaled thumbnails in both SwiftUI menu rows and native hotkey popup history menus
 - [x] Image thumbnail robustness improved: thumbnail decoding now falls back to `NSBitmapImageRep` and uses fixed-canvas aspect-fit scaling, improving preview rendering for edge-case image clipboard data
 - [x] App-menu image preview parity fix: SwiftUI clip rows now prioritize thumbnail rendering over type icons, resolving cases where app menu showed only a document icon instead of the image preview
+- [x] Added diagnostics logging for image preview troubleshooting across capture and rendering paths (`ClipsService`, `ClipMenuItem`, `HotkeyService`) including image byte capture, decode path, and thumbnail attachment outcomes
+- [x] Snippets preferences visual polish: added vertical inset around the 3-column split view so divider lines have top/bottom padding instead of touching window edges
+- [x] Hotkey paste reliability pass: hotkey popup now records the pre-popup frontmost app and re-activates it before selection-triggered paste; popup anchor window no longer tries to become key (removes borderless key-window warning source)
+- [x] Hotkey paste timing hardening: for popup selections, copy now occurs without immediate paste, then Cmd+V is dispatched after focus handoff delays; added `PasteService` guard-result logging (AX trust/keycode/event source/post)
+- [x] Accessibility trust hardening: when AX trust is false, `PasteService` now requests system prompt via `AXIsProcessTrustedWithOptions` (once/session) and logs bundle/executable identity for TCC mismatch diagnosis
+- [x] Bundle identity updated for downstream signing/distribution: `PRODUCT_BUNDLE_IDENTIFIER` changed from `com.naotaka.ClipMenu` to `app.eetr.ClipMenu`
+- [x] App icon pipeline completed: generated all required macOS `AppIcon.appiconset` sizes (16/32/128/256/512 @1x/@2x) from the provided 1024x1024 source image and wired filenames in asset catalog `Contents.json`
 - [x] All legacy Objective-C source moved to `legacy/` for reference
   - `legacy/Source/` — 40+ ObjC `.h`/`.m` files
   - `legacy/English.lproj/`, `legacy/Japanese.lproj/` — XIB + strings

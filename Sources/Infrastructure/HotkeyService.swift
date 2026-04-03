@@ -79,6 +79,7 @@ private enum HotkeyMenuKind {
 
 private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
     private let actionTarget = HotkeyPopupActionTarget()
+    private var targetAppForPaste: NSRunningApplication?
     private lazy var anchorWindow: NSWindow = {
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 1, height: 1),
@@ -104,11 +105,13 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
 
         let menu = buildMenu(runtime: runtime, context: context, kind: kind)
         actionTarget.runtime = runtime
+        targetAppForPaste = currentTargetApplication()
+        actionTarget.targetAppForPaste = targetAppForPaste
         menu.delegate = self
 
         let mouse = NSEvent.mouseLocation
         anchorWindow.setFrameOrigin(mouse)
-        anchorWindow.makeKeyAndOrderFront(nil)
+        anchorWindow.orderFront(nil)
 
         if let contentView = anchorWindow.contentView {
             menu.popUp(positioning: nil, at: NSPoint(x: 0, y: 0), in: contentView)
@@ -122,6 +125,14 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
 
     func menuDidClose(_ menu: NSMenu) {
         anchorWindow.orderOut(nil)
+    }
+
+    private func currentTargetApplication() -> NSRunningApplication? {
+        guard let frontmost = NSWorkspace.shared.frontmostApplication else { return nil }
+        if frontmost.processIdentifier == NSRunningApplication.current.processIdentifier {
+            return nil
+        }
+        return frontmost
     }
 
     private func buildMenu(runtime: AppRuntime, context: ModelContext, kind: HotkeyMenuKind) -> NSMenu {
@@ -236,6 +247,9 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
             item.representedObject = clip
             if let thumbnail = thumbnailImage(for: clip, settings: settings) {
                 item.image = thumbnail
+                HotkeyService.log.debug("Attached inline popup thumbnail for clip index=\(idx, privacy: .public)")
+            } else if clip.imageData != nil {
+                HotkeyService.log.debug("Inline popup clip has imageData but no thumbnail index=\(idx, privacy: .public) bytes=\(clip.imageData?.count ?? 0, privacy: .public)")
             }
             menu.addItem(item)
         }
@@ -260,6 +274,9 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
                 item.representedObject = clip
                 if let thumbnail = thumbnailImage(for: clip, settings: settings) {
                     item.image = thumbnail
+                    HotkeyService.log.debug("Attached grouped popup thumbnail group=\(groupIndex, privacy: .public) idx=\(idx, privacy: .public)")
+                } else if clip.imageData != nil {
+                    HotkeyService.log.debug("Grouped popup clip has imageData but no thumbnail group=\(groupIndex, privacy: .public) idx=\(idx, privacy: .public) bytes=\(clip.imageData?.count ?? 0, privacy: .public)")
                 }
                 submenu.addItem(item)
             }
@@ -311,7 +328,12 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
         guard settings.showImageInMenu,
               let imageData = clip.imageData,
               let image = decodedImage(from: imageData)
-        else { return nil }
+        else {
+            if clip.imageData != nil {
+                HotkeyService.log.debug("Popup thumbnail decode failed bytes=\(clip.imageData?.count ?? 0, privacy: .public)")
+            }
+            return nil
+        }
 
         let targetSize = NSSize(width: CGFloat(settings.thumbnailWidth),
                                 height: CGFloat(settings.thumbnailHeight))
@@ -341,32 +363,62 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
 
     private func decodedImage(from data: Data) -> NSImage? {
         if let image = NSImage(data: data), image.size.width > 0, image.size.height > 0 {
+            HotkeyService.log.debug("Popup decode via NSImage size=\(Int(image.size.width), privacy: .public)x\(Int(image.size.height), privacy: .public)")
             return image
         }
 
         if let rep = NSBitmapImageRep(data: data) {
             let image = NSImage(size: rep.size)
             image.addRepresentation(rep)
+            HotkeyService.log.debug("Popup decode via NSBitmapImageRep size=\(Int(rep.size.width), privacy: .public)x\(Int(rep.size.height), privacy: .public)")
             return image
         }
 
+        HotkeyService.log.debug("Popup decode failed for image bytes=\(data.count, privacy: .public)")
         return NSImage(data: data)
     }
 }
 
 private final class HotkeyPopupActionTarget: NSObject {
     weak var runtime: AppRuntime?
+    weak var targetAppForPaste: NSRunningApplication?
+    private let pasteService = PasteService()
+
+    @MainActor
+    private func reactivateTargetAppIfNeeded() {
+        guard let targetAppForPaste else { return }
+        HotkeyService.log.debug("Re-activating target app pid=\(targetAppForPaste.processIdentifier, privacy: .public)")
+        targetAppForPaste.activate(options: [.activateIgnoringOtherApps])
+    }
 
     @objc func selectClip(_ sender: NSMenuItem) {
         guard let runtime,
               let clip = sender.representedObject as? ClipEntry else { return }
-        Task { await runtime.clipsService.select(clip) }
+        Task { @MainActor in
+            reactivateTargetAppIfNeeded()
+            // Allow menu interaction to settle before writing pasteboard.
+            try? await Task.sleep(nanoseconds: 160_000_000)
+            await runtime.clipsService.select(clip, pasteImmediately: false)
+            if runtime.settings.autoPasteAfterSelection {
+                // Extra delay helps ensure front app is active before Cmd+V.
+                try? await Task.sleep(nanoseconds: 180_000_000)
+                await pasteService.paste()
+            }
+        }
     }
 
     @objc func selectSnippet(_ sender: NSMenuItem) {
         guard let runtime,
               let snippet = sender.representedObject as? Snippet else { return }
-        Task { await runtime.clipsService.copyStringToPasteboard(snippet.content) }
+        Task { @MainActor in
+            reactivateTargetAppIfNeeded()
+            try? await Task.sleep(nanoseconds: 160_000_000)
+            await runtime.clipsService.copyStringToPasteboard(snippet.content, pasteImmediately: false)
+            if runtime.settings.autoPasteAfterSelection {
+                try? await Task.sleep(nanoseconds: 180_000_000)
+                await pasteService.paste()
+            }
+        }
     }
 
     @objc func clearHistory(_ sender: NSMenuItem) {
