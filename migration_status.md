@@ -3,7 +3,7 @@
 > **Every agent that completes a migration step MUST update this file before committing.**
 > See `.github/copilot-instructions.md` for the full rule.
 
-**Overall progress:** Bootstrapping complete — Phase 1 not started
+**Overall progress:** Bootstrapping complete — Phase 1 substantially implemented (1 task partially complete)
 
 ---
 
@@ -33,7 +33,11 @@
 
 ## In Progress
 
-_Nothing currently in progress._
+### Phase 1 — Infrastructure (no UI changes)
+
+- [ ] **1.8** `LegacyMigration` — one-time import of `clips.data`, `Snippets.xml`, `actions.plist`
+  - Implemented clips import from `clips.data` and actions import from `actions.plist`
+  - Remaining: legacy snippets import from `Snippets.xml` and fallback handling for `actionMenu.data`
 
 ---
 
@@ -42,17 +46,16 @@ _Nothing currently in progress._
 ### Phase 1 — Infrastructure (no UI changes)
 See `doc/migration.md` §"Phase 1" for full task list.
 
-- [ ] **1.1** SwiftData models — `ClipEntry.contentHash` algorithm (ref: `legacy/Source/Clip.m -hash`)
-- [ ] **1.2** `ClipboardMonitor` — NSPasteboard polling loop + Combine publisher
-- [ ] **1.3** `ClipsService` — pasteboard reading, deduplication, SwiftData persistence
-- [ ] **1.4** `PasteService` — CGEvent Cmd+V synthesis, Accessibility permission prompt
-- [ ] **1.5** `ClipMenuSettings` — `@AppStorage` wrappers for all keys in `legacy/Source/constants.h`
-- [ ] **1.6** `LoginItemService` — `SMAppService` wiring in `AppDelegate`
-- [ ] **1.7** `AppExclusionService` — frontmost-app exclusion list logic
-- [ ] **1.8** `LegacyMigration` — one-time import of `clips.data`, `Snippets.xml`, `actions.plist`
-- [ ] **1.9** `SnippetService` — CRUD + sort order
-- [ ] **1.10** `ActionService` — action tree loading and dispatch scaffolding
-- [ ] **1.11** Wire services into `AppDelegate.applicationDidFinishLaunching`
+- [x] **1.1** SwiftData models — `ClipEntry.contentHash` algorithm (ref: `legacy/Source/Clip.m -hash`)
+- [x] **1.2** `ClipboardMonitor` — NSPasteboard polling loop + Combine publisher
+- [x] **1.3** `ClipsService` — pasteboard reading, deduplication, SwiftData persistence
+- [x] **1.4** `PasteService` — CGEvent Cmd+V synthesis, Accessibility permission prompt
+- [x] **1.5** `ClipMenuSettings` — legacy-compatible key mapping and default registration
+- [x] **1.6** `LoginItemService` — `SMAppService` wiring in `AppDelegate`
+- [x] **1.7** `AppExclusionService` — frontmost-app exclusion list logic
+- [x] **1.9** `SnippetService` — CRUD + sort order
+- [x] **1.10** `ActionService` — action tree loading and dispatch scaffolding
+- [x] **1.11** Wire services into `AppDelegate.applicationDidFinishLaunching`
 
 ### Phase 2 — UI
 - [ ] `ClipMenuView` — history rows, snippet section, action section, separator items

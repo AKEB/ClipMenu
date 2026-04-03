@@ -33,17 +33,27 @@ final class ClipEntry {
         isRTFD     = false
     }
 
-    // TODO: Phase 1 — implement contentHash replicating legacy/Source/Clip.m -hash
-    //       (XOR of types.joined().hashValue, image byte count, filenames, URLs,
-    //        PDF byte count, stringValue, RTF byte count).
     var contentHash: Int {
-        // Placeholder — replace with real algorithm.
         var h = types.joined().hashValue
-        h ^= (imageData?.count ?? 0)
-        h ^= (filenames?.reduce(0) { $0 ^ $1.hashValue } ?? 0)
-        h ^= (urlStrings?.reduce(0) { $0 ^ $1.hashValue } ?? 0)
-        h ^= (pdfData?.count ?? 0)
-        h ^= (stringValue?.hashValue ?? 0)
+
+        if let imageData {
+            h ^= imageData.count
+        }
+
+        if let filenames {
+            for filename in filenames {
+                h ^= filename.hashValue
+            }
+        } else if let urlStrings {
+            for urlString in urlStrings {
+                h ^= urlString.hashValue
+            }
+        } else if let pdfData {
+            h ^= pdfData.count
+        } else if let stringValue {
+            h ^= stringValue.hashValue
+        }
+
         h ^= (rtfData?.count ?? 0)
         return h
     }

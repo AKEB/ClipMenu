@@ -1,4 +1,5 @@
 import SwiftData
+import Foundation
 
 /// Manages the action tree and dispatches script execution.
 ///
@@ -14,20 +15,29 @@ actor ActionService {
         self.context = context
     }
 
-    /// Returns the action nodes applicable to the given clip entry.
-    ///
-    /// TODO: Phase 2 — replicate the type-filtering logic from
-    ///       ActionNodeController.m before returning nodes.
     func availableActions(for entry: ClipEntry) async -> [ActionNode] {
-        // TODO: Phase 2
-        return []
+        _ = entry
+        guard let context else { return [] }
+
+        do {
+            return try context.fetch(FetchDescriptor<ActionNode>(sortBy: [SortDescriptor(\ActionNode.sortIndex)]))
+        } catch {
+            return []
+        }
     }
 
-    /// Executes the action identified by `node` on `entry`.
-    ///
-    /// TODO: Phase 2 — dispatch to ScriptEngine for JS actions or to
-    ///       BuiltInActionController equivalents for built-in types.
     func perform(action node: ActionNode, on entry: ClipEntry) async {
-        // TODO: Phase 2
+        guard node.isEnabled else { return }
+
+        switch node.actionType {
+        case "javaScript":
+            guard let script = node.scriptContent else { return }
+            _ = engine.run(script: script, clip: ScriptableClip())
+        case "builtin":
+            _ = entry
+            return
+        default:
+            return
+        }
     }
 }

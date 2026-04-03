@@ -8,18 +8,26 @@ import Combine
 /// Check `legacy/Source/ClipsController.m` for the polling interval and the
 /// change-count comparison logic before changing this implementation.
 final class ClipboardMonitor {
-
-    // TODO: Phase 1 — implement NSPasteboard polling with a Combine Timer publisher.
-    //       Emit the current pasteboard only when changeCount advances.
-    //       Interval: replicate legacy value from ClipsController.m.
-
     let pasteboardChanged = PassthroughSubject<NSPasteboard, Never>()
 
     private var cancellables = Set<AnyCancellable>()
     private var lastChangeCount: Int = 0
+    private let pasteboard = NSPasteboard.general
 
-    func start() {
-        // TODO: Phase 1 — start polling timer.
+    func start(interval: TimeInterval = 0.75) {
+        stop()
+        lastChangeCount = pasteboard.changeCount
+
+        Timer.publish(every: interval, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
+                guard let self else { return }
+                let current = self.pasteboard.changeCount
+                guard current != self.lastChangeCount else { return }
+                self.lastChangeCount = current
+                self.pasteboardChanged.send(self.pasteboard)
+            }
+            .store(in: &cancellables)
     }
 
     func stop() {

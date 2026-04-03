@@ -17,6 +17,7 @@
 		5F656B886B8F29CC5617F8BB /* ClipMenuApp+Scenes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ED996E53C34CFD8C7D0310C /* ClipMenuApp+Scenes.swift */; };
 		609E344BBBB03FD8514E6C91 /* ClipMenuSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29576F23AAFF791919F37AA2 /* ClipMenuSettings.swift */; };
 		6F1C323AB9B0297F0E353CCF /* ClipMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0016B43E0CACE631C4CC81B1 /* ClipMenuItem.swift */; };
+		76969A92D3459A30D0C7A6E2 /* AppRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E215E86DBA662D409E0C3E8 /* AppRuntime.swift */; };
 		80C5101B8CC05DF5E188A131 /* ClipMenuApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CDD26CD466BFA583E75E608 /* ClipMenuApp.swift */; };
 		87A7B382426FBCFEB7553409 /* SnippetFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAD0F7706C0E03012259C58E /* SnippetFolder.swift */; };
 		936E1E26F533AC6B39414F5D /* GeneralPrefsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2761ACB3529E51DE835B8478 /* GeneralPrefsView.swift */; };
@@ -42,6 +43,7 @@
 		0016B43E0CACE631C4CC81B1 /* ClipMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipMenuItem.swift; sourceTree = "<group>"; };
 		0CD6C21C72EE5244BB1D7613 /* ActionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionService.swift; sourceTree = "<group>"; };
 		0CDD26CD466BFA583E75E608 /* ClipMenuApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipMenuApp.swift; sourceTree = "<group>"; };
+		0E215E86DBA662D409E0C3E8 /* AppRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRuntime.swift; sourceTree = "<group>"; };
 		0F33CC09804F1E54781E0EBD /* ActionsPrefsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionsPrefsView.swift; sourceTree = "<group>"; };
 		137B169B289424AA2C053F6E /* ShortcutsPrefsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsPrefsView.swift; sourceTree = "<group>"; };
 		179AF605EB49F693BF4AD85E /* migration.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = migration.md; sourceTree = "<group>"; };
@@ -187,6 +189,7 @@
 			isa = PBXGroup;
 			children = (
 				630C393A150A0A2DD37B2D11 /* AppDelegate.swift */,
+				0E215E86DBA662D409E0C3E8 /* AppRuntime.swift */,
 				0CDD26CD466BFA583E75E608 /* ClipMenuApp.swift */,
 			);
 			path = App;
@@ -320,6 +323,7 @@
 				F89987AC92544F66743A4CC7 /* ActionsPrefsView.swift in Sources */,
 				A976327DD179929219A27364 /* AppDelegate.swift in Sources */,
 				F9343715F430A05D2DD97E34 /* AppExclusionService.swift in Sources */,
+				76969A92D3459A30D0C7A6E2 /* AppRuntime.swift in Sources */,
 				951A172FEC26A436F6BC3232 /* ClipEntry.swift in Sources */,
 				5F656B886B8F29CC5617F8BB /* ClipMenuApp+Scenes.swift in Sources */,
 				80C5101B8CC05DF5E188A131 /* ClipMenuApp.swift in Sources */,

@@ -19,4 +19,12 @@ final class LoginItemService {
     func disable() throws {
         try service.unregister()
     }
+
+    func setEnabled(_ enabled: Bool) throws {
+        if enabled {
+            try enable()
+        } else {
+            try disable()
+        }
+    }
 }

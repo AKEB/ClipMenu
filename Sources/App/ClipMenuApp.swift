@@ -3,15 +3,28 @@ import SwiftData
 
 @main
 struct ClipMenuApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
-    // TODO: Phase 1 — initialise ModelContainer with all SwiftData models and
-    // inject ClipsService, SnippetService, ActionService as environment objects.
+    private let modelContainer: ModelContainer
+    private let runtime = AppRuntime.shared
+
+    init() {
+        let schema = Schema([
+            ClipEntry.self,
+            SnippetFolder.self,
+            Snippet.self,
+            ActionNode.self,
+        ])
+
+        let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        modelContainer = try! ModelContainer(for: schema, configurations: [configuration])
+        runtime.modelContainer = modelContainer
+    }
 
     var body: some Scene {
-        // TODO: Phase 2 — replace with ClipMenuApp+Scenes.swift scene definitions
-        //       (MenuBarExtra + Settings).
         Settings {
             EmptyView()
         }
+        .modelContainer(modelContainer)
     }
 }
