@@ -1981,3 +1981,604 @@ Use this checklist to confirm the migration is complete and correct before shipp
 | Built-in action selectors | `legacy/Source/BuiltInActionController.m` |
 | Snippet XML format | `legacy/Source/SnippetEditorController.m`, `doc/features.md` § "Import/Export" |
 | Hotkey default combos | `doc/features.md` § "Default Key Combos" |
+
+---
+
+## Phase 4 — Actions System
+
+This phase completes the actions feature end-to-end: default data seeding, modifier-click dispatch, the preferences editor, and numeric key equivalents. It also includes a bug fix for the legacy snippets migration that was silently skipped in Phases 1–3.
+
+---
+
+### Bug Fix: Snippets Migration (prerequisite)
+
+**File:** `Sources/Migration/LegacyMigration.swift`
+
+`importSnippets()` has two bugs that make it silently no-op for every user:
+
+1. `Bundle.main.url(forResource: "Snippets", withExtension: "momd")` always returns `nil` — `legacy/Snippets.xcdatamodel` was never added to `project.yml` sources and therefore is never compiled into the bundle.
+2. Even if bundled, the extension is wrong: a flat `.xcdatamodel` compiles to `.mom`, not `.momd` (`.momd` is produced only by versioned `.xcdatamodeld` packages).
+
+**Fix:** Replace the bundle model load with a programmatically constructed `NSManagedObjectModel`. The schema is simple and stable, so hardcoding it eliminates all bundle path dependencies. No changes to `project.yml` needed.
+
+Replace the guard block that loads the model from bundle:
+
+```swift
+// DELETE these lines:
+guard let modelURL = Bundle.main.url(forResource: "Snippets", withExtension: "momd") else {
+    return
+}
+guard let mom = NSManagedObjectModel(contentsOf: modelURL) else { return }
+
+// REPLACE WITH:
+let mom = makeLegacySnippetModel()
+```
+
+Add this private helper to `LegacyMigration`:
+
+```swift
+private static func makeLegacySnippetModel() -> NSManagedObjectModel {
+    let model = NSManagedObjectModel()
+
+    let folderEntity = NSEntityDescription()
+    folderEntity.name = "Folder"
+    folderEntity.managedObjectClassName = "NSManagedObject"
+
+    let snippetEntity = NSEntityDescription()
+    snippetEntity.name = "Snippet"
+    snippetEntity.managedObjectClassName = "NSManagedObject"
+
+    func attr(_ name: String, _ type: NSAttributeType) -> NSAttributeDescription {
+        let a = NSAttributeDescription()
+        a.name = name; a.attributeType = type; a.isOptional = true
+        return a
+    }
+
+    folderEntity.properties = [
+        attr("title", .stringAttributeType),
+        attr("index", .integer32AttributeType),
+        attr("enabled", .booleanAttributeType),
+    ]
+    snippetEntity.properties = [
+        attr("title", .stringAttributeType),
+        attr("content", .stringAttributeType),
+        attr("index", .integer32AttributeType),
+        attr("enabled", .booleanAttributeType),
+    ]
+
+    let folderSnippets = NSRelationshipDescription()
+    folderSnippets.name = "snippets"
+    folderSnippets.isOptional = true
+    folderSnippets.minCount = 0
+    folderSnippets.maxCount = 0  // to-many
+    folderSnippets.destinationEntity = snippetEntity
+
+    let snippetFolder = NSRelationshipDescription()
+    snippetFolder.name = "folder"
+    snippetFolder.isOptional = true
+    snippetFolder.minCount = 0
+    snippetFolder.maxCount = 1   // to-one
+    snippetFolder.destinationEntity = folderEntity
+
+    folderSnippets.inverseRelationship = snippetFolder
+    snippetFolder.inverseRelationship = folderSnippets
+
+    folderEntity.properties += [folderSnippets]
+    snippetEntity.properties += [snippetFolder]
+
+    model.entities = [folderEntity, snippetEntity]
+    return model
+}
+```
+
+**Verification:** Copy a `Snippets.xml` from `~/Library/Application Support/ClipMenu/` on a machine that ran the legacy app → delete the `legacyMigrationCompleted` key from UserDefaults (or use `defaults delete app.eetr.ClipMenu legacyMigrationCompleted`) → relaunch → confirm folders and snippets appear in the Snippets prefs editor.
+
+---
+
+### Step 4A: Default Action Seeding
+
+**New file:** `Sources/Services/DefaultActionSeeder.swift`  
+**Modified files:** `Sources/App/AppDelegate.swift`, `project.yml`, `migration_status.md`
+
+On a fresh install there is no `actions.plist` to migrate and `ActionService.availableActions()` returns empty. This step seeds a sensible default action tree into SwiftData on first launch.
+
+**Bundled scripts:** Copy the full `legacy/resource/script/` tree (subdirs `action/` and `lib/`) into `Resources/scripts/` in the new project root. Add a folder reference in `project.yml` so XcodeGen includes it in the Copy Bundle Resources build phase:
+
+```yaml
+sources:
+  - path: Sources
+  - path: Assets.xcassets
+    buildPhase: resources
+  - path: Resources/scripts
+    buildPhase: resources
+    type: folder
+```
+
+**`DefaultActionSeeder.swift`:**
+
+```swift
+import SwiftData
+import Foundation
+
+struct DefaultActionSeeder {
+
+    static func seedIfNeeded(in context: ModelContext) {
+        let count = (try? context.fetchCount(FetchDescriptor<ActionNode>())) ?? 0
+        guard count == 0 else { return }
+        seed(in: context)
+    }
+
+    // MARK: - Private
+
+    private static func seed(in context: ModelContext) {
+        var idx = 0
+
+        func leaf(title: String, type: String, name: String? = nil, path: String? = nil) -> ActionNode {
+            let node = ActionNode(title: title, isLeaf: true, sortIndex: idx)
+            idx += 1
+            node.actionType = type
+            node.actionName = name
+            node.scriptPath = path ?? (type == "javaScript" ? bundlePath(for: title) : nil)
+            return node
+        }
+
+        func folder(title: String, children: [ActionNode]) -> ActionNode {
+            let node = ActionNode(title: title, isLeaf: false, sortIndex: idx)
+            idx += 1
+            for (i, child) in children.enumerated() {
+                child.sortIndex = i
+                child.parent = node
+            }
+            node.children = children
+            return node
+        }
+
+        let roots: [ActionNode] = [
+            leaf(title: "Paste as Plain Text", type: "builtin", name: "pasteAsPlainText"),
+            leaf(title: "Paste as File Path",  type: "builtin", name: "pasteAsFilePath"),
+            leaf(title: "Paste as HFS File Path", type: "builtin", name: "pasteAsHFSFilePath"),
+            leaf(title: "Remove",              type: "builtin", name: "removeAction"),
+            folder(title: "Case", children: [
+                leaf(title: "Capitalize",  type: "javaScript"),
+                leaf(title: "Title Case",  type: "javaScript"),
+                leaf(title: "UPPERCASE",   type: "javaScript"),
+                leaf(title: "lowercase",   type: "javaScript"),
+            ]),
+            folder(title: "Trim", children: [
+                leaf(title: "Trim",  type: "javaScript"),
+                leaf(title: "LTrim", type: "javaScript"),
+                leaf(title: "RTrim", type: "javaScript"),
+            ]),
+            folder(title: "Crypt", children: [
+                leaf(title: "Encode to Base64",    type: "javaScript"),
+                leaf(title: "Decode from Base64",  type: "javaScript"),
+                leaf(title: "Calculate MD5 hash",  type: "javaScript"),
+                leaf(title: "Calculate SHA-1 hash", type: "javaScript"),
+            ]),
+            folder(title: "HTML", children: [
+                leaf(title: "Escape HTML characters",   type: "javaScript"),
+                leaf(title: "Unescape HTML characters", type: "javaScript"),
+                leaf(title: "Encode URI component",     type: "javaScript"),
+                leaf(title: "Decode URI component",     type: "javaScript"),
+                leaf(title: "Strip Tags",               type: "javaScript"),
+            ]),
+            leaf(title: "Collapse Spaces", type: "javaScript"),
+            leaf(title: "Reverse",         type: "javaScript"),
+            folder(title: "Surround with", children: [
+                leaf(title: "\" \"", type: "javaScript"),
+                leaf(title: "' '",   type: "javaScript"),
+                leaf(title: "( )",   type: "javaScript"),
+                leaf(title: "[ ]",   type: "javaScript"),
+                leaf(title: "{ }",   type: "javaScript"),
+                leaf(title: "< >",   type: "javaScript"),
+                leaf(title: "` `",   type: "javaScript"),
+            ]),
+        ]
+
+        for node in roots { context.insert(node) }
+        try? context.save()
+    }
+
+    // MARK: - Script path resolution
+    //
+    // Walk the bundle scripts/action/ tree to find a .js file matching the node title.
+    // For short scripts, prefer reading content inline (scriptContent) over scriptPath
+    // to avoid path fragility when the app bundle moves.
+
+    private static func bundlePath(for title: String) -> String? {
+        guard let base = Bundle.main.resourceURL?
+            .appendingPathComponent("scripts/action") else { return nil }
+        // Search subdirectories for a file named "<title>.js"
+        let fm = FileManager.default
+        guard let enumerator = fm.enumerator(at: base,
+            includingPropertiesForKeys: nil,
+            options: [.skipsHiddenFiles]) else { return nil }
+        for case let url as URL in enumerator
+            where url.deletingPathExtension().lastPathComponent == title
+                && url.pathExtension == "js" {
+            return url.path
+        }
+        return nil
+    }
+}
+```
+
+**AppDelegate integration** — inside `applicationDidFinishLaunching`, after the SwiftData container is ready and `LegacyMigration.run()` has been called:
+
+```swift
+DefaultActionSeeder.seedIfNeeded(in: context)
+```
+
+**ScriptEngine `require()` path:** `ScriptEngine.libSource(for:)` already searches `Bundle.main.resourceURL?.appendingPathComponent("script/lib")`. The bundled scripts are placed at `Resources/scripts/lib/`, so update the bundle search path in `ScriptEngine` to `scripts/lib` (note the plural `scripts`) to match the new location.
+
+**Verification:** Delete the app container, build fresh → launch → open a clip → Control+click (if configured) → action menu shows 4 built-ins + JS folders.
+
+---
+
+### Step 4B: Modifier-Click Action Dispatch
+
+**New file:** `Sources/UI/ActionMenuBuilder.swift`  
+**Modified files:** `Sources/UI/ClipMenuItem.swift`, `Sources/Services/ActionService.swift`
+
+#### ActionService additions
+
+Add two methods to `ActionService` (existing `actor`):
+
+```swift
+/// Root-level nodes only (no parent), sorted by sortIndex.
+func rootActions() async -> [ActionNode] {
+    guard let context else { return [] }
+    var desc = FetchDescriptor<ActionNode>(
+        predicate: #Predicate { $0.parent == nil },
+        sortBy: [SortDescriptor(\ActionNode.sortIndex)]
+    )
+    return (try? context.fetch(desc)) ?? []
+}
+
+func rootActionCount() async -> Int {
+    guard let context else { return 0 }
+    let desc = FetchDescriptor<ActionNode>(predicate: #Predicate { $0.parent == nil })
+    return (try? context.fetchCount(desc)) ?? 0
+}
+```
+
+#### ActionMenuBuilder
+
+`ActionSection` is SwiftUI and cannot be embedded in an `NSMenu`. Extract shared NSMenu construction into a new helper:
+
+**File:** `Sources/UI/ActionMenuBuilder.swift`
+
+```swift
+import AppKit
+
+/// Builds a native NSMenu from an ActionNode tree for use in modifier-click popups.
+///
+/// Mirrors ActionSection rendering but produces NSMenu/NSMenuItem instead of SwiftUI views.
+enum ActionMenuBuilder {
+
+    static func makeMenu(
+        from roots: [ActionNode],
+        target: ClipEntry,
+        service: ActionService
+    ) -> NSMenu {
+        let menu = NSMenu()
+        for node in roots.filter(\.isEnabled).sorted(by: { $0.sortIndex < $1.sortIndex }) {
+            menu.addItem(makeItem(for: node, target: target, service: service))
+        }
+        return menu
+    }
+
+    // MARK: - Private
+
+    private static func makeItem(
+        for node: ActionNode,
+        target: ClipEntry,
+        service: ActionService
+    ) -> NSMenuItem {
+        if node.isLeaf {
+            let item = NSMenuItem(title: node.title, action: nil, keyEquivalent: "")
+            item.representedObject = node
+            // Use a block-based action via associated closure stored on the item
+            item.target = ActionMenuTarget.shared
+            item.action = #selector(ActionMenuTarget.perform(_:))
+            ActionMenuTarget.shared.register(node: node, target: target, service: service)
+            return item
+        } else {
+            let submenu = NSMenu(title: node.title)
+            let children = node.children
+                .filter(\.isEnabled)
+                .sorted { $0.sortIndex < $1.sortIndex }
+            for child in children where child.isLeaf {
+                submenu.addItem(makeItem(for: child, target: target, service: service))
+            }
+            let item = NSMenuItem(title: node.title, action: nil, keyEquivalent: "")
+            item.submenu = submenu
+            return item
+        }
+    }
+}
+
+/// NSObject target that bridges NSMenuItem actions to async ActionService calls.
+///
+/// Uses a dictionary keyed by ActionNode.id so multiple menus can coexist.
+final class ActionMenuTarget: NSObject {
+    static let shared = ActionMenuTarget()
+    private var handlers: [ObjectIdentifier: () -> Void] = [:]
+
+    func register(node: ActionNode, target: ClipEntry, service: ActionService) {
+        handlers[ObjectIdentifier(node)] = {
+            Task { await service.perform(action: node, on: target) }
+        }
+    }
+
+    @objc func perform(_ sender: NSMenuItem) {
+        guard let node = sender.representedObject as? ActionNode else { return }
+        handlers[ObjectIdentifier(node)]?()
+    }
+}
+```
+
+#### ClipMenuItem changes
+
+Add `@Environment(\.actionService) private var actionService` and replace `select()`:
+
+```swift
+@Environment(\.actionService) private var actionService
+
+private func select() {
+    let flags = NSEvent.modifierFlags.intersection([.control, .shift, .option, .command])
+
+    if settings.enableAction {
+        let behavior: String
+        switch flags {
+        case .control: behavior = settings.controlClickBehavior
+        case .shift:   behavior = settings.shiftClickBehavior
+        case .option:  behavior = settings.optionClickBehavior
+        case .command: behavior = settings.commandClickBehavior
+        default:       behavior = ""
+        }
+
+        if behavior == "popUpActionMenu" {
+            showActionMenu()
+            return
+        }
+    }
+
+    Task { await clipsService.select(entry) }
+}
+
+private func showActionMenu() {
+    Task {
+        let roots = await actionService.rootActions()
+
+        // invokeActionImmediately: skip menu when exactly one root-level leaf action exists
+        if settings.invokeActionImmediately, roots.count == 1, roots[0].isLeaf {
+            await actionService.perform(action: roots[0], on: entry)
+            return
+        }
+
+        await MainActor.run {
+            let menu = ActionMenuBuilder.makeMenu(from: roots, target: entry, service: actionService)
+            menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+        }
+    }
+}
+```
+
+**Verification:** Set Control+Click → "Show action menu" in Action prefs. Control+click a clip → native NSMenu appears. Select "Paste as Plain Text" → result pasted. Enable `invokeActionImmediately`, remove all but one root action → modifier-click fires directly.
+
+---
+
+### Step 4C: Actions Preferences Editor
+
+**Modified file:** `Sources/UI/Preferences/ActionsPrefsView.swift`
+
+Expand the existing 54-line file to include a full CRUD tree editor below the settings form, matching the legacy reference UI. The editor uses `@Query` for live SwiftData updates.
+
+**High-level layout:**
+
+```
+VStack {
+    Form { ... existing enable/modifier-click sections ... }
+
+    Divider()
+
+    Text("Action Menu").font(.headline)
+
+    HStack(alignment: .top) {
+        // ── LEFT: active action tree ──────────────────────────
+        List(selection: $selectedLeft) {
+            OutlineGroup(rootNodes, children: \.sortedEnabledChildren) { node in
+                ActionTreeRow(node: node, isEditing: $editingNode)
+            }
+        }
+        .frame(minWidth: 200)
+
+        // ── CENTER: add/folder/remove controls ────────────────
+        VStack(spacing: 8) {
+            Button("<<") { addSelectedAction() }
+                .disabled(selectedRight == nil)
+            Button("Folder") { addFolder() }
+            Button("Remove") { removeSelected() }
+                .disabled(selectedLeft == nil)
+        }
+        .padding(.top, 40)
+
+        // ── RIGHT: available action catalog ───────────────────
+        VStack {
+            Picker("", selection: $rightTab) {
+                Text("Built-in").tag(RightTab.builtin)
+                Text("JavaScript").tag(RightTab.javaScript)
+                Text("User's").tag(RightTab.users)
+            }
+            .pickerStyle(.segmented)
+
+            List(availableItems, selection: $selectedRight) { item in
+                Text(item.name)
+            }
+        }
+        .frame(minWidth: 180)
+    }
+    .frame(minHeight: 280)
+
+    // ── STATUS BAR ────────────────────────────────────────────
+    HStack {
+        Text("Name:")
+        Text(selectedLeft?.title ?? selectedRight?.name ?? "")
+        Spacer()
+    }
+    .padding(.horizontal)
+}
+```
+
+**Supporting types:**
+
+```swift
+enum RightTab { case builtin, javaScript, users }
+
+struct AvailableActionItem: Identifiable, Hashable {
+    var id: String
+    var name: String
+    var actionType: String   // "builtin" | "javaScript"
+    var actionName: String?  // built-in only
+    var scriptPath: String?  // javaScript only
+}
+```
+
+**Built-in catalog** (static):
+
+```swift
+static let builtinItems: [AvailableActionItem] = [
+    .init(id: "pasteAsPlainText",   name: "Paste as Plain Text",   actionType: "builtin", actionName: "pasteAsPlainText"),
+    .init(id: "pasteAsFilePath",    name: "Paste as File Path",    actionType: "builtin", actionName: "pasteAsFilePath"),
+    .init(id: "pasteAsHFSFilePath", name: "Paste as HFS File Path",actionType: "builtin", actionName: "pasteAsHFSFilePath"),
+    .init(id: "removeAction",       name: "Remove",                actionType: "builtin", actionName: "removeAction"),
+]
+```
+
+**JavaScript catalog** — enumerate `Bundle.main.urls(forResourcesWithExtension: "js", subdirectory: "scripts/action")` for bundled scripts. Computed lazily.
+
+**User's catalog** — enumerate `~/Library/Application Support/ClipMenu/script/action/*.js`.
+
+**Operations:**
+
+```swift
+// Add selected right-panel item to the left tree
+func addSelectedAction() {
+    guard let item = selectedRight else { return }
+    let node = ActionNode(title: item.name, isLeaf: true, sortIndex: nextRootSortIndex())
+    node.actionType = item.actionType
+    node.actionName = item.actionName
+    node.scriptPath = item.scriptPath
+    if let folder = selectedLeft, !folder.isLeaf {
+        node.parent = folder
+        folder.children.append(node)
+    }
+    context.insert(node)
+    try? context.save()
+}
+
+// Add new folder at root (or inside selected folder)
+func addFolder() {
+    let node = ActionNode(title: "New Folder", isLeaf: false, sortIndex: nextRootSortIndex())
+    if let folder = selectedLeft, !folder.isLeaf {
+        node.parent = folder
+        folder.children.append(node)
+    }
+    context.insert(node)
+    try? context.save()
+}
+
+// Remove selected node (cascade deletes children via SwiftData relationship rule)
+func removeSelected() {
+    guard let node = selectedLeft else { return }
+    context.delete(node)
+    selectedLeft = nil
+    try? context.save()
+}
+```
+
+**Rename:** `ActionTreeRow` renders a `Text` in normal state and a `TextField` when double-tapped (manage with `@State var isRenaming: Bool` per row). On commit, set `node.title` and save context.
+
+**Reorder:** Use `.onMove` on the `List`. After move, update `sortIndex` of all affected siblings to reflect new order.
+
+**`@Environment(\.modelContext) private var context`** — use this for all mutations. `@Query(filter: #Predicate<ActionNode> { $0.parent == nil }, sort: \ActionNode.sortIndex)` for root nodes.
+
+**`sortedEnabledChildren` computed property on `ActionNode`** (add as `extension ActionNode`):
+
+```swift
+extension ActionNode {
+    var sortedEnabledChildren: [ActionNode]? {
+        let c = children.filter(\.isEnabled).sorted { $0.sortIndex < $1.sortIndex }
+        return c.isEmpty ? nil : c
+    }
+}
+```
+
+Returning `nil` instead of `[]` tells `OutlineGroup` the node is a leaf from the UI perspective (no disclosure arrow).
+
+**Verification:** Open Prefs → Action tab → add "Paste as Plain Text" from Built-in panel → it appears in left tree. Add a folder, drag an action into it. Remove an action. Reopen prefs → changes persisted.
+
+---
+
+### Step 4D: Numeric Key Equivalents
+
+**Modified files:** `Sources/UI/ClipMenuItem.swift`, `Sources/Infrastructure/HotkeyService.swift`
+
+When `settings.numericKeyEquivalents` is `true`, history items gain keyboard shortcuts matching their list number (1–9 for items 1–9, 0 for item 10).
+
+#### ClipMenuItem
+
+Add a `ViewModifier` (private, local to the file) and apply it:
+
+```swift
+private struct NumericShortcut: ViewModifier {
+    let number: Int
+    let enabled: Bool
+    func body(content: Content) -> some View {
+        if enabled, (0...9).contains(number) {
+            content.keyboardShortcut(KeyEquivalent(Character(String(number))), modifiers: [])
+        } else {
+            content
+        }
+    }
+}
+```
+
+```swift
+var body: some View {
+    Button(action: select) { itemLabel }
+        .help(tooltip)
+        .modifier(NumericShortcut(number: listNumber % 10,
+                                  enabled: settings.numericKeyEquivalents))
+}
+```
+
+#### HotkeyService NSMenu construction
+
+In the section that creates `NSMenuItem` objects for history clips, add:
+
+```swift
+if settings.numericKeyEquivalents {
+    item.keyEquivalent = String(listNumber % 10)
+    item.keyEquivalentModifierMask = []
+}
+```
+
+**Verification:** Enable "Number keys select items" in Menu prefs → open history menu → press `1` → first clip is pasted.
+
+---
+
+### Phase 4 Completion Checklist
+
+Update `migration_status.md` with the following when each item is done:
+
+- [ ] Snippets migration bug fixed (`makeLegacySnippetModel()` replaces bundle load)
+- [ ] `Resources/scripts/` folder created from `legacy/resource/script/` and wired in `project.yml`
+- [ ] `DefaultActionSeeder.seedIfNeeded(in:)` implemented and called from `AppDelegate`
+- [ ] `ActionService.rootActions()` and `rootActionCount()` added
+- [ ] `ActionMenuBuilder.makeMenu(from:target:service:)` implemented
+- [ ] `ClipMenuItem.select()` reads modifier flags and calls `showActionMenu()` when configured
+- [ ] `ActionsPrefsView` expanded with full CRUD action tree editor
+- [ ] `NumericShortcut` modifier wired in `ClipMenuItem` and `HotkeyService`
+- [ ] Build passes (`xcodegen generate && xcodebuild -scheme ClipMenu build`)

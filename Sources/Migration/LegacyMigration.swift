@@ -50,11 +50,12 @@ struct LegacyMigration {
     private static func importSnippets(from url: URL, into context: ModelContext) {
         guard FileManager.default.fileExists(atPath: url.path) else { return }
 
-        // Load the legacy Core Data XML store read-only via a temporary stack.
-        guard let modelURL = Bundle.main.url(forResource: "Snippets", withExtension: "momd") else {
-            return
-        }
-        guard let mom = NSManagedObjectModel(contentsOf: modelURL) else { return }
+        // Build the legacy Core Data model programmatically.
+        // The original Snippets.xcdatamodel is a flat (non-versioned) model that was never
+        // compiled into the new app bundle, so loading it from Bundle.main is not possible.
+        // The schema is stable (Folder/Snippet with title/index/enabled + relationship), so
+        // constructing it in code is the most reliable approach.
+        let mom = makeLegacySnippetModel()
 
         let psc = NSPersistentStoreCoordinator(managedObjectModel: mom)
         let options: [String: Any] = [NSReadOnlyPersistentStoreOption: true]
@@ -99,6 +100,64 @@ struct LegacyMigration {
         }
 
         try? context.save()
+    }
+
+    /// Constructs the legacy Snippets Core Data model programmatically.
+    ///
+    /// Avoids any dependency on a compiled `.mom`/`.momd` bundle resource.
+    /// Matches the schema defined in `legacy/Snippets.xcdatamodel`.
+    private static func makeLegacySnippetModel() -> NSManagedObjectModel {
+        let model = NSManagedObjectModel()
+
+        let folderEntity = NSEntityDescription()
+        folderEntity.name = "Folder"
+        folderEntity.managedObjectClassName = "NSManagedObject"
+
+        let snippetEntity = NSEntityDescription()
+        snippetEntity.name = "Snippet"
+        snippetEntity.managedObjectClassName = "NSManagedObject"
+
+        func attr(_ name: String, _ type: NSAttributeType) -> NSAttributeDescription {
+            let a = NSAttributeDescription()
+            a.name = name; a.attributeType = type; a.isOptional = true
+            return a
+        }
+
+        folderEntity.properties = [
+            attr("title", .stringAttributeType),
+            attr("index", .integer32AttributeType),
+            attr("enabled", .booleanAttributeType),
+        ]
+        snippetEntity.properties = [
+            attr("title", .stringAttributeType),
+            attr("content", .stringAttributeType),
+            attr("index", .integer32AttributeType),
+            attr("enabled", .booleanAttributeType),
+        ]
+
+        // Relationship: Folder.snippets ↔ Snippet.folder
+        let folderSnippets = NSRelationshipDescription()
+        folderSnippets.name = "snippets"
+        folderSnippets.isOptional = true
+        folderSnippets.minCount = 0
+        folderSnippets.maxCount = 0  // to-many
+        folderSnippets.destinationEntity = snippetEntity
+
+        let snippetFolder = NSRelationshipDescription()
+        snippetFolder.name = "folder"
+        snippetFolder.isOptional = true
+        snippetFolder.minCount = 0
+        snippetFolder.maxCount = 1   // to-one
+        snippetFolder.destinationEntity = folderEntity
+
+        folderSnippets.inverseRelationship = snippetFolder
+        snippetFolder.inverseRelationship = folderSnippets
+
+        folderEntity.properties += [folderSnippets]
+        snippetEntity.properties += [snippetFolder]
+
+        model.entities = [folderEntity, snippetEntity]
+        return model
     }
 
     private static func importClips(from url: URL, into context: ModelContext) {
