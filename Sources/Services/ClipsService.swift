@@ -213,4 +213,14 @@ actor ClipsService {
         for entry in all { context.delete(entry) }
         try context.save()
     }
+
+    /// Writes a plain string to the pasteboard and triggers paste.
+    func copyStringToPasteboard(_ string: String) async {
+        let pboard = NSPasteboard.general
+        pboard.clearContents()
+        pboard.setString(string, forType: .string)
+        if settings.autoPasteAfterSelection {
+            await paste.paste()
+        }
+    }
 }

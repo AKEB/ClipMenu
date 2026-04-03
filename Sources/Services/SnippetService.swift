@@ -1,4 +1,5 @@
 import SwiftData
+import AppKit
 import Foundation
 
 /// CRUD operations over SnippetFolder / Snippet records.
@@ -75,6 +76,9 @@ actor SnippetService {
     }
 
     func paste(snippet: Snippet) async {
-        // TODO: Phase 2 — write snippet.content to NSPasteboard then call PasteService.paste().
+        let pboard = NSPasteboard.general
+        pboard.clearContents()
+        pboard.setString(snippet.content, forType: .string)
+        await PasteService().paste()
     }
 }

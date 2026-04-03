@@ -106,7 +106,7 @@ import AppKit
         case "dash":       return NSUnderlineStyle.patternDash.rawValue
         case "dashdot":    return NSUnderlineStyle.patternDashDot.rawValue
         case "dashdotdot": return NSUnderlineStyle.patternDashDotDot.rawValue
-        default:           return NSUnderlineStyle.patternSolid.rawValue
+        default:           return 0
         }
     }
 }

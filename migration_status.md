@@ -3,7 +3,7 @@
 > **Every agent that completes a migration step MUST update this file before committing.**
 > See `.github/copilot-instructions.md` for the full rule.
 
-**Overall progress:** Bootstrapping complete — Phase 1 substantially implemented (1 task partially complete)
+**Overall progress:** Phase 1 complete — Phase 2 substantially implemented (UI, script engine, services wired)
 
 ---
 
@@ -33,44 +33,41 @@
 
 ## In Progress
 
-### Phase 1 — Infrastructure (no UI changes)
+### Phase 3 — Hotkeys + Polish
 
-- [ ] **1.8** `LegacyMigration` — one-time import of `clips.data`, `Snippets.xml`, `actions.plist`
-  - Implemented clips import from `clips.data` and actions import from `actions.plist`
-  - Remaining: legacy snippets import from `Snippets.xml` and fallback handling for `actionMenu.data`
+- [ ] `HotkeyService` — wire `KeyboardShortcuts` registration into `AppRuntime`/`AppDelegate`
+- [ ] `ShortcutsPrefsView` — replace placeholder with `KeyboardShortcuts.Recorder` controls
+- [ ] End-to-end smoke test: history capture → select → paste
 
 ---
 
 ## Not Started
 
-### Phase 1 — Infrastructure (no UI changes)
-See `doc/migration.md` §"Phase 1" for full task list.
+### Phase 3 — Hotkeys + Polish
+See `doc/migration.md` §"Phase 3" for full task list.
 
-- [x] **1.1** SwiftData models — `ClipEntry.contentHash` algorithm (ref: `legacy/Source/Clip.m -hash`)
-- [x] **1.2** `ClipboardMonitor` — NSPasteboard polling loop + Combine publisher
-- [x] **1.3** `ClipsService` — pasteboard reading, deduplication, SwiftData persistence
-- [x] **1.4** `PasteService` — CGEvent Cmd+V synthesis, Accessibility permission prompt
-- [x] **1.5** `ClipMenuSettings` — legacy-compatible key mapping and default registration
-- [x] **1.6** `LoginItemService` — `SMAppService` wiring in `AppDelegate`
-- [x] **1.7** `AppExclusionService` — frontmost-app exclusion list logic
-- [x] **1.9** `SnippetService` — CRUD + sort order
-- [x] **1.10** `ActionService` — action tree loading and dispatch scaffolding
-- [x] **1.11** Wire services into `AppDelegate.applicationDidFinishLaunching`
+---
+
+## Completed
 
 ### Phase 2 — UI
-- [ ] `ClipMenuView` — history rows, snippet section, action section, separator items
-- [ ] `ClipMenuItem` — type icon + inline preview (ref: `legacy/Source/MenuController.m -imageForClip:`)
-- [ ] `SnippetSection` — enabled folders + nested snippet rows
-- [ ] `ActionSection` — filtered action tree
-- [ ] `PreferencesView` tabs — General, Menu, Actions (full implementation)
-- [ ] `ScriptEngine` / `ScriptableClip` — JSContext bridge (ref: `legacy/Source/JavaScriptSupport.m`)
-- [ ] `ClipMenuApp+Scenes.swift` — `MenuBarExtra` + `Settings` scenes
-- [ ] Update `ClipMenuApp.swift` to inject `ModelContainer` and services
 
-### Phase 3 — Hotkeys + Polish
-- [ ] `HotkeyService` — `KeyboardShortcuts` registration for 3 shortcuts
-- [ ] `ShortcutsPrefsView` — `KeyboardShortcuts.Recorder` rows
-- [ ] End-to-end smoke test: history capture → select → paste
+- [x] `ScriptEngine` — JSContext bridge with `clipText`/`clip` globals and `ClipMenu.require()` loader
+- [x] `ScriptableClip` — `JSExport` bridge: `text`, `setStringAttributes(_:)`, `addStringAttributes(_:)`, CSS color extension
+- [x] `ClipMenuApp` — `MenuBarExtra` + `Settings` scenes wired; `EnvironmentKeys.swift` with service environment keys
+- [x] `ClipMenuView` — full history section (inline + folder groups), snippet section (above/below/hidden), clear history, preferences + quit items; `#Preview`
+- [x] `ClipMenuItem` — type icon via `NSWorkspace`, thumbnail scaling, trimTitle(), numbering, labels, tooltip, font size, `#Preview`
+- [x] `SnippetSection` — enabled folders, single-snippet inline / multi-snippet submenu, paste on select; `#Preview`
+- [x] `ActionSection` — folder + leaf node rendering, action dispatch; `#Preview`
+- [x] `GeneralPrefsView` — login item, clipboard prefs, store-types grid, exclude-apps editor; `#Preview`
+- [x] `MenuPrefsView` — title length, inline/folder counts, numbering, labels, clear-history, tooltips, font size, images, icons; `#Preview`
+- [x] `ActionsPrefsView` — enable toggle, modifier-click pickers, invoke-immediately; `#Preview`
+- [x] `ShortcutsPrefsView` — placeholder with default shortcut display; `#Preview`
+- [x] `PreferencesView` — tab shell; `#Preview`
+- [x] `LegacyMigration` — snippet import from `Snippets.xml` added (Core Data XML → SwiftData)
+- [x] `SnippetService.paste(snippet:)` — implemented (write to pasteboard + `PasteService.paste()`)
+- [x] `ActionService` — builtin actions (`removeAction`, `pasteAsPlainText`, `pasteAsFilePath`, `pasteAsHFSFilePath`); JS script dispatch via `ScriptEngine`
+- [x] `ClipsService.clearAll()` and `ClipsService.copyStringToPasteboard(_:)` added
 
 ---
 

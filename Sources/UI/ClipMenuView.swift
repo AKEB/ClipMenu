@@ -100,3 +100,14 @@ struct ClipMenuView: View {
     }
 }
 
+// MARK: - Preview
+
+#Preview {
+    ClipMenuView()
+        .environment(ClipMenuSettings())
+        .environment(\.clipsService, ClipsService(settings: ClipMenuSettings()))
+        .environment(\.snippetService, SnippetService())
+        .modelContainer(for: [ClipEntry.self, SnippetFolder.self, Snippet.self, ActionNode.self],
+                        inMemory: true)
+}
+

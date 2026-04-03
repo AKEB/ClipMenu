@@ -2,9 +2,8 @@ import SwiftUI
 
 /// Root of the Settings scene — tabbed preferences window.
 ///
-/// TODO: Phase 2 — build tab structure mirroring legacy Preferences.xib
-///       (General, Menu, Actions, Shortcuts tabs from
-///       legacy/Source/PrefsWindowController.{h,m}).
+/// Mirrors the tab structure from `legacy/Source/PrefsWindowController.{h,m}`
+/// (General, Menu, Actions, Shortcuts tabs).
 struct PreferencesView: View {
     var body: some View {
         TabView {
@@ -22,4 +21,12 @@ struct PreferencesView: View {
         }
         .frame(minWidth: 480, minHeight: 360)
     }
+}
+
+// MARK: - Preview
+
+#Preview {
+    PreferencesView()
+        .environment(ClipMenuSettings())
+        .environment(\.loginItemService, LoginItemService())
 }

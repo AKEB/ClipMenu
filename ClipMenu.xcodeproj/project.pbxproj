@@ -12,6 +12,7 @@
 		21AD2E3FCA0D9D76AC02FA23 /* LegacyMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42B59EEB0DCCE6D695636F67 /* LegacyMigration.swift */; };
 		2F8F707D3AF29A98FCBA6CAF /* ClipsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A83BE5811A4FB6A1DB019AC2 /* ClipsService.swift */; };
 		34EB7B9526F4C2AAF8291A23 /* ClipboardMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9075790B975D02A5039621CB /* ClipboardMonitor.swift */; };
+		40A1F4EED97AF8553F7672B0 /* EnvironmentKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC267D67332120F313F7EA31 /* EnvironmentKeys.swift */; };
 		49010720EA3588BD56645417 /* Snippet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B60996BF476330FFB6501381 /* Snippet.swift */; };
 		529A9D03AD998DAE8ADB2A00 /* MenuPrefsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C53F23FA57EE7251E7DC8C6E /* MenuPrefsView.swift */; };
 		5F656B886B8F29CC5617F8BB /* ClipMenuApp+Scenes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ED996E53C34CFD8C7D0310C /* ClipMenuApp+Scenes.swift */; };
@@ -82,6 +83,7 @@
 		C53F23FA57EE7251E7DC8C6E /* MenuPrefsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuPrefsView.swift; sourceTree = "<group>"; };
 		D443B0D12EBBA794375C2643 /* PasteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteService.swift; sourceTree = "<group>"; };
 		D4616EE385FA381E5A043060 /* SnippetService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetService.swift; sourceTree = "<group>"; };
+		DC267D67332120F313F7EA31 /* EnvironmentKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentKeys.swift; sourceTree = "<group>"; };
 		EBDD749FF754FE72E7DB47E6 /* HotkeyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyService.swift; sourceTree = "<group>"; };
 		EF4A999AFD48E89E62517C2E /* VersionHistory-en.yaml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "VersionHistory-en.yaml"; sourceTree = "<group>"; };
 		F425B2066AB9B7524D4770CD /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
@@ -191,6 +193,7 @@
 				630C393A150A0A2DD37B2D11 /* AppDelegate.swift */,
 				0E215E86DBA662D409E0C3E8 /* AppRuntime.swift */,
 				0CDD26CD466BFA583E75E608 /* ClipMenuApp.swift */,
+				DC267D67332120F313F7EA31 /* EnvironmentKeys.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -332,6 +335,7 @@
 				BA02CE3D4BA737DCD6AC686A /* ClipMenuView.swift in Sources */,
 				34EB7B9526F4C2AAF8291A23 /* ClipboardMonitor.swift in Sources */,
 				2F8F707D3AF29A98FCBA6CAF /* ClipsService.swift in Sources */,
+				40A1F4EED97AF8553F7672B0 /* EnvironmentKeys.swift in Sources */,
 				936E1E26F533AC6B39414F5D /* GeneralPrefsView.swift in Sources */,
 				E1DFEA8B6C7669DFC34FBC0C /* HotkeyService.swift in Sources */,
 				21AD2E3FCA0D9D76AC02FA23 /* LegacyMigration.swift in Sources */,

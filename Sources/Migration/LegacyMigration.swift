@@ -39,9 +39,66 @@ struct LegacyMigration {
         }
 
         importClips(from: supportFolder.appendingPathComponent("clips.data"), into: context)
+        importSnippets(from: supportFolder.appendingPathComponent("Snippets.xml"), into: context)
         importActions(from: supportFolder.appendingPathComponent("actions.plist"), into: context)
 
         UserDefaults.standard.set(true, forKey: completedKey)
+    }
+
+    // MARK: - Snippets (Core Data XML → SwiftData)
+
+    private static func importSnippets(from url: URL, into context: ModelContext) {
+        guard FileManager.default.fileExists(atPath: url.path) else { return }
+
+        // Load the legacy Core Data XML store read-only via a temporary stack.
+        guard let modelURL = Bundle.main.url(forResource: "Snippets", withExtension: "momd") else {
+            return
+        }
+        guard let mom = NSManagedObjectModel(contentsOf: modelURL) else { return }
+
+        let psc = NSPersistentStoreCoordinator(managedObjectModel: mom)
+        let options: [String: Any] = [NSReadOnlyPersistentStoreOption: true]
+        guard (try? psc.addPersistentStore(
+            ofType: NSXMLStoreType,
+            configurationName: nil,
+            at: url,
+            options: options)) != nil
+        else { return }
+
+        let legacyCtx = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+        legacyCtx.persistentStoreCoordinator = psc
+
+        let folderReq = NSFetchRequest<NSManagedObject>(entityName: "Folder")
+        folderReq.sortDescriptors = [NSSortDescriptor(key: "index", ascending: true)]
+        guard let legacyFolders = try? legacyCtx.fetch(folderReq) else { return }
+
+        for legacyFolder in legacyFolders {
+            let folder = SnippetFolder(
+                title: legacyFolder.value(forKey: "title") as? String ?? "",
+                sortIndex: legacyFolder.value(forKey: "index") as? Int ?? 0
+            )
+            folder.isEnabled = legacyFolder.value(forKey: "enabled") as? Bool ?? true
+            context.insert(folder)
+
+            let snippetSet = (legacyFolder.value(forKey: "snippets") as? NSSet)?
+                .allObjects as? [NSManagedObject] ?? []
+            let sorted = snippetSet.sorted {
+                ($0.value(forKey: "index") as? Int ?? 0) < ($1.value(forKey: "index") as? Int ?? 0)
+            }
+            for legacySnippet in sorted {
+                let snippet = Snippet(
+                    title: legacySnippet.value(forKey: "title") as? String ?? "",
+                    content: legacySnippet.value(forKey: "content") as? String ?? "",
+                    sortIndex: legacySnippet.value(forKey: "index") as? Int ?? 0
+                )
+                snippet.isEnabled = legacySnippet.value(forKey: "enabled") as? Bool ?? true
+                snippet.folder = folder
+                folder.snippets.append(snippet)
+                context.insert(snippet)
+            }
+        }
+
+        try? context.save()
     }
 
     private static func importClips(from url: URL, into context: ModelContext) {
