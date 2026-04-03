@@ -26,6 +26,9 @@
 - [x] `ClipMenu.xcodeproj` generated via `xcodegen generate`
 - [x] Build confirmed: project generates without errors
 
+### Documentation
+- [x] `BUILD.md` added with modern build commands and legacy release-script notes
+
 ---
 
 ## In Progress
