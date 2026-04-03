@@ -22,9 +22,24 @@ struct ClipMenuApp: App {
     }
 
     var body: some Scene {
+        MenuBarExtra {
+            ClipMenuView()
+                .environment(runtime.settings)
+                .environment(\.clipsService, runtime.clipsService)
+                .environment(\.snippetService, runtime.snippetService)
+                .environment(\.actionService, runtime.actionService)
+        } label: {
+            Image(systemName: "doc.on.clipboard")
+        }
+        .menuBarExtraStyle(.menu)
+        .modelContainer(modelContainer)
+
         Settings {
-            EmptyView()
+            PreferencesView()
+                .environment(runtime.settings)
+                .environment(\.loginItemService, runtime.loginItemService)
         }
         .modelContainer(modelContainer)
     }
 }
+

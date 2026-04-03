@@ -206,4 +206,11 @@ actor ClipsService {
         default: return nil
         }
     }
+
+    func clearAll() throws {
+        guard let context else { return }
+        let all = try context.fetch(FetchDescriptor<ClipEntry>())
+        for entry in all { context.delete(entry) }
+        try context.save()
+    }
 }
