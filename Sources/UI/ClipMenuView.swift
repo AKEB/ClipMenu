@@ -44,34 +44,44 @@ struct ClipMenuView: View {
 
     // MARK: - Clips section
 
+    // Computed outside @ViewBuilder so SwiftUI's dependency tracking reliably
+    // sees the @Query `clips` property on every render.
+
+    private var inlineClips: [ClipEntry] {
+        let n = settings.numberOfItemsInline
+        // Legacy: n == 0 → all items go into folder submenus (mirrors ObjC behaviour).
+        return n == 0 ? [] : Array(clips.prefix(n))
+    }
+
+    /// Groups of clips that appear inside folder submenus.
+    private var folderGroups: [[ClipEntry]] {
+        let n = settings.numberOfItemsInline
+        let groupSize = max(settings.numberOfItemsInsideFolder, 1)
+        let remaining = n == 0 ? clips : Array(clips.dropFirst(n))
+        guard !remaining.isEmpty else { return [] }
+        return stride(from: 0, to: remaining.count, by: groupSize).map {
+            Array(remaining[$0..<min($0 + groupSize, remaining.count)])
+        }
+    }
+
     @ViewBuilder
     private var clipsSection: some View {
         let inlineCount = settings.numberOfItemsInline
-        let perFolder   = settings.numberOfItemsInsideFolder
-
-        // Legacy behaviour: inlineCount == 0 means ALL items go into folders (same as legacy ObjC).
-        let inlineClips = inlineCount == 0 ? [] : Array(clips.prefix(inlineCount))
-        let folderClips = inlineCount == 0 ? clips : Array(clips.dropFirst(inlineCount))
+        let groupSize   = max(settings.numberOfItemsInsideFolder, 1)
 
         ForEach(Array(inlineClips.enumerated()), id: \.element.id) { index, clip in
             ClipMenuItem(entry: clip, listNumber: listNumber(for: index))
         }
 
-        if !folderClips.isEmpty {
-            let groupSize = max(perFolder, 1)
-            let groups = stride(from: 0, to: folderClips.count, by: groupSize).map {
-                Array(folderClips[$0..<min($0 + groupSize, folderClips.count)])
-            }
-            ForEach(Array(groups.enumerated()), id: \.offset) { groupIndex, group in
-                let start = inlineCount + groupIndex * groupSize + 1
-                let end   = start + group.count - 1
-                Menu("\(start)-\(end)") {
-                    ForEach(Array(group.enumerated()), id: \.element.id) { idx, clip in
-                        ClipMenuItem(
-                            entry: clip,
-                            listNumber: listNumber(for: inlineCount + groupIndex * groupSize + idx)
-                        )
-                    }
+        ForEach(Array(folderGroups.enumerated()), id: \.offset) { groupIndex, group in
+            let start = inlineCount + groupIndex * groupSize + 1
+            let end   = start + group.count - 1
+            Menu("\(start) – \(end)") {
+                ForEach(Array(group.enumerated()), id: \.element.id) { idx, clip in
+                    ClipMenuItem(
+                        entry: clip,
+                        listNumber: listNumber(for: inlineCount + groupIndex * groupSize + idx)
+                    )
                 }
             }
         }

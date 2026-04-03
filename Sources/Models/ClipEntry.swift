@@ -34,7 +34,10 @@ final class ClipEntry {
     }
 
     var contentHash: Int {
-        var h = types.joined().hashValue
+        // Use NSString.hash (stable across process runs) rather than Swift's
+        // randomised hashValue so that deduplication survives app restarts.
+        // This mirrors legacy/Source/Clip.m which calls -hash on NSString.
+        var h = (types.joined() as NSString).hash
 
         if let imageData {
             h ^= imageData.count
@@ -42,16 +45,16 @@ final class ClipEntry {
 
         if let filenames {
             for filename in filenames {
-                h ^= filename.hashValue
+                h ^= (filename as NSString).hash
             }
         } else if let urlStrings {
             for urlString in urlStrings {
-                h ^= urlString.hashValue
+                h ^= (urlString as NSString).hash
             }
         } else if let pdfData {
             h ^= pdfData.count
         } else if let stringValue {
-            h ^= stringValue.hashValue
+            h ^= (stringValue as NSString).hash
         }
 
         h ^= (rtfData?.count ?? 0)

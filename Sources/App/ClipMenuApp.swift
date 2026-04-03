@@ -24,6 +24,7 @@ struct ClipMenuApp: App {
     var body: some Scene {
         MenuBarExtra {
             ClipMenuView()
+                .modelContainer(modelContainer)
                 .environment(runtime.settings)
                 .environment(\.clipsService, runtime.clipsService)
                 .environment(\.snippetService, runtime.snippetService)
@@ -36,6 +37,7 @@ struct ClipMenuApp: App {
 
         Settings {
             PreferencesView()
+                .modelContainer(modelContainer)
                 .environment(runtime.settings)
                 .environment(\.loginItemService, runtime.loginItemService)
         }

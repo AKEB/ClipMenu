@@ -1,6 +1,5 @@
 import Foundation
 import Observation
-import SwiftUI
 
 @Observable
 final class ClipMenuSettings {
@@ -10,210 +9,211 @@ final class ClipMenuSettings {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         registerLegacyDefaultsIfNeeded()
+        loadFromDefaults()
+        sanitizeAndPersist()
     }
 
     // MARK: - General
 
-    @ObservationIgnored @AppStorage("loginItem")
-    var launchAtLogin: Bool = false
-
-    @ObservationIgnored @AppStorage("suppressAlertForLoginItem")
-    var suppressLoginItemAlert: Bool = false
-
-    @ObservationIgnored @AppStorage("inputPasteCommand")
-    var autoPasteAfterSelection: Bool = true
-
-    @ObservationIgnored @AppStorage("reorderClipsAfterPasting")
-    var reorderClipsAfterPasting: Bool = true
-
-    @ObservationIgnored @AppStorage("maxHistorySize")
-    var maxHistorySize: Int = 20
-
-    @ObservationIgnored @AppStorage("autosaveDelay")
-    var autosaveDelay: Int = 1800
-
-    @ObservationIgnored @AppStorage("saveHistoryOnQuit")
-    var saveHistoryOnQuit: Bool = true
-
-    @ObservationIgnored @AppStorage("exportHistoryAsSingleFile")
-    var exportHistoryAsSingleFile: Bool = true
-
-    @ObservationIgnored @AppStorage("tagOfSeparatorForExportHistoryToFile")
-    var exportSeparatorTag: Int = 1
-
-    @ObservationIgnored @AppStorage("showStatusItem")
-    var showStatusItem: Bool = true
-
-    @ObservationIgnored @AppStorage("timeInterval")
-    var pollingInterval: Double = 0.75
-
-    var storeTypes: [String: Bool] {
-        get {
-            (defaults.dictionary(forKey: "storeTypes") as? [String: Bool]) ?? Self.defaultStoreTypes
-        }
-        set {
-            defaults.set(newValue, forKey: "storeTypes")
-        }
-    }
-
-    var excludeApps: [[String: String]] {
-        get {
-            defaults.array(forKey: "excludeApps") as? [[String: String]] ?? Self.defaultExcludeApps
-        }
-        set {
-            defaults.set(newValue, forKey: "excludeApps")
-        }
-    }
+    var launchAtLogin: Bool = false { didSet { defaults.set(launchAtLogin, forKey: "loginItem") } }
+    var suppressLoginItemAlert: Bool = false { didSet { defaults.set(suppressLoginItemAlert, forKey: "suppressAlertForLoginItem") } }
+    var autoPasteAfterSelection: Bool = true { didSet { defaults.set(autoPasteAfterSelection, forKey: "inputPasteCommand") } }
+    var reorderClipsAfterPasting: Bool = true { didSet { defaults.set(reorderClipsAfterPasting, forKey: "reorderClipsAfterPasting") } }
+    var maxHistorySize: Int = 20 { didSet { defaults.set(maxHistorySize, forKey: "maxHistorySize") } }
+    var autosaveDelay: Int = 1_800 { didSet { defaults.set(autosaveDelay, forKey: "autosaveDelay") } }
+    var saveHistoryOnQuit: Bool = true { didSet { defaults.set(saveHistoryOnQuit, forKey: "saveHistoryOnQuit") } }
+    var exportHistoryAsSingleFile: Bool = true { didSet { defaults.set(exportHistoryAsSingleFile, forKey: "exportHistoryAsSingleFile") } }
+    var exportSeparatorTag: Int = 1 { didSet { defaults.set(exportSeparatorTag, forKey: "tagOfSeparatorForExportHistoryToFile") } }
+    var showStatusItem: Bool = true { didSet { defaults.set(showStatusItem, forKey: "showStatusItem") } }
+    var pollingInterval: Double = 0.75 { didSet { defaults.set(pollingInterval, forKey: "timeInterval") } }
+    var storeTypes: [String: Bool] = [
+        "String": true,
+        "RTF": true,
+        "RTFD": true,
+        "PDF": true,
+        "Filenames": true,
+        "URL": true,
+        "TIFF": true,
+        "PICT": true,
+    ] { didSet { defaults.set(storeTypes, forKey: "storeTypes") } }
+    var excludeApps: [[String: String]] = [[
+        "bundleIdentifier": "org.openoffice.script",
+        "name": "OpenOffice.org",
+    ]] { didSet { defaults.set(excludeApps, forKey: "excludeApps") } }
 
     // MARK: - Menu
 
-    @ObservationIgnored @AppStorage("maxMenuItemTitleLength")
-    var maxMenuItemTitleLength: Int = 20
-
-    @ObservationIgnored @AppStorage("numberOfItemsPlaceInline")
-    var numberOfItemsInline: Int = 0
-
-    @ObservationIgnored @AppStorage("numberOfItemsPlaceInsideFolder")
-    var numberOfItemsInsideFolder: Int = 10
-
-    @ObservationIgnored @AppStorage("menuItemsAreMarkedWithNumbers")
-    var numberedMenuItems: Bool = true
-
-    @ObservationIgnored @AppStorage("menuItemsTitleStartWithZero")
-    var numberingStartsAtZero: Bool = false
-
-    @ObservationIgnored @AppStorage("addNumericKeyEquivalents")
-    var numericKeyEquivalents: Bool = false
-
-    @ObservationIgnored @AppStorage("addClearHistoryMenuItem")
-    var showClearHistoryItem: Bool = true
-
-    @ObservationIgnored @AppStorage("showAlertBeforeClearHistory")
-    var showAlertBeforeClearHistory: Bool = true
-
-    @ObservationIgnored @AppStorage("showLabelsInMenu")
-    var showLabelsInMenu: Bool = true
-
-    @ObservationIgnored @AppStorage("showToolTipOnMenuItem")
-    var showTooltipsInMenu: Bool = true
-
-    @ObservationIgnored @AppStorage("maxLengthOfToolTipKey")
-    var maxTooltipLength: Int = 200
-
-    @ObservationIgnored @AppStorage("changeFontSize")
-    var changeFontSize: Bool = false
-
-    @ObservationIgnored @AppStorage("howToChangeFontSize")
-    var fontSizeMode: Int = 0
-
-    @ObservationIgnored @AppStorage("selectedFontSize")
-    var selectedFontSize: Int = 14
-
-    @ObservationIgnored @AppStorage("showImageInTheMenu")
-    var showImageInMenu: Bool = true
-
-    @ObservationIgnored @AppStorage("thumbnailWidth")
-    var thumbnailWidth: Int = 100
-
-    @ObservationIgnored @AppStorage("thumbnailHeight")
-    var thumbnailHeight: Int = 32
-
-    @ObservationIgnored @AppStorage("showIconInTheMenu")
-    var showIconInMenu: Bool = true
-
-    @ObservationIgnored @AppStorage("menuIconSize")
-    var menuIconSize: Int = 16
-
-    @ObservationIgnored @AppStorage("menuIconOfFileTypeTagForString")
-    var menuIconOfFileTypeTagForString: Int = 1
-
-    @ObservationIgnored @AppStorage("menuIconOfFileTypeForString")
-    var menuIconOfFileTypeForString: String = "TEXT"
-
-    @ObservationIgnored @AppStorage("menuIconOfFileTypeTagForRTF")
-    var menuIconOfFileTypeTagForRTF: Int = 0
-
-    @ObservationIgnored @AppStorage("menuIconOfFileTypeForRTF")
-    var menuIconOfFileTypeForRTF: String = "rtf"
-
-    @ObservationIgnored @AppStorage("menuIconOfFileTypeTagForRTFD")
-    var menuIconOfFileTypeTagForRTFD: Int = 0
-
-    @ObservationIgnored @AppStorage("menuIconOfFileTypeForRTFD")
-    var menuIconOfFileTypeForRTFD: String = "rtfd"
-
-    @ObservationIgnored @AppStorage("menuIconOfFileTypeTagForPDF")
-    var menuIconOfFileTypeTagForPDF: Int = 0
-
-    @ObservationIgnored @AppStorage("menuIconOfFileTypeForPDF")
-    var menuIconOfFileTypeForPDF: String = "pdf"
-
-    @ObservationIgnored @AppStorage("menuIconOfFileTypeTagForFilenames")
-    var menuIconOfFileTypeTagForFilenames: Int = 1
-
-    @ObservationIgnored @AppStorage("menuIconOfFileTypeForFilenames")
-    var menuIconOfFileTypeForFilenames: String = "clpu"
-
-    @ObservationIgnored @AppStorage("menuIconOfFileTypeTagForURL")
-    var menuIconOfFileTypeTagForURL: Int = 1
-
-    @ObservationIgnored @AppStorage("menuIconOfFileTypeForURL")
-    var menuIconOfFileTypeForURL: String = "gurl"
-
-    @ObservationIgnored @AppStorage("menuIconOfFileTypeTagForTIFF")
-    var menuIconOfFileTypeTagForTIFF: Int = 0
-
-    @ObservationIgnored @AppStorage("menuIconOfFileTypeForTIFF")
-    var menuIconOfFileTypeForTIFF: String = "tiff"
-
-    @ObservationIgnored @AppStorage("menuIconOfFileTypeTagForPICT")
-    var menuIconOfFileTypeTagForPICT: Int = 0
-
-    @ObservationIgnored @AppStorage("menuIconOfFileTypeForPICT")
-    var menuIconOfFileTypeForPICT: String = "pict"
+    var maxMenuItemTitleLength: Int = 20 { didSet { defaults.set(maxMenuItemTitleLength, forKey: "maxMenuItemTitleLength") } }
+    var numberOfItemsInline: Int = 0 { didSet { defaults.set(numberOfItemsInline, forKey: "numberOfItemsPlaceInline") } }
+    var numberOfItemsInsideFolder: Int = 10 { didSet { defaults.set(numberOfItemsInsideFolder, forKey: "numberOfItemsPlaceInsideFolder") } }
+    var numberedMenuItems: Bool = true { didSet { defaults.set(numberedMenuItems, forKey: "menuItemsAreMarkedWithNumbers") } }
+    var numberingStartsAtZero: Bool = false { didSet { defaults.set(numberingStartsAtZero, forKey: "menuItemsTitleStartWithZero") } }
+    var numericKeyEquivalents: Bool = false { didSet { defaults.set(numericKeyEquivalents, forKey: "addNumericKeyEquivalents") } }
+    var showClearHistoryItem: Bool = true { didSet { defaults.set(showClearHistoryItem, forKey: "addClearHistoryMenuItem") } }
+    var showAlertBeforeClearHistory: Bool = true { didSet { defaults.set(showAlertBeforeClearHistory, forKey: "showAlertBeforeClearHistory") } }
+    var showLabelsInMenu: Bool = true { didSet { defaults.set(showLabelsInMenu, forKey: "showLabelsInMenu") } }
+    var showTooltipsInMenu: Bool = true { didSet { defaults.set(showTooltipsInMenu, forKey: "showToolTipOnMenuItem") } }
+    var maxTooltipLength: Int = 200 { didSet { defaults.set(maxTooltipLength, forKey: "maxLengthOfToolTipKey") } }
+    var changeFontSize: Bool = false { didSet { defaults.set(changeFontSize, forKey: "changeFontSize") } }
+    var fontSizeMode: Int = 0 { didSet { defaults.set(fontSizeMode, forKey: "howToChangeFontSize") } }
+    var selectedFontSize: Int = 14 { didSet { defaults.set(selectedFontSize, forKey: "selectedFontSize") } }
+    var showImageInMenu: Bool = true { didSet { defaults.set(showImageInMenu, forKey: "showImageInTheMenu") } }
+    var thumbnailWidth: Int = 100 { didSet { defaults.set(thumbnailWidth, forKey: "thumbnailWidth") } }
+    var thumbnailHeight: Int = 32 { didSet { defaults.set(thumbnailHeight, forKey: "thumbnailHeight") } }
+    var showIconInMenu: Bool = true { didSet { defaults.set(showIconInMenu, forKey: "showIconInTheMenu") } }
+    var menuIconSize: Int = 16 { didSet { defaults.set(menuIconSize, forKey: "menuIconSize") } }
+    var menuIconOfFileTypeTagForString: Int = 1 { didSet { defaults.set(menuIconOfFileTypeTagForString, forKey: "menuIconOfFileTypeTagForString") } }
+    var menuIconOfFileTypeForString: String = "TEXT" { didSet { defaults.set(menuIconOfFileTypeForString, forKey: "menuIconOfFileTypeForString") } }
+    var menuIconOfFileTypeTagForRTF: Int = 0 { didSet { defaults.set(menuIconOfFileTypeTagForRTF, forKey: "menuIconOfFileTypeTagForRTF") } }
+    var menuIconOfFileTypeForRTF: String = "rtf" { didSet { defaults.set(menuIconOfFileTypeForRTF, forKey: "menuIconOfFileTypeForRTF") } }
+    var menuIconOfFileTypeTagForRTFD: Int = 0 { didSet { defaults.set(menuIconOfFileTypeTagForRTFD, forKey: "menuIconOfFileTypeTagForRTFD") } }
+    var menuIconOfFileTypeForRTFD: String = "rtfd" { didSet { defaults.set(menuIconOfFileTypeForRTFD, forKey: "menuIconOfFileTypeForRTFD") } }
+    var menuIconOfFileTypeTagForPDF: Int = 0 { didSet { defaults.set(menuIconOfFileTypeTagForPDF, forKey: "menuIconOfFileTypeTagForPDF") } }
+    var menuIconOfFileTypeForPDF: String = "pdf" { didSet { defaults.set(menuIconOfFileTypeForPDF, forKey: "menuIconOfFileTypeForPDF") } }
+    var menuIconOfFileTypeTagForFilenames: Int = 1 { didSet { defaults.set(menuIconOfFileTypeTagForFilenames, forKey: "menuIconOfFileTypeTagForFilenames") } }
+    var menuIconOfFileTypeForFilenames: String = "clpu" { didSet { defaults.set(menuIconOfFileTypeForFilenames, forKey: "menuIconOfFileTypeForFilenames") } }
+    var menuIconOfFileTypeTagForURL: Int = 1 { didSet { defaults.set(menuIconOfFileTypeTagForURL, forKey: "menuIconOfFileTypeTagForURL") } }
+    var menuIconOfFileTypeForURL: String = "gurl" { didSet { defaults.set(menuIconOfFileTypeForURL, forKey: "menuIconOfFileTypeForURL") } }
+    var menuIconOfFileTypeTagForTIFF: Int = 0 { didSet { defaults.set(menuIconOfFileTypeTagForTIFF, forKey: "menuIconOfFileTypeTagForTIFF") } }
+    var menuIconOfFileTypeForTIFF: String = "tiff" { didSet { defaults.set(menuIconOfFileTypeForTIFF, forKey: "menuIconOfFileTypeForTIFF") } }
+    var menuIconOfFileTypeTagForPICT: Int = 0 { didSet { defaults.set(menuIconOfFileTypeTagForPICT, forKey: "menuIconOfFileTypeTagForPICT") } }
+    var menuIconOfFileTypeForPICT: String = "pict" { didSet { defaults.set(menuIconOfFileTypeForPICT, forKey: "menuIconOfFileTypeForPICT") } }
 
     // MARK: - Hot Keys
 
-    var hotKeys: [String: Any] {
-        get { defaults.dictionary(forKey: "hotKeys") ?? Self.defaultHotKeys }
-        set { defaults.set(newValue, forKey: "hotKeys") }
-    }
+    var hotKeys: [String: Any] = [
+        "ClipMenu": ["keyCode": 9, "modifiers": 768],
+        "HistoryMenu": ["keyCode": 9, "modifiers": 4352],
+        "SnippetsMenu": ["keyCode": 11, "modifiers": 768],
+    ] { didSet { defaults.set(hotKeys, forKey: "hotKeys") } }
 
     // MARK: - Actions
 
-    @ObservationIgnored @AppStorage("enableAction")
-    var enableAction: Bool = true
-
-    @ObservationIgnored @AppStorage("invokeActionImmediately")
-    var invokeActionImmediately: Bool = false
-
-    @ObservationIgnored @AppStorage("controlClickBehavior")
-    var controlClickBehavior: String = "popUpActionMenu"
-
-    @ObservationIgnored @AppStorage("shiftClickBehavior")
-    var shiftClickBehavior: String = ""
-
-    @ObservationIgnored @AppStorage("optionClickBehavior")
-    var optionClickBehavior: String = ""
-
-    @ObservationIgnored @AppStorage("commandClickBehavior")
-    var commandClickBehavior: String = ""
+    var enableAction: Bool = true { didSet { defaults.set(enableAction, forKey: "enableAction") } }
+    var invokeActionImmediately: Bool = false { didSet { defaults.set(invokeActionImmediately, forKey: "invokeActionImmediately") } }
+    var controlClickBehavior: String = "popUpActionMenu" { didSet { defaults.set(controlClickBehavior, forKey: "controlClickBehavior") } }
+    var shiftClickBehavior: String = "" { didSet { defaults.set(shiftClickBehavior, forKey: "shiftClickBehavior") } }
+    var optionClickBehavior: String = "" { didSet { defaults.set(optionClickBehavior, forKey: "optionClickBehavior") } }
+    var commandClickBehavior: String = "" { didSet { defaults.set(commandClickBehavior, forKey: "commandClickBehavior") } }
 
     // MARK: - Snippets
 
-    @ObservationIgnored @AppStorage("positionOfSnippets")
-    var positionOfSnippets: Int = 1
+    var positionOfSnippets: Int = 1 { didSet { defaults.set(positionOfSnippets, forKey: "positionOfSnippets") } }
 
     // MARK: - Updates
 
-    @ObservationIgnored @AppStorage("enableAutomaticCheck")
-    var enableAutomaticCheck: Bool = true
+    var enableAutomaticCheck: Bool = true { didSet { defaults.set(enableAutomaticCheck, forKey: "enableAutomaticCheck") } }
+    var enableAutomaticCheckPreRelease: Bool = false { didSet { defaults.set(enableAutomaticCheckPreRelease, forKey: "enableAutomaticCheckPreReleaseKey") } }
+    var updateCheckInterval: Int = 86_400 { didSet { defaults.set(updateCheckInterval, forKey: "updateCheckInterval") } }
 
-    @ObservationIgnored @AppStorage("enableAutomaticCheckPreReleaseKey")
-    var enableAutomaticCheckPreRelease: Bool = false
+    /// Re-reads all persisted keys from UserDefaults.
+    /// Useful on startup and after external defaults changes.
+    func reload() {
+        loadFromDefaults()
+        sanitizeAndPersist()
+    }
 
-    @ObservationIgnored @AppStorage("updateCheckInterval")
-    var updateCheckInterval: Int = 86_400
+    private func boolValue(_ key: String, default fallback: Bool) -> Bool {
+        (defaults.object(forKey: key) as? Bool) ?? fallback
+    }
+
+    private func intValue(_ key: String, default fallback: Int) -> Int {
+        (defaults.object(forKey: key) as? Int) ?? fallback
+    }
+
+    private func doubleValue(_ key: String, default fallback: Double) -> Double {
+        (defaults.object(forKey: key) as? Double) ?? fallback
+    }
+
+    private func stringValue(_ key: String, default fallback: String) -> String {
+        (defaults.object(forKey: key) as? String) ?? fallback
+    }
+
+    private func loadFromDefaults() {
+        launchAtLogin = boolValue("loginItem", default: false)
+        suppressLoginItemAlert = boolValue("suppressAlertForLoginItem", default: false)
+        autoPasteAfterSelection = boolValue("inputPasteCommand", default: true)
+        reorderClipsAfterPasting = boolValue("reorderClipsAfterPasting", default: true)
+        maxHistorySize = intValue("maxHistorySize", default: 20)
+        autosaveDelay = intValue("autosaveDelay", default: 1_800)
+        saveHistoryOnQuit = boolValue("saveHistoryOnQuit", default: true)
+        exportHistoryAsSingleFile = boolValue("exportHistoryAsSingleFile", default: true)
+        exportSeparatorTag = intValue("tagOfSeparatorForExportHistoryToFile", default: 1)
+        showStatusItem = boolValue("showStatusItem", default: true)
+        pollingInterval = doubleValue("timeInterval", default: 0.75)
+        storeTypes = (defaults.dictionary(forKey: "storeTypes") as? [String: Bool]) ?? Self.defaultStoreTypes
+        excludeApps = (defaults.array(forKey: "excludeApps") as? [[String: String]]) ?? Self.defaultExcludeApps
+
+        maxMenuItemTitleLength = intValue("maxMenuItemTitleLength", default: 20)
+        numberOfItemsInline = intValue("numberOfItemsPlaceInline", default: 0)
+        numberOfItemsInsideFolder = intValue("numberOfItemsPlaceInsideFolder", default: 10)
+        numberedMenuItems = boolValue("menuItemsAreMarkedWithNumbers", default: true)
+        numberingStartsAtZero = boolValue("menuItemsTitleStartWithZero", default: false)
+        numericKeyEquivalents = boolValue("addNumericKeyEquivalents", default: false)
+        showClearHistoryItem = boolValue("addClearHistoryMenuItem", default: true)
+        showAlertBeforeClearHistory = boolValue("showAlertBeforeClearHistory", default: true)
+        showLabelsInMenu = boolValue("showLabelsInMenu", default: true)
+        showTooltipsInMenu = boolValue("showToolTipOnMenuItem", default: true)
+        maxTooltipLength = intValue("maxLengthOfToolTipKey", default: 200)
+        changeFontSize = boolValue("changeFontSize", default: false)
+        fontSizeMode = intValue("howToChangeFontSize", default: 0)
+        selectedFontSize = intValue("selectedFontSize", default: 14)
+        showImageInMenu = boolValue("showImageInTheMenu", default: true)
+        thumbnailWidth = intValue("thumbnailWidth", default: 100)
+        thumbnailHeight = intValue("thumbnailHeight", default: 32)
+        showIconInMenu = boolValue("showIconInTheMenu", default: true)
+        menuIconSize = intValue("menuIconSize", default: 16)
+        menuIconOfFileTypeTagForString = intValue("menuIconOfFileTypeTagForString", default: 1)
+        menuIconOfFileTypeForString = stringValue("menuIconOfFileTypeForString", default: "TEXT")
+        menuIconOfFileTypeTagForRTF = intValue("menuIconOfFileTypeTagForRTF", default: 0)
+        menuIconOfFileTypeForRTF = stringValue("menuIconOfFileTypeForRTF", default: "rtf")
+        menuIconOfFileTypeTagForRTFD = intValue("menuIconOfFileTypeTagForRTFD", default: 0)
+        menuIconOfFileTypeForRTFD = stringValue("menuIconOfFileTypeForRTFD", default: "rtfd")
+        menuIconOfFileTypeTagForPDF = intValue("menuIconOfFileTypeTagForPDF", default: 0)
+        menuIconOfFileTypeForPDF = stringValue("menuIconOfFileTypeForPDF", default: "pdf")
+        menuIconOfFileTypeTagForFilenames = intValue("menuIconOfFileTypeTagForFilenames", default: 1)
+        menuIconOfFileTypeForFilenames = stringValue("menuIconOfFileTypeForFilenames", default: "clpu")
+        menuIconOfFileTypeTagForURL = intValue("menuIconOfFileTypeTagForURL", default: 1)
+        menuIconOfFileTypeForURL = stringValue("menuIconOfFileTypeForURL", default: "gurl")
+        menuIconOfFileTypeTagForTIFF = intValue("menuIconOfFileTypeTagForTIFF", default: 0)
+        menuIconOfFileTypeForTIFF = stringValue("menuIconOfFileTypeForTIFF", default: "tiff")
+        menuIconOfFileTypeTagForPICT = intValue("menuIconOfFileTypeTagForPICT", default: 0)
+        menuIconOfFileTypeForPICT = stringValue("menuIconOfFileTypeForPICT", default: "pict")
+
+        hotKeys = defaults.dictionary(forKey: "hotKeys") ?? Self.defaultHotKeys
+
+        enableAction = boolValue("enableAction", default: true)
+        invokeActionImmediately = boolValue("invokeActionImmediately", default: false)
+        controlClickBehavior = stringValue("controlClickBehavior", default: "popUpActionMenu")
+        shiftClickBehavior = stringValue("shiftClickBehavior", default: "")
+        optionClickBehavior = stringValue("optionClickBehavior", default: "")
+        commandClickBehavior = stringValue("commandClickBehavior", default: "")
+
+        positionOfSnippets = intValue("positionOfSnippets", default: 1)
+
+        enableAutomaticCheck = boolValue("enableAutomaticCheck", default: true)
+        enableAutomaticCheckPreRelease = boolValue("enableAutomaticCheckPreReleaseKey", default: false)
+        updateCheckInterval = intValue("updateCheckInterval", default: 86_400)
+    }
+
+    private func sanitizeAndPersist() {
+        maxHistorySize = max(maxHistorySize, 1)
+        autosaveDelay = max(autosaveDelay, 60)
+        pollingInterval = max(pollingInterval, 0.1)
+
+        maxMenuItemTitleLength = max(maxMenuItemTitleLength, 1)
+        numberOfItemsInline = max(numberOfItemsInline, 0)
+        numberOfItemsInsideFolder = max(numberOfItemsInsideFolder, 1)
+        maxTooltipLength = max(maxTooltipLength, 1)
+        selectedFontSize = max(selectedFontSize, 8)
+        thumbnailWidth = max(thumbnailWidth, 1)
+        thumbnailHeight = max(thumbnailHeight, 1)
+        menuIconSize = [16, 32, 48].contains(menuIconSize) ? menuIconSize : 16
+        fontSizeMode = [0, 1].contains(fontSizeMode) ? fontSizeMode : 0
+        positionOfSnippets = [0, 1, 2].contains(positionOfSnippets) ? positionOfSnippets : 1
+
+        if controlClickBehavior.isEmpty { controlClickBehavior = "popUpActionMenu" }
+    }
 
     private func registerLegacyDefaultsIfNeeded() {
         defaults.register(defaults: [

@@ -1,5 +1,4 @@
 import AppKit
-import ApplicationServices
 
 /// Lifecycle hooks that must live in an NSApplicationDelegate rather than the
 /// SwiftUI App struct (e.g. applicationWillTerminate, Sparkle delegate).
@@ -7,7 +6,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let runtime = AppRuntime.shared
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        _ = AXIsProcessTrustedWithOptions([kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary)
+        // Ensure persisted settings are hydrated and normalized before services read them.
+        runtime.settings.reload()
 
         guard let modelContext = runtime.modelContainer?.mainContext else { return }
 

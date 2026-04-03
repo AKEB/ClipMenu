@@ -3,7 +3,7 @@
 > **Every agent that completes a migration step MUST update this file before committing.**
 > See `.github/copilot-instructions.md` for the full rule.
 
-**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete (hotkeys wired, ShortcutsPrefsView implemented, build passes)
+**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete (hotkeys wired, ShortcutsPrefsView implemented, settings persistence/startup hydration hardened, build passes)
 
 ---
 
@@ -65,6 +65,11 @@ No tasks currently in progress.
 - [x] `AppDelegate` — `hotkeyService.register()` called in `applicationDidFinishLaunching`; `hotkeyService.unregister()` called in `applicationWillTerminate`
 - [x] `ShortcutsPrefsView` — `KeyboardShortcuts.Recorder` controls for all three shortcuts (⌘⇧V, ⌘⌃V, ⌘⇧B); `#Preview`
 - [x] Build passes (one deprecation warning for `icon(forFileType:)`, no errors)
+- [x] `ClipMenuSettings` persistence hardened: replaced `@AppStorage` + `@ObservationIgnored` fields with explicit `UserDefaults`-backed observed properties, added startup reload and value sanitization for stable defaults and app-launch behavior
+- [x] `AppDelegate` now calls `settings.reload()` during launch before services start, ensuring settings are loaded/normalized before initial menu and clipboard service usage
+- [x] Accessibility prompt no longer triggers unconditionally at launch; permission prompt is now lazy via paste path (`PasteService`) and startup no longer opens System Settings repeatedly
+- [x] Settings reload now uses typed fallback defaults (`object(forKey:)` with explicit defaults) rather than raw `bool/integer` reads, improving launch-time hydration correctness when keys are missing or malformed
+- [x] SwiftData environment wiring hardened for menu startup: `ClipMenuApp` now injects `.modelContainer(modelContainer)` directly into `ClipMenuView` and `PreferencesView` roots to avoid `@Query` modelContext-missing errors on initial load
 
 ---
 
