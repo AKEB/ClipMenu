@@ -15,6 +15,21 @@ actor ActionService {
 
     func start(context: ModelContext) {
         self.context = context
+        seedDefaultActionsIfNeeded()
+    }
+
+    /// Root-level action nodes sorted by persisted order.
+    func rootActions() async -> [ActionNode] {
+        guard let context else { return [] }
+        let descriptor = FetchDescriptor<ActionNode>(
+            predicate: #Predicate<ActionNode> { $0.parent == nil },
+            sortBy: [SortDescriptor(\ActionNode.sortIndex)]
+        )
+        return (try? context.fetch(descriptor)) ?? []
+    }
+
+    func rootActionCount() async -> Int {
+        await rootActions().count
     }
 
     func availableActions(for entry: ClipEntry) async -> [ActionNode] {
@@ -100,5 +115,114 @@ actor ActionService {
         if let inline = node.scriptContent, !inline.isEmpty { return inline }
         if let path = node.scriptPath { return try? String(contentsOfFile: path, encoding: .utf8) }
         return nil
+    }
+
+    private func seedDefaultActionsIfNeeded() {
+        guard let context else { return }
+
+        let existingCount = (try? context.fetchCount(FetchDescriptor<ActionNode>())) ?? 0
+        guard existingCount == 0 else { return }
+
+        var roots: [ActionNode] = []
+
+        roots.append(makeBuiltin(title: "Paste as Plain Text", name: "pasteAsPlainText", sortIndex: 0))
+        roots.append(makeBuiltin(title: "Paste as File Path", name: "pasteAsFilePath", sortIndex: 1))
+        roots.append(makeBuiltin(title: "Paste as HFS File Path", name: "pasteAsHFSFilePath", sortIndex: 2))
+        roots.append(makeBuiltin(title: "Remove", name: "removeAction", sortIndex: 3))
+
+        var nextSortIndex = roots.count
+        for directory in scriptSearchRoots() {
+            let scriptRoots = discoverActionNodes(in: directory)
+            guard !scriptRoots.isEmpty else { continue }
+            for node in scriptRoots {
+                node.sortIndex = nextSortIndex
+                nextSortIndex += 1
+                roots.append(node)
+            }
+        }
+
+        for node in roots {
+            context.insert(node)
+        }
+        try? context.save()
+    }
+
+    private func makeBuiltin(title: String, name: String, sortIndex: Int) -> ActionNode {
+        let node = ActionNode(title: title, isLeaf: true, sortIndex: sortIndex)
+        node.actionType = "builtin"
+        node.actionName = name
+        return node
+    }
+
+    private func scriptSearchRoots() -> [URL] {
+        var roots: [URL] = []
+
+        if let bundleRoot = Bundle.main.resourceURL {
+            roots.append(bundleRoot.appendingPathComponent("script/action"))
+            roots.append(bundleRoot.appendingPathComponent("scripts/action"))
+        }
+
+        if let appSupport = FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask)
+            .first {
+            roots.append(appSupport.appendingPathComponent("ClipMenu/script/action"))
+        }
+
+        var seen = Set<String>()
+        return roots.filter { url in
+            let key = url.standardizedFileURL.path
+            guard !seen.contains(key) else { return false }
+            seen.insert(key)
+            return true
+        }
+    }
+
+    private func discoverActionNodes(in directory: URL) -> [ActionNode] {
+        let fm = FileManager.default
+        guard let entries = try? fm.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            return []
+        }
+
+        let sortedEntries = entries.sorted {
+            $0.lastPathComponent.localizedCaseInsensitiveCompare($1.lastPathComponent) == .orderedAscending
+        }
+
+        var result: [ActionNode] = []
+        var index = 0
+
+        for url in sortedEntries {
+            let isDirectory = (try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false
+
+            if isDirectory {
+                let children = discoverActionNodes(in: url)
+                guard !children.isEmpty else { continue }
+                let folder = ActionNode(title: url.lastPathComponent, isLeaf: false, sortIndex: index)
+                index += 1
+                for (childIndex, child) in children.enumerated() {
+                    child.sortIndex = childIndex
+                    child.parent = folder
+                }
+                folder.children = children
+                result.append(folder)
+                continue
+            }
+
+            guard url.pathExtension.lowercased() == "js" else { continue }
+            let node = ActionNode(
+                title: url.deletingPathExtension().lastPathComponent,
+                isLeaf: true,
+                sortIndex: index
+            )
+            index += 1
+            node.actionType = "javaScript"
+            node.scriptPath = url.path
+            result.append(node)
+        }
+
+        return result
     }
 }

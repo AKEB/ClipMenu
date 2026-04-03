@@ -18,6 +18,7 @@
 		529A9D03AD998DAE8ADB2A00 /* MenuPrefsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C53F23FA57EE7251E7DC8C6E /* MenuPrefsView.swift */; };
 		5F656B886B8F29CC5617F8BB /* ClipMenuApp+Scenes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ED996E53C34CFD8C7D0310C /* ClipMenuApp+Scenes.swift */; };
 		609E344BBBB03FD8514E6C91 /* ClipMenuSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29576F23AAFF791919F37AA2 /* ClipMenuSettings.swift */; };
+		6A9FBD0E7674740848F7DA2A /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = A665B545F09CB77A65913253 /* scripts */; };
 		6F1C323AB9B0297F0E353CCF /* ClipMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0016B43E0CACE631C4CC81B1 /* ClipMenuItem.swift */; };
 		76969A92D3459A30D0C7A6E2 /* AppRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E215E86DBA662D409E0C3E8 /* AppRuntime.swift */; };
 		80C5101B8CC05DF5E188A131 /* ClipMenuApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CDD26CD466BFA583E75E608 /* ClipMenuApp.swift */; };
@@ -37,6 +38,7 @@
 		D54B008B6D9741A0002054BB /* LoginItemService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48E46B042ACC84B0F6F1766 /* LoginItemService.swift */; };
 		E1DFEA8B6C7669DFC34FBC0C /* HotkeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBDD749FF754FE72E7DB47E6 /* HotkeyService.swift */; };
 		E3A5BEAC6D55B0DBE1B56388 /* ActionSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6321E93388B5BFB5F35292 /* ActionSection.swift */; };
+		EAA8E570AEAA9695CC422081 /* ActionMenuBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2071986765235444ED5C4B6 /* ActionMenuBuilder.swift */; };
 		F89987AC92544F66743A4CC7 /* ActionsPrefsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F33CC09804F1E54781E0EBD /* ActionsPrefsView.swift */; };
 		F9343715F430A05D2DD97E34 /* AppExclusionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CA10EBC72D8E5AE80FF0F4E /* AppExclusionService.swift */; };
 		FD1AC14BA0BC211BB0749243 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = D3A2344418DAEC005417850D /* KeyboardShortcuts */; };
@@ -44,52 +46,108 @@
 
 /* Begin PBXFileReference section */
 		0016B43E0CACE631C4CC81B1 /* ClipMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipMenuItem.swift; sourceTree = "<group>"; };
+		05040ED7DB4E9E6B59B441AB /* ` `.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "` `.js"; sourceTree = "<group>"; };
+		091565A092F406927E15ED61 /* Convert Markdown to HTML.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Convert Markdown to HTML.js"; sourceTree = "<group>"; };
 		0CD6C21C72EE5244BB1D7613 /* ActionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionService.swift; sourceTree = "<group>"; };
 		0CDD26CD466BFA583E75E608 /* ClipMenuApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipMenuApp.swift; sourceTree = "<group>"; };
 		0E215E86DBA662D409E0C3E8 /* AppRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRuntime.swift; sourceTree = "<group>"; };
 		0F33CC09804F1E54781E0EBD /* ActionsPrefsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionsPrefsView.swift; sourceTree = "<group>"; };
+		0FD091B978990ECF3F3D7E4E /* Encode URI component.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Encode URI component.js"; sourceTree = "<group>"; };
 		137B169B289424AA2C053F6E /* ShortcutsPrefsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsPrefsView.swift; sourceTree = "<group>"; };
+		175D9BC47EBD304CA4230174 /* Surround with Tags....js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Surround with Tags....js"; sourceTree = "<group>"; };
 		179AF605EB49F693BF4AD85E /* migration.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = migration.md; sourceTree = "<group>"; };
 		19473B9E42EE0B4041018F4D /* SnippetsPrefsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetsPrefsView.swift; sourceTree = "<group>"; };
+		19B808EFAA8952BC9BA1CA8D /* string.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = string.js; sourceTree = "<group>"; };
 		1AAA8A2C77102B5966216536 /* LICENSE */ = {isa = PBXFileReference; path = LICENSE; sourceTree = "<group>"; };
+		1C7B6FEA8365FA24B2DBB906 /* Convert Character to Decimal.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Convert Character to Decimal.js"; sourceTree = "<group>"; };
+		1E56AEC45D95D95509478467 /* util.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = util.js; sourceTree = "<group>"; };
+		1FD73C6C287485CB59A08FEE /* Calculate MD5 hash.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Calculate MD5 hash.js"; sourceTree = "<group>"; };
+		268B85C5E498C2D963151455 /* Reverse.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Reverse.js; sourceTree = "<group>"; };
 		2761ACB3529E51DE835B8478 /* GeneralPrefsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralPrefsView.swift; sourceTree = "<group>"; };
 		29576F23AAFF791919F37AA2 /* ClipMenuSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipMenuSettings.swift; sourceTree = "<group>"; };
+		2F809C93EED8F3156F24FC72 /* Capitalize.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Capitalize.js; sourceTree = "<group>"; };
+		2FC43A69E4D022001DD1564A /* 『 』.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "『 』.js"; sourceTree = "<group>"; };
 		30E03F362BFE6F8406DB1DEB /* ScriptEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptEngine.swift; sourceTree = "<group>"; };
 		30F9D13D4936E1E652C416E4 /* enhancements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = enhancements.md; sourceTree = "<group>"; };
+		3E9CBA111ACE835F326FE6AE /* showdown.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = showdown.js; sourceTree = "<group>"; };
+		419D60462A50E9A91E55BF47 /* [ ].js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "[ ].js"; sourceTree = "<group>"; };
 		42B59EEB0DCCE6D695636F67 /* LegacyMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyMigration.swift; sourceTree = "<group>"; };
 		49876023CA687002F8002CBC /* JavaScriptアクションの書き方.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "JavaScriptアクションの書き方.txt"; sourceTree = "<group>"; };
+		4ACF487AADDB8BB33F71BBDE /* fhconvert.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = fhconvert.js; sourceTree = "<group>"; };
 		4B34871F4041DDF5A7D98840 /* features.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = features.md; sourceTree = "<group>"; };
 		4ED996E53C34CFD8C7D0310C /* ClipMenuApp+Scenes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClipMenuApp+Scenes.swift"; sourceTree = "<group>"; };
 		5658921DF2A880EDEE8DFABB /* release_note_ja.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = release_note_ja.html; sourceTree = "<group>"; };
+		5669B9BE900EF523AAFE399F /* html.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = html.js; sourceTree = "<group>"; };
+		56CED544AE6F1EF258ED10D4 /* Collapse Spaces.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Collapse Spaces.js"; sourceTree = "<group>"; };
 		620B8F52759F74FEBF46E0F1 /* ScriptableClip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptableClip.swift; sourceTree = "<group>"; };
 		62662520F05129C2F1ECA59C /* ReadMe (Japanese).rtfd */ = {isa = PBXFileReference; lastKnownFileType = wrapper.rtfd; path = "ReadMe (Japanese).rtfd"; sourceTree = "<group>"; };
 		630C393A150A0A2DD37B2D11 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		65E27B62279E4C612E6FD0AC /* Convert Decimal to Character.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Convert Decimal to Character.js"; sourceTree = "<group>"; };
+		6669409568F7A199CA873CC3 /* Unescape HTML characters.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Unescape HTML characters.js"; sourceTree = "<group>"; };
 		6CA10EBC72D8E5AE80FF0F4E /* AppExclusionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppExclusionService.swift; sourceTree = "<group>"; };
+		78D2C9749DE0976D367B4137 /* Encode to Base64.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Encode to Base64.js"; sourceTree = "<group>"; };
+		7DF8D7A913C65A7B9D98B687 /* Convert Zenkaku katakana to Hankaku katakana.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Convert Zenkaku katakana to Hankaku katakana.js"; sourceTree = "<group>"; };
 		83A17B48EFB6F8C9C5953E6C /* SnippetSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetSection.swift; sourceTree = "<group>"; };
 		8480717B6E5E00346D1A2B51 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		8CF863742DF4C9510FA75342 /* ( ).js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "( ).js"; sourceTree = "<group>"; };
+		8D78AE8D3F92F3B8B7ACACFD /* 〔 〕.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "〔 〕.js"; sourceTree = "<group>"; };
+		8FAC9EE3C2A3F05DB8CB82A4 /* ＜ ＞.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "＜ ＞.js"; sourceTree = "<group>"; };
 		9075790B975D02A5039621CB /* ClipboardMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardMonitor.swift; sourceTree = "<group>"; };
+		9B06FFF1F48BED207E608272 /* Convert Hankaku katakana to Zenkaku katakana.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Convert Hankaku katakana to Zenkaku katakana.js"; sourceTree = "<group>"; };
+		9C3C35D89529AE5775DEA3B4 /* Convert Hankaku alphanumeric characters to Zenkaku.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Convert Hankaku alphanumeric characters to Zenkaku.js"; sourceTree = "<group>"; };
 		9E6321E93388B5BFB5F35292 /* ActionSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionSection.swift; sourceTree = "<group>"; };
+		A15329B57CD738C87147D390 /* “ ”.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "“ ”.js"; sourceTree = "<group>"; };
+		A44363547A3A0692BC3EB462 /* char.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = char.js; sourceTree = "<group>"; };
 		A663BD7362E0C5445528C4F1 /* ActionNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionNode.swift; sourceTree = "<group>"; };
+		A665B545F09CB77A65913253 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = Resources/scripts; sourceTree = SOURCE_ROOT; };
+		A6C2A42099A7B3FE6149753C /* " ".js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "\" \".js"; sourceTree = "<group>"; };
 		A83BE5811A4FB6A1DB019AC2 /* ClipsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipsService.swift; sourceTree = "<group>"; };
 		AA18E6BAC3B61463FBA61589 /* ClipEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipEntry.swift; sourceTree = "<group>"; };
+		AB521B6B2DB86D0ACD8DAFC7 /* Escape HTML characters.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Escape HTML characters.js"; sourceTree = "<group>"; };
 		AE6E1C2B11B47F58BD83816D /* ClipMenu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClipMenu.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AE76319566DD96015EDF23BA /* Convert Katakana to Hiragana.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Convert Katakana to Hiragana.js"; sourceTree = "<group>"; };
 		AEC26F1A30437471626D2578 /* VersionHistory-ja.yaml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "VersionHistory-ja.yaml"; sourceTree = "<group>"; };
+		AF2E8D3A4198B0765F64E64C /* Decode URI component.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Decode URI component.js"; sourceTree = "<group>"; };
+		AFA02BDF56F7F5BF80C2E4AA /* < >.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "< >.js"; sourceTree = "<group>"; };
 		AFC2785BEDC95DB32BD21552 /* ClipMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipMenuView.swift; sourceTree = "<group>"; };
 		B11A04D2CD51A76FE707BEA1 /* project.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = project.yml; sourceTree = "<group>"; };
+		B2C402FC20A31058F679AC66 /* ［ ］.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "［ ］.js"; sourceTree = "<group>"; };
 		B4070C5C34CA29D0646E6606 /* ClipMenu website.webloc */ = {isa = PBXFileReference; path = "ClipMenu website.webloc"; sourceTree = "<group>"; };
 		B48E46B042ACC84B0F6F1766 /* LoginItemService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemService.swift; sourceTree = "<group>"; };
+		B4ADF0FD762FEE65EEE8DEBC /* inflection.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = inflection.js; sourceTree = "<group>"; };
 		B60996BF476330FFB6501381 /* Snippet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Snippet.swift; sourceTree = "<group>"; };
 		B9F2FC9E1D536A30571DAAAB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BA400EEACE736B3818DA8A3E /* ReadMe.rtfd */ = {isa = PBXFileReference; lastKnownFileType = wrapper.rtfd; path = ReadMe.rtfd; sourceTree = "<group>"; };
 		BAD0F7706C0E03012259C58E /* SnippetFolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetFolder.swift; sourceTree = "<group>"; };
+		BB3D24622C12C3B43F770963 /* ｛ ｝.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "｛ ｝.js"; sourceTree = "<group>"; };
 		BF6C0BE229E6930FA608401B /* ClipMenu.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ClipMenu.entitlements; sourceTree = "<group>"; };
 		BFA3C0115DA1665C86E95348 /* release_note.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = release_note.html; sourceTree = "<group>"; };
+		BFFC088DE2CD462BD34AB520 /* 《 》.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "《 》.js"; sourceTree = "<group>"; };
+		C0C2DEA9193BEC16FD145658 /* 【 】.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "【 】.js"; sourceTree = "<group>"; };
+		C0F0FAA9BB77661670F28FA6 /* （ ）.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "（ ）.js"; sourceTree = "<group>"; };
+		C47B7A1E32A72B3C15931D0E /* Title Case.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Title Case.js"; sourceTree = "<group>"; };
 		C53F23FA57EE7251E7DC8C6E /* MenuPrefsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuPrefsView.swift; sourceTree = "<group>"; };
+		C6107A96E18C02167CD2BF95 /* { }.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "{ }.js"; sourceTree = "<group>"; };
+		CC0D05E32BADC3B23BA7F652 /* ' '.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "' '.js"; sourceTree = "<group>"; };
+		CDB67016D05B5750B90F5809 /* ‘ ’.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "‘ ’.js"; sourceTree = "<group>"; };
+		D2071986765235444ED5C4B6 /* ActionMenuBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionMenuBuilder.swift; sourceTree = "<group>"; };
 		D443B0D12EBBA794375C2643 /* PasteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteService.swift; sourceTree = "<group>"; };
 		D4616EE385FA381E5A043060 /* SnippetService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetService.swift; sourceTree = "<group>"; };
+		D4FBE08D6142DF084563E0A2 /* Decode from Base64.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Decode from Base64.js"; sourceTree = "<group>"; };
+		D815EE9E2833C4392A353AAD /* Trim.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Trim.js; sourceTree = "<group>"; };
 		DC267D67332120F313F7EA31 /* EnvironmentKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentKeys.swift; sourceTree = "<group>"; };
+		DD1940E394AE1A2C53BBACAC /* RTrim.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = RTrim.js; sourceTree = "<group>"; };
+		DE38FE3285C8C6542C65BD62 /* Convert Hiragana to Katakana.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Convert Hiragana to Katakana.js"; sourceTree = "<group>"; };
+		E06CE4CEDE07D2B72D5ED51C /* LTrim.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = LTrim.js; sourceTree = "<group>"; };
+		E3B5C233715C4B6C58F8E299 /* Calculate SHA-1 hash.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Calculate SHA-1 hash.js"; sourceTree = "<group>"; };
+		E4A00A1E1A0D43947431A0E2 /* lowercase.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = lowercase.js; sourceTree = "<group>"; };
 		EBDD749FF754FE72E7DB47E6 /* HotkeyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyService.swift; sourceTree = "<group>"; };
+		EBF7A7C9E337640DC76B28CB /* Convert Zenkaku alphanumeric characters to Hankaku.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Convert Zenkaku alphanumeric characters to Hankaku.js"; sourceTree = "<group>"; };
 		EF4A999AFD48E89E62517C2E /* VersionHistory-en.yaml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "VersionHistory-en.yaml"; sourceTree = "<group>"; };
+		EFE2D0E62C25351BA06254E5 /* UPPERCASE.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = UPPERCASE.js; sourceTree = "<group>"; };
+		F04ADA9E33388D3B40D982F8 /* Strip Tags.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Strip Tags.js"; sourceTree = "<group>"; };
+		F0BC75442C797B6A536F1862 /* 「 」.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "「 」.js"; sourceTree = "<group>"; };
+		F20169FFCAD9D79CBE1EB179 /* 〈 〉.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "〈 〉.js"; sourceTree = "<group>"; };
 		F425B2066AB9B7524D4770CD /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -105,6 +163,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0C31C6DB5C7D8A1F645B725C /* JS-methods */ = {
+			isa = PBXGroup;
+			children = (
+				A44363547A3A0692BC3EB462 /* char.js */,
+				19B808EFAA8952BC9BA1CA8D /* string.js */,
+			);
+			path = "JS-methods";
+			sourceTree = "<group>";
+		};
 		1142AC27F2BF296FFE246D7B /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
@@ -145,6 +212,7 @@
 		1C3A17C357BB67EAD06E9BEC /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				D2071986765235444ED5C4B6 /* ActionMenuBuilder.swift */,
 				9E6321E93388B5BFB5F35292 /* ActionSection.swift */,
 				4ED996E53C34CFD8C7D0310C /* ClipMenuApp+Scenes.swift */,
 				0016B43E0CACE631C4CC81B1 /* ClipMenuItem.swift */,
@@ -164,6 +232,43 @@
 			path = Migration;
 			sourceTree = "<group>";
 		};
+		2C91290915A8370DC0D9711F /* Case */ = {
+			isa = PBXGroup;
+			children = (
+				2F809C93EED8F3156F24FC72 /* Capitalize.js */,
+				E4A00A1E1A0D43947431A0E2 /* lowercase.js */,
+				C47B7A1E32A72B3C15931D0E /* Title Case.js */,
+				EFE2D0E62C25351BA06254E5 /* UPPERCASE.js */,
+			);
+			path = Case;
+			sourceTree = "<group>";
+		};
+		401A7197EC810F93DDB971C1 /* Trim */ = {
+			isa = PBXGroup;
+			children = (
+				E06CE4CEDE07D2B72D5ED51C /* LTrim.js */,
+				DD1940E394AE1A2C53BBACAC /* RTrim.js */,
+				D815EE9E2833C4392A353AAD /* Trim.js */,
+			);
+			path = Trim;
+			sourceTree = "<group>";
+		};
+		407969EF539F438C8347EF38 /* action */ = {
+			isa = PBXGroup;
+			children = (
+				56CED544AE6F1EF258ED10D4 /* Collapse Spaces.js */,
+				268B85C5E498C2D963151455 /* Reverse.js */,
+				2C91290915A8370DC0D9711F /* Case */,
+				57A362CDE6C1C45E1AA984EC /* Crypt */,
+				9376A80D07E9424EC38210FD /* HTML */,
+				FAF86C7190D49F4D6BB2A676 /* Japanese */,
+				8B08DD47603CC3768E0DB566 /* Surround with */,
+				D86525B3A2826CC5ECCB598F /* Surround with (Japanese) */,
+				401A7197EC810F93DDB971C1 /* Trim */,
+			);
+			path = action;
+			sourceTree = "<group>";
+		};
 		4117F742CD5AC010C95693B2 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
@@ -179,6 +284,17 @@
 			path = Sources;
 			sourceTree = "<group>";
 		};
+		57A362CDE6C1C45E1AA984EC /* Crypt */ = {
+			isa = PBXGroup;
+			children = (
+				1FD73C6C287485CB59A08FEE /* Calculate MD5 hash.js */,
+				E3B5C233715C4B6C58F8E299 /* Calculate SHA-1 hash.js */,
+				D4FBE08D6142DF084563E0A2 /* Decode from Base64.js */,
+				78D2C9749DE0976D367B4137 /* Encode to Base64.js */,
+			);
+			path = Crypt;
+			sourceTree = "<group>";
+		};
 		6859B965AEE7F3DFF1841686 = {
 			isa = PBXGroup;
 			children = (
@@ -188,6 +304,7 @@
 				B11A04D2CD51A76FE707BEA1 /* project.yml */,
 				8480717B6E5E00346D1A2B51 /* README.md */,
 				199F3DF7DF875EB03BE65B06 /* doc */,
+				A06183AEA97ACC53713DC2B8 /* Resources */,
 				4117F742CD5AC010C95693B2 /* Sources */,
 				C90771EDF751C2E74AB91204 /* Products */,
 			);
@@ -204,6 +321,20 @@
 			path = App;
 			sourceTree = "<group>";
 		};
+		8B08DD47603CC3768E0DB566 /* Surround with */ = {
+			isa = PBXGroup;
+			children = (
+				CC0D05E32BADC3B23BA7F652 /* ' '.js */,
+				A6C2A42099A7B3FE6149753C /* " ".js */,
+				8CF863742DF4C9510FA75342 /* ( ).js */,
+				419D60462A50E9A91E55BF47 /* [ ].js */,
+				C6107A96E18C02167CD2BF95 /* { }.js */,
+				05040ED7DB4E9E6B59B441AB /* ` `.js */,
+				AFA02BDF56F7F5BF80C2E4AA /* < >.js */,
+			);
+			path = "Surround with";
+			sourceTree = "<group>";
+		};
 		8E2DCB09DBCA5860A085715A /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -213,6 +344,31 @@
 				BAD0F7706C0E03012259C58E /* SnippetFolder.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		9376A80D07E9424EC38210FD /* HTML */ = {
+			isa = PBXGroup;
+			children = (
+				1C7B6FEA8365FA24B2DBB906 /* Convert Character to Decimal.js */,
+				65E27B62279E4C612E6FD0AC /* Convert Decimal to Character.js */,
+				091565A092F406927E15ED61 /* Convert Markdown to HTML.js */,
+				AF2E8D3A4198B0765F64E64C /* Decode URI component.js */,
+				0FD091B978990ECF3F3D7E4E /* Encode URI component.js */,
+				AB521B6B2DB86D0ACD8DAFC7 /* Escape HTML characters.js */,
+				F04ADA9E33388D3B40D982F8 /* Strip Tags.js */,
+				175D9BC47EBD304CA4230174 /* Surround with Tags....js */,
+				6669409568F7A199CA873CC3 /* Unescape HTML characters.js */,
+			);
+			path = HTML;
+			sourceTree = "<group>";
+		};
+		A06183AEA97ACC53713DC2B8 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A665B545F09CB77A65913253 /* scripts */,
+				E03CEE8F2C7117BD9BE6E1E5 /* scripts */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		A208D5DF7A819084D6B276BB /* Settings */ = {
@@ -234,12 +390,61 @@
 			path = archive_contents;
 			sourceTree = "<group>";
 		};
+		B291E9FCF52786571D3DFF2F /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				4ACF487AADDB8BB33F71BBDE /* fhconvert.js */,
+				B4ADF0FD762FEE65EEE8DEBC /* inflection.js */,
+				3E9CBA111ACE835F326FE6AE /* showdown.js */,
+				0C31C6DB5C7D8A1F645B725C /* JS-methods */,
+				D50E19267744B818A3EF735F /* v8cgi */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
 		C90771EDF751C2E74AB91204 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				AE6E1C2B11B47F58BD83816D /* ClipMenu.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		D50E19267744B818A3EF735F /* v8cgi */ = {
+			isa = PBXGroup;
+			children = (
+				5669B9BE900EF523AAFE399F /* html.js */,
+				1E56AEC45D95D95509478467 /* util.js */,
+			);
+			path = v8cgi;
+			sourceTree = "<group>";
+		};
+		D86525B3A2826CC5ECCB598F /* Surround with (Japanese) */ = {
+			isa = PBXGroup;
+			children = (
+				CDB67016D05B5750B90F5809 /* ‘ ’.js */,
+				A15329B57CD738C87147D390 /* “ ”.js */,
+				C0F0FAA9BB77661670F28FA6 /* （ ）.js */,
+				B2C402FC20A31058F679AC66 /* ［ ］.js */,
+				BB3D24622C12C3B43F770963 /* ｛ ｝.js */,
+				F20169FFCAD9D79CBE1EB179 /* 〈 〉.js */,
+				BFFC088DE2CD462BD34AB520 /* 《 》.js */,
+				F0BC75442C797B6A536F1862 /* 「 」.js */,
+				2FC43A69E4D022001DD1564A /* 『 』.js */,
+				C0C2DEA9193BEC16FD145658 /* 【 】.js */,
+				8D78AE8D3F92F3B8B7ACACFD /* 〔 〕.js */,
+				8FAC9EE3C2A3F05DB8CB82A4 /* ＜ ＞.js */,
+			);
+			path = "Surround with (Japanese)";
+			sourceTree = "<group>";
+		};
+		E03CEE8F2C7117BD9BE6E1E5 /* scripts */ = {
+			isa = PBXGroup;
+			children = (
+				407969EF539F438C8347EF38 /* action */,
+				B291E9FCF52786571D3DFF2F /* lib */,
+			);
+			path = scripts;
 			sourceTree = "<group>";
 		};
 		F755ED3311A8CB452BC467EB /* Infrastructure */ = {
@@ -261,6 +466,19 @@
 				30E03F362BFE6F8406DB1DEB /* ScriptEngine.swift */,
 			);
 			path = Scripting;
+			sourceTree = "<group>";
+		};
+		FAF86C7190D49F4D6BB2A676 /* Japanese */ = {
+			isa = PBXGroup;
+			children = (
+				9C3C35D89529AE5775DEA3B4 /* Convert Hankaku alphanumeric characters to Zenkaku.js */,
+				9B06FFF1F48BED207E608272 /* Convert Hankaku katakana to Zenkaku katakana.js */,
+				DE38FE3285C8C6542C65BD62 /* Convert Hiragana to Katakana.js */,
+				AE76319566DD96015EDF23BA /* Convert Katakana to Hiragana.js */,
+				EBF7A7C9E337640DC76B28CB /* Convert Zenkaku alphanumeric characters to Hankaku.js */,
+				7DF8D7A913C65A7B9D98B687 /* Convert Zenkaku katakana to Hankaku katakana.js */,
+			);
+			path = Japanese;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -329,6 +547,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				85CEF62003CEC8629A60FEA4 /* Assets.xcassets in Resources */,
+				6A9FBD0E7674740848F7DA2A /* scripts in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -339,6 +558,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EAA8E570AEAA9695CC422081 /* ActionMenuBuilder.swift in Sources */,
 				00CE4E605010BDF7D2B57FCB /* ActionNode.swift in Sources */,
 				E3A5BEAC6D55B0DBE1B56388 /* ActionSection.swift in Sources */,
 				9A4C53BF9C1CD72C0D832BAF /* ActionService.swift in Sources */,

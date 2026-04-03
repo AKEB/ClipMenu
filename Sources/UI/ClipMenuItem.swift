@@ -16,12 +16,15 @@ struct ClipMenuItem: View {
 
     @Environment(ClipMenuSettings.self) private var settings
     @Environment(\.clipsService) private var clipsService
+    @Environment(\.actionService) private var actionService
 
     var body: some View {
         Button(action: select) {
             itemLabel
         }
         .help(tooltip)
+        .modifier(NumericShortcut(number: listNumber % 10,
+                                  enabled: settings.numericKeyEquivalents))
     }
 
     // MARK: - Label
@@ -183,7 +186,87 @@ struct ClipMenuItem: View {
     // MARK: - Action
 
     private func select() {
+        let flags = NSEvent.modifierFlags.intersection([.control, .shift, .option, .command])
+
+        guard settings.enableAction else {
+            Task { await clipsService.select(entry) }
+            return
+        }
+
+        if let behavior = behaviorForFlags(flags), !behavior.isEmpty {
+            if behavior == "popUpActionMenu" {
+                showActionMenu()
+                return
+            }
+
+            if let configuredNode = configuredActionNode(from: behavior) {
+                Task { await actionService.perform(action: configuredNode, on: entry) }
+                return
+            }
+        }
+
         Task { await clipsService.select(entry) }
+    }
+
+    private func behaviorForFlags(_ flags: NSEvent.ModifierFlags) -> String? {
+        switch flags {
+        case .control:
+            return settings.controlClickBehavior
+        case .shift:
+            return settings.shiftClickBehavior
+        case .option:
+            return settings.optionClickBehavior
+        case .command:
+            return settings.commandClickBehavior
+        default:
+            return nil
+        }
+    }
+
+    private func showActionMenu() {
+        Task {
+            let roots = await actionService.rootActions()
+            let enabledRoots = roots.filter(\.isEnabled)
+
+            if settings.invokeActionImmediately,
+               enabledRoots.count == 1,
+               let only = enabledRoots.first,
+               only.isLeaf {
+                await actionService.perform(action: only, on: entry)
+                return
+            }
+
+            await MainActor.run {
+                let menu = ActionMenuBuilder.makeMenu(from: enabledRoots, target: entry, service: actionService)
+                menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+            }
+        }
+    }
+
+    private func configuredActionNode(from rawBehavior: String) -> ActionNode? {
+        guard let data = rawBehavior.data(using: .utf8),
+              let object = try? JSONSerialization.jsonObject(with: data),
+              let dict = object as? [String: Any] else {
+            return nil
+        }
+
+        let type = (dict["type"] as? String) ?? ""
+        let node = ActionNode(title: (dict["name"] as? String) ?? "Configured Action", isLeaf: true)
+
+        if type == "javaScript" || type == "js" {
+            node.actionType = "javaScript"
+            node.scriptPath = dict["path"] as? String
+            node.scriptContent = dict["content"] as? String
+            return node
+        }
+
+        if type == "builtin" {
+            node.actionType = "builtin"
+            node.actionName = dict["name"] as? String
+            return node
+        }
+
+        return nil
     }
 
     // MARK: - Helpers
@@ -221,6 +304,26 @@ struct ClipMenuItem: View {
         }
 
         return NSImage(data: data)
+    }
+}
+
+private struct NumericShortcut: ViewModifier {
+    let number: Int
+    let enabled: Bool
+
+    func body(content: Content) -> some View {
+        if enabled, let char = Character(String(number)).asciiDigit {
+            content.keyboardShortcut(KeyEquivalent(char), modifiers: [])
+        } else {
+            content
+        }
+    }
+}
+
+private extension Character {
+    var asciiDigit: Character? {
+        guard self >= "0", self <= "9" else { return nil }
+        return self
     }
 }
 

@@ -64,8 +64,11 @@ final class ScriptEngine {
 
     private func libSource(for relativePath: String) -> String? {
         // Bundle resources first, then user support folder
-        let bundleURL = Bundle.main.resourceURL?
+        let bundleLegacyURL = Bundle.main.resourceURL?
             .appendingPathComponent("script/lib")
+            .appendingPathComponent(relativePath)
+        let bundleModernURL = Bundle.main.resourceURL?
+            .appendingPathComponent("scripts/lib")
             .appendingPathComponent(relativePath)
         let userURL = FileManager.default
             .urls(for: .applicationSupportDirectory, in: .userDomainMask)
@@ -73,7 +76,7 @@ final class ScriptEngine {
             .appendingPathComponent("ClipMenu/script/lib")
             .appendingPathComponent(relativePath)
 
-        for url in [bundleURL, userURL].compactMap({ $0 }) {
+        for url in [bundleLegacyURL, bundleModernURL, userURL].compactMap({ $0 }) {
             if let source = try? String(contentsOf: url, encoding: .utf8) {
                 return source
             }

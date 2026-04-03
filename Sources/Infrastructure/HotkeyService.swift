@@ -241,11 +241,16 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
         let folderClips = inlineCount == 0 ? clips : Array(clips.dropFirst(inlineCount))
 
         for (idx, clip) in inlineClips.enumerated() {
-            let item = NSMenuItem(title: clipTitle(for: clip, settings: settings, listNumber: listNumber(for: idx, settings: settings)),
+            let itemNumber = listNumber(for: idx, settings: settings)
+            let item = NSMenuItem(title: clipTitle(for: clip, settings: settings, listNumber: itemNumber),
                                   action: #selector(HotkeyPopupActionTarget.selectClip(_:)),
                                   keyEquivalent: "")
             item.target = actionTarget
             item.representedObject = clip
+            if settings.numericKeyEquivalents {
+                item.keyEquivalent = String(itemNumber % 10)
+                item.keyEquivalentModifierMask = []
+            }
             if let thumbnail = thumbnailImage(for: clip, settings: settings) {
                 item.image = thumbnail
                 HotkeyService.log.debug("Attached inline popup thumbnail for clip index=\(idx, privacy: .public)")
@@ -268,11 +273,16 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
             let submenu = NSMenu(title: folderItem.title)
             for (idx, clip) in group.enumerated() {
                 let absoluteIndex = inlineCount + groupIndex * perFolder + idx
-                let item = NSMenuItem(title: clipTitle(for: clip, settings: settings, listNumber: listNumber(for: absoluteIndex, settings: settings)),
+                let itemNumber = listNumber(for: absoluteIndex, settings: settings)
+                let item = NSMenuItem(title: clipTitle(for: clip, settings: settings, listNumber: itemNumber),
                                       action: #selector(HotkeyPopupActionTarget.selectClip(_:)),
                                       keyEquivalent: "")
                 item.target = actionTarget
                 item.representedObject = clip
+                if settings.numericKeyEquivalents {
+                    item.keyEquivalent = String(itemNumber % 10)
+                    item.keyEquivalentModifierMask = []
+                }
                 if let thumbnail = thumbnailImage(for: clip, settings: settings) {
                     item.image = thumbnail
                     HotkeyService.log.debug("Attached grouped popup thumbnail group=\(groupIndex, privacy: .public) idx=\(idx, privacy: .public)")
