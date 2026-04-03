@@ -1,6 +1,24 @@
-# ClipMenu
+# <img src="Assets.xcassets/AppIcon.appiconset/AppIcon-32.png" alt="ClipMenu icon" width="24" /> ClipMenu
 
 ClipMenu is a macOS clipboard manager rebuilt in Swift (SwiftUI + SwiftData).
+
+![ClipMenu Screenshot](screenshot.jpg)
+
+## What Is Updated From The Original
+
+This repository now reflects a fully modernized implementation of ClipMenu. Major updates include:
+
+- Replaced legacy polling-style clipboard handling with an event-driven clipboard pipeline.
+- Adopted Combine-based publishers/observation in the app flow for reactive updates.
+- Migrated persistence to SwiftData models and services.
+- Completed end-to-end implementation of the Actions menu, including action execution wiring in the modern app.
+- Rebuilt the app architecture in Swift with SwiftUI scenes and a generated Xcode project workflow.
+
+## Huge Thanks
+
+A huge thank you to Naotaka Morimoto, the original author of ClipMenu.
+
+ClipMenu has helped many users for years, and this modernization work stands on top of that original design and effort.
 
 ## Current Stack
 
