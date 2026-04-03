@@ -5,6 +5,7 @@ import SwiftData
 ///
 /// Mirrors the menu hierarchy from `legacy/Source/MenuController.m -buildClipMenu`.
 struct ClipMenuView: View {
+    private let runtime = AppRuntime.shared
 
     @Query(sort: \ClipEntry.lastUsedAt, order: .reverse) private var clips: [ClipEntry]
     @Query(sort: \SnippetFolder.sortIndex) private var folders: [SnippetFolder]
@@ -37,7 +38,7 @@ struct ClipMenuView: View {
 
         Divider()
 
-        SettingsLink { Text("Preferences…") }
+        Button("Preferences…") { runtime.showPreferences() }
         Button("Quit ClipMenu") { NSApp.terminate(nil) }
     }
 
@@ -110,4 +111,3 @@ struct ClipMenuView: View {
         .modelContainer(for: [ClipEntry.self, SnippetFolder.self, Snippet.self, ActionNode.self],
                         inMemory: true)
 }
-
