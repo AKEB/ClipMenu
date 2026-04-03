@@ -19,6 +19,12 @@ struct ActionsPrefsView: View {
     @State private var selectedCatalogID: String?
     @State private var rightTab: RightTab = .builtin
 
+    private struct ClickBehaviorOption: Identifiable {
+        let id: String
+        let title: String
+        let value: String
+    }
+
     private enum RightTab: String, CaseIterable {
         case builtin = "Built-in"
         case javaScript = "JavaScript"
@@ -59,17 +65,23 @@ struct ActionsPrefsView: View {
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            HStack(alignment: .top, spacing: 12) {
-                actionTreePane
-                    .frame(minWidth: 280, idealWidth: 360, maxWidth: .infinity)
+            GeometryReader { proxy in
+                let spacing: CGFloat = 12
+                let controlsWidth: CGFloat = 120
+                let columnWidth = max(260, (proxy.size.width - controlsWidth - (spacing * 2)) / 2)
 
-                actionControlsPane
-                    .frame(width: 96)
+                HStack(alignment: .top, spacing: spacing) {
+                    actionTreePane
+                        .frame(width: columnWidth)
 
-                actionCatalogPane
-                    .frame(minWidth: 220, idealWidth: 280, maxWidth: 320)
+                    actionControlsPane
+                        .frame(width: controlsWidth)
+
+                    actionCatalogPane
+                        .frame(width: columnWidth)
+                }
             }
-            .frame(minHeight: 280)
+            .frame(minHeight: 320)
 
             HStack(spacing: 8) {
                 Text("Name:")
@@ -106,9 +118,14 @@ struct ActionsPrefsView: View {
     /// Legacy values: "" (no-op), "popUpActionMenu" (show action menu).
     @ViewBuilder
     private func clickBehaviorPicker(_ label: String, binding: Binding<String>) -> some View {
+        let options = clickBehaviorOptions
         Picker(label, selection: binding) {
-            Text("No action").tag("")
-            Text("Show action menu").tag("popUpActionMenu")
+            ForEach(options) { option in
+                Text(option.title).tag(option.value)
+            }
+            if !options.contains(where: { $0.value == binding.wrappedValue }) {
+                Text("Custom action").tag(binding.wrappedValue)
+            }
         }
         .pickerStyle(.menu)
     }
@@ -119,7 +136,7 @@ struct ActionsPrefsView: View {
                 .font(.subheadline)
                 .fontWeight(.medium)
 
-            List {
+            List(selection: $selectedNodeID) {
                 OutlineGroup(sortedRoots, children: \.sortedChildrenForUI) { node in
                     HStack(spacing: 8) {
                         Toggle("", isOn: Binding(
@@ -140,45 +157,64 @@ struct ActionsPrefsView: View {
 
                         Spacer(minLength: 0)
                     }
-                    .contentShape(Rectangle())
-                    .background(selectionBackground(for: node))
-                    .onTapGesture {
-                        selectedNodeID = node.persistentModelID
+                    .tag(node.persistentModelID)
+                    .draggable(nodeToken(node))
+                    .dropDestination(for: String.self) { items, _ in
+                        guard let sourceToken = items.first else { return false }
+                        return handleDrop(sourceToken: sourceToken, onto: node)
                     }
                 }
             }
-            .listStyle(.inset)
+            .listStyle(.sidebar)
+            .dropDestination(for: String.self) { items, _ in
+                guard let sourceToken = items.first,
+                      let source = nodeForToken(sourceToken)
+                else { return false }
+
+                return moveNode(source, destinationParent: nil, destinationIndex: sortedRoots.count)
+            }
         }
     }
 
     private var actionControlsPane: some View {
         VStack(spacing: 8) {
-            Button("<<") {
+            Button {
                 addSelectedCatalogAction()
+            } label: {
+                Label("Add", systemImage: "plus")
             }
             .disabled(selectedCatalogItem == nil)
 
-            Button("Folder") {
+            Button {
                 addFolder()
+            } label: {
+                Label("Folder", systemImage: "folder.badge.plus")
             }
 
-            Button("Remove") {
+            Button(role: .destructive) {
                 removeSelectedNode()
+            } label: {
+                Label("Delete", systemImage: "trash")
             }
             .disabled(selectedNode == nil)
 
             Divider()
 
-            Button("Up") {
+            Button {
                 moveSelectedNode(delta: -1)
+            } label: {
+                Label("Up", systemImage: "arrow.up")
             }
             .disabled(!canMoveSelectedNode(delta: -1))
 
-            Button("Down") {
+            Button {
                 moveSelectedNode(delta: 1)
+            } label: {
+                Label("Down", systemImage: "arrow.down")
             }
             .disabled(!canMoveSelectedNode(delta: 1))
         }
+        .controlSize(.small)
         .buttonStyle(.bordered)
         .padding(.top, 28)
     }
@@ -198,7 +234,7 @@ struct ActionsPrefsView: View {
                         .tag(item.id)
                 }
             }
-            .listStyle(.inset)
+            .listStyle(.sidebar)
         }
     }
 
@@ -218,6 +254,30 @@ struct ActionsPrefsView: View {
     private var selectedCatalogItem: AvailableActionItem? {
         guard let selectedCatalogID else { return nil }
         return availableItems.first { $0.id == selectedCatalogID }
+    }
+
+    private var clickBehaviorOptions: [ClickBehaviorOption] {
+        var options: [ClickBehaviorOption] = [
+            ClickBehaviorOption(id: "none", title: "No action", value: ""),
+            ClickBehaviorOption(id: "popup", title: "Show action menu", value: "popUpActionMenu"),
+        ]
+
+        let leaves = allNodes
+            .filter { $0.isLeaf && $0.isEnabled }
+            .sorted {
+                $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending
+            }
+
+        options.append(contentsOf: leaves.compactMap { node in
+            guard let behavior = serializedBehavior(for: node) else { return nil }
+            return ClickBehaviorOption(
+                id: nodeToken(node),
+                title: "Run \(node.title)",
+                value: behavior
+            )
+        })
+
+        return options
     }
 
     private var availableItems: [AvailableActionItem] {
@@ -389,18 +449,133 @@ struct ActionsPrefsView: View {
         return result
     }
 
-    @ViewBuilder
-    private func selectionBackground(for node: ActionNode) -> some View {
-        if selectedNodeID == node.persistentModelID {
-            RoundedRectangle(cornerRadius: 4)
-                .fill(Color.accentColor.opacity(0.2))
+    private func persist() {
+        try? modelContext.save()
+    }
+
+    // MARK: - Drag and Drop
+
+    private func nodeToken(_ node: ActionNode) -> String {
+        String(describing: node.persistentModelID)
+    }
+
+    private func nodeForToken(_ token: String) -> ActionNode? {
+        allNodes.first { nodeToken($0) == token }
+    }
+
+    private func handleDrop(sourceToken: String, onto target: ActionNode) -> Bool {
+        guard let source = nodeForToken(sourceToken), source !== target else { return false }
+
+        if target.isLeaf {
+            let parent = target.parent
+            let siblings = parent == nil
+                ? sortedRoots
+                : parent!.children.sorted { $0.sortIndex < $1.sortIndex }
+            guard let targetIndex = siblings.firstIndex(where: { $0.persistentModelID == target.persistentModelID }) else {
+                return false
+            }
+            return moveNode(source, destinationParent: parent, destinationIndex: targetIndex + 1)
+        }
+
+        let children = target.children.sorted { $0.sortIndex < $1.sortIndex }
+        return moveNode(source, destinationParent: target, destinationIndex: children.count)
+    }
+
+    private func moveNode(_ source: ActionNode, destinationParent: ActionNode?, destinationIndex: Int) -> Bool {
+        if let destinationParent {
+            if source === destinationParent || isDescendant(destinationParent, of: source) {
+                return false
+            }
+        }
+
+        let sourceParent = source.parent
+        if sourceParent === destinationParent {
+            if sourceParent == nil {
+                var roots = sortedRoots.filter { $0.persistentModelID != source.persistentModelID }
+                let insertionIndex = max(0, min(destinationIndex, roots.count))
+                roots.insert(source, at: insertionIndex)
+                renumber(nodes: roots)
+                persist()
+                return true
+            }
+
+            guard let sourceParent else { return false }
+            var siblings = sourceParent.children
+                .filter { $0.persistentModelID != source.persistentModelID }
+                .sorted { $0.sortIndex < $1.sortIndex }
+            let insertionIndex = max(0, min(destinationIndex, siblings.count))
+            siblings.insert(source, at: insertionIndex)
+            sourceParent.children = siblings
+            renumber(nodes: siblings)
+            persist()
+            return true
+        }
+
+        if let sourceParent {
+            sourceParent.children.removeAll { $0.persistentModelID == source.persistentModelID }
+            renumber(nodes: sourceParent.children.sorted { $0.sortIndex < $1.sortIndex })
+        }
+
+        if let destinationParent {
+            var children = destinationParent.children
+                .filter { $0.persistentModelID != source.persistentModelID }
+                .sorted { $0.sortIndex < $1.sortIndex }
+            let insertionIndex = max(0, min(destinationIndex, children.count))
+            source.parent = destinationParent
+            children.insert(source, at: insertionIndex)
+            destinationParent.children = children
+            renumber(nodes: children)
         } else {
-            Color.clear
+            source.parent = nil
+            var roots = sortedRoots.filter { $0.persistentModelID != source.persistentModelID }
+            let insertionIndex = max(0, min(destinationIndex, roots.count))
+            roots.insert(source, at: insertionIndex)
+            renumber(nodes: roots)
+        }
+
+        selectedNodeID = source.persistentModelID
+        persist()
+        return true
+    }
+
+    private func renumber(nodes: [ActionNode]) {
+        for (index, node) in nodes.enumerated() {
+            node.sortIndex = index
         }
     }
 
-    private func persist() {
-        try? modelContext.save()
+    private func isDescendant(_ candidate: ActionNode, of ancestor: ActionNode) -> Bool {
+        var current = candidate.parent
+        while let node = current {
+            if node === ancestor { return true }
+            current = node.parent
+        }
+        return false
+    }
+
+    // MARK: - Modifier behavior serialization
+
+    private func serializedBehavior(for node: ActionNode) -> String? {
+        guard node.isLeaf else { return nil }
+
+        var dict: [String: Any] = ["type": node.actionType ?? ""]
+        if let name = node.actionName, !name.isEmpty {
+            dict["name"] = name
+        }
+        if let path = node.scriptPath, !path.isEmpty {
+            dict["path"] = path
+        }
+        if let content = node.scriptContent, !content.isEmpty {
+            dict["content"] = content
+        }
+
+        guard let data = try? JSONSerialization.data(withJSONObject: dict, options: []),
+              let json = String(data: data, encoding: .utf8)
+        else {
+            return nil
+        }
+
+        return json
     }
 }
 
