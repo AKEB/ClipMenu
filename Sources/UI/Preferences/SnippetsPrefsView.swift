@@ -15,8 +15,11 @@ struct SnippetsPrefsView: View {
     @State private var selectedSnippetID: PersistentIdentifier?
     @State private var editingFolderID: PersistentIdentifier?
     @State private var editingFolderTitle: String = ""
+    @State private var editingSnippetID: PersistentIdentifier?
+    @State private var editingSnippetTitle: String = ""
 
     @FocusState private var isFolderNameFocused: Bool
+    @FocusState private var isSnippetNameFocused: Bool
 
     private var selectedFolder: SnippetFolder? {
         folders.first { $0.persistentModelID == selectedFolderID }
@@ -35,22 +38,38 @@ struct SnippetsPrefsView: View {
         @Bindable var s = settings
 
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("The position to show snippets in ClipMenu:")
-                Spacer()
-                Picker("Snippet position", selection: $s.positionOfSnippets) {
-                    Text("Above the clipboard history").tag(0)
-                    Text("Below the clipboard history").tag(1)
-                    Text("Hidden").tag(2)
+            ViewThatFits(in: .horizontal) {
+                HStack {
+                    Text("The position to show snippets in ClipMenu:")
+                    Spacer()
+                    Picker("Snippet position", selection: $s.positionOfSnippets) {
+                        Text("Above the clipboard history").tag(0)
+                        Text("Below the clipboard history").tag(1)
+                        Text("Hidden").tag(2)
+                    }
+                    .labelsHidden()
+                    .frame(width: 260)
                 }
-                .labelsHidden()
-                .frame(width: 260)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("The position to show snippets in ClipMenu:")
+                    Picker("Snippet position", selection: $s.positionOfSnippets) {
+                        Text("Above the clipboard history").tag(0)
+                        Text("Below the clipboard history").tag(1)
+                        Text("Hidden").tag(2)
+                    }
+                    .labelsHidden()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
 
-            HStack(alignment: .top, spacing: 12) {
+            HSplitView {
                 foldersPane
+                    .frame(minWidth: 180, idealWidth: 240, maxWidth: .infinity)
                 snippetsPane
+                    .frame(minWidth: 180, idealWidth: 240, maxWidth: .infinity)
                 contentPane
+                    .frame(minWidth: 220, idealWidth: 360, maxWidth: .infinity)
             }
         }
         .padding()
@@ -64,6 +83,7 @@ struct SnippetsPrefsView: View {
             if !selectedFolder.snippets.contains(where: { $0.persistentModelID == selectedSnippetID }) {
                 selectedSnippetID = selectedFolder.snippets.sorted { $0.sortIndex < $1.sortIndex }.first?.persistentModelID
             }
+            editingSnippetID = nil
         }
     }
 
@@ -108,7 +128,7 @@ struct SnippetsPrefsView: View {
                     .listRowBackground(folder.persistentModelID == selectedFolderID ? Color.accentColor.opacity(0.15) : Color.clear)
                 }
             }
-            .frame(minWidth: 250)
+            .frame(maxWidth: .infinity)
 
             HStack {
                 Button("Add Folder") { addFolder() }
@@ -137,17 +157,27 @@ struct SnippetsPrefsView: View {
                             .toggleStyle(.checkbox)
                             .labelsHidden()
 
-                            Text(snippet.title)
+                            if editingSnippetID == snippet.persistentModelID {
+                                TextField("Title", text: $editingSnippetTitle)
+                                    .textFieldStyle(.plain)
+                                    .focused($isSnippetNameFocused)
+                                    .onSubmit { commitSnippetRename(snippet) }
+                            } else {
+                                Text(snippet.title)
+                            }
                             Spacer()
                         }
                         .contentShape(Rectangle())
                         .onTapGesture {
                             selectedSnippetID = snippet.persistentModelID
                         }
+                        .onTapGesture(count: 2) {
+                            beginSnippetRename(snippet)
+                        }
                         .listRowBackground(snippet.persistentModelID == selectedSnippetID ? Color.accentColor.opacity(0.15) : Color.clear)
                     }
                 }
-                .frame(minWidth: 250)
+                .frame(maxWidth: .infinity)
 
                 HStack {
                     Button("Add Snippet") { addSnippet(to: selectedFolder) }
@@ -174,17 +204,7 @@ struct SnippetsPrefsView: View {
                     persist()
                 }
             ))
-            .frame(minWidth: 320, minHeight: 280)
-            .disabled(selectedSnippet == nil)
-
-            TextField("Title", text: Binding(
-                get: { selectedSnippet?.title ?? "" },
-                set: { newValue in
-                    guard let selectedSnippet else { return }
-                    selectedSnippet.title = newValue
-                    persist()
-                }
-            ))
+            .frame(minHeight: 280)
             .disabled(selectedSnippet == nil)
         }
     }
@@ -216,6 +236,7 @@ struct SnippetsPrefsView: View {
         modelContext.insert(snippet)
         persist()
         selectedSnippetID = snippet.persistentModelID
+        beginSnippetRename(snippet)
     }
 
     private func removeSelectedSnippet() {
@@ -255,6 +276,20 @@ struct SnippetsPrefsView: View {
         let trimmed = editingFolderTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         folder.title = trimmed.isEmpty ? folder.title : trimmed
         editingFolderID = nil
+        persist()
+    }
+
+    private func beginSnippetRename(_ snippet: Snippet) {
+        selectedSnippetID = snippet.persistentModelID
+        editingSnippetID = snippet.persistentModelID
+        editingSnippetTitle = snippet.title
+        isSnippetNameFocused = true
+    }
+
+    private func commitSnippetRename(_ snippet: Snippet) {
+        let trimmed = editingSnippetTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        snippet.title = trimmed.isEmpty ? snippet.title : trimmed
+        editingSnippetID = nil
         persist()
     }
 }

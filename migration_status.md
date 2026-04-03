@@ -86,6 +86,7 @@ No tasks currently in progress.
 - [x] Snippets menu structure parity: snippet folders now always render as submenus (including single-snippet folders) in both status menu and hotkey popup menu
 - [x] Snippets settings UX improved: selected folder can now be renamed directly in `SnippetsPrefsView`
 - [x] Snippets settings parity pass: `SnippetsPrefsView` now uses a classic 3-column macOS layout (Folders / Titles / Content), supports folder rename on double-click, and exposes snippet-position placement (above/below/hidden) directly in the Snippets tab
+- [x] Snippets rename/edit parity improved: snippet titles now support inline rename on double-click (same interaction model as folders), and the Snippets tab layout is now responsive with adaptive top controls and resizable split columns
 
 ---
 
