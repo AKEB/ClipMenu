@@ -53,6 +53,7 @@ struct PreferencesView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 8)
                     }
+                    .frame(maxWidth: .infinity)
                     .buttonStyle(.plain)
                     .focusable(false)
                     .foregroundStyle(selection == tab ? .white : .primary)
@@ -60,6 +61,7 @@ struct PreferencesView: View {
                         RoundedRectangle(cornerRadius: 8)
                             .fill(selection == tab ? Color.accentColor : Color.clear)
                     )
+                    .contentShape(Rectangle())
                 }
             }
             .padding(6)
