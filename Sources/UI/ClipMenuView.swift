@@ -49,8 +49,9 @@ struct ClipMenuView: View {
         let inlineCount = settings.numberOfItemsInline
         let perFolder   = settings.numberOfItemsInsideFolder
 
-        let inlineClips = inlineCount == 0 ? clips : Array(clips.prefix(inlineCount))
-        let folderClips = inlineCount == 0 ? [] : Array(clips.dropFirst(inlineCount))
+        // Legacy behaviour: inlineCount == 0 means ALL items go into folders (same as legacy ObjC).
+        let inlineClips = inlineCount == 0 ? [] : Array(clips.prefix(inlineCount))
+        let folderClips = inlineCount == 0 ? clips : Array(clips.dropFirst(inlineCount))
 
         ForEach(Array(inlineClips.enumerated()), id: \.element.id) { index, clip in
             ClipMenuItem(entry: clip, listNumber: listNumber(for: index))
