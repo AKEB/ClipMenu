@@ -21,6 +21,8 @@
  - [x] Hotkey parity extension: added a dedicated global shortcut/menu for actions (`⌘⇧A`) and integrated it in `HotkeyService` + `ShortcutsPrefsView` while preserving existing snippets shortcut UX (`⌘⇧B`)
  - [x] JavaScript catalog folder parity: `ActionsPrefsView` now renders JavaScript/User script catalogs as hierarchical folder trees (instead of a flat list) so insertion browsing matches bundled script structure
  - [x] Main menu Actions visibility parity: `ClipMenuView` now renders an `Actions` submenu in the status-bar menu (when actions are enabled), with clear empty states for no clips / no configured actions
+ - [x] Contextual popup Actions parity: main hotkey/contextual `NSMenu` now includes an `Actions` submenu (when actions are enabled), matching status-menu availability while preserving the dedicated actions-only shortcut menu
+ - [x] Contextual menu crash fix: prevented `NSInternalInconsistencyException` from re-inserting `NSMenuItem` instances already attached to another menu by assigning built action menus directly as submenus (or transferring items with explicit detach before re-add)
  - [x] Preferences tab-strip hit-target parity: custom tabs now use full-width tab cells with explicit rectangular content shapes so clicks register across the entire tab area (not text-only)
  - [x] Snippets styling refinement: panel backgrounds normalized to `black.opacity(0.1)` and content editor made visually unified with the same card background by hiding the default scroll/content fill
  - [x] Snippets editor controls aligned to macOS conventions: folder/snippet add/remove actions now use compact `+`/`−` controls positioned under each list instead of text buttons

@@ -155,6 +155,7 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
 
         let showSnippetsInMain = kind == .main
         let showHistory = kind != .snippets && kind != .actions
+        let showActionsInMain = kind == .main && settings.enableAction
 
         if showSnippetsInMain && settings.positionOfSnippets == 0 {
             addSnippets(to: menu, folders: folders, settings: settings)
@@ -176,6 +177,11 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
         if showSnippetsInMain && settings.positionOfSnippets == 1 {
             if showHistory { menu.addItem(.separator()) }
             addSnippets(to: menu, folders: folders, settings: settings)
+        }
+
+        if showActionsInMain {
+            menu.addItem(.separator())
+            addActionsSubmenu(to: menu, clips: clips, context: context, runtime: runtime)
         }
 
         if showHistory && settings.showClearHistoryItem {
@@ -205,6 +211,39 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
         return menu
     }
 
+    private func addActionsSubmenu(to menu: NSMenu, clips: [ClipEntry], context: ModelContext, runtime: AppRuntime) {
+        let actionsItem = NSMenuItem(title: "Actions", action: nil, keyEquivalent: "")
+        actionsItem.image = NSImage(systemSymbolName: "bolt", accessibilityDescription: nil)
+
+        guard let targetClip = clips.first else {
+            let submenu = NSMenu(title: "Actions")
+            let empty = NSMenuItem(title: "No clips available", action: nil, keyEquivalent: "")
+            empty.isEnabled = false
+            submenu.addItem(empty)
+            actionsItem.submenu = submenu
+            menu.addItem(actionsItem)
+            return
+        }
+
+        let roots = (try? context.fetch(FetchDescriptor<ActionNode>(
+            predicate: #Predicate<ActionNode> { $0.parent == nil },
+            sortBy: [SortDescriptor(\ActionNode.sortIndex)]
+        ))) ?? []
+
+        let actionMenu = ActionMenuBuilder.makeMenu(from: roots, target: targetClip, service: runtime.actionService)
+        if actionMenu.items.isEmpty {
+            let submenu = NSMenu(title: "Actions")
+            let empty = NSMenuItem(title: "No actions configured", action: nil, keyEquivalent: "")
+            empty.isEnabled = false
+            submenu.addItem(empty)
+            actionsItem.submenu = submenu
+        } else {
+            actionsItem.submenu = actionMenu
+        }
+
+        menu.addItem(actionsItem)
+    }
+
     private func addActions(to menu: NSMenu, clips: [ClipEntry], context: ModelContext, runtime: AppRuntime) {
         guard let targetClip = clips.first else {
             let empty = NSMenuItem(title: "No clips available", action: nil, keyEquivalent: "")
@@ -231,8 +270,9 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
             return
         }
 
-        for item in actionsMenu.items {
-            menu.addItem(item)
+        while let first = actionsMenu.items.first {
+            actionsMenu.removeItem(first)
+            menu.addItem(first)
         }
     }
 
