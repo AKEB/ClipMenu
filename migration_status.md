@@ -3,7 +3,7 @@
 > **Every agent that completes a migration step MUST update this file before committing.**
 > See `.github/copilot-instructions.md` for the full rule.
 
-**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete (hotkeys wired, ShortcutsPrefsView implemented, settings persistence/startup hydration hardened, build passes)
+**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete (hotkeys wired, snippets settings/menu parity improved, preferences window made larger/resizable, settings persistence/startup hydration hardened, build passes)
 
 ---
 
@@ -53,6 +53,7 @@ No tasks currently in progress.
 - [x] `ActionsPrefsView` — enable toggle, modifier-click pickers, invoke-immediately; `#Preview`
 - [x] `ShortcutsPrefsView` — `KeyboardShortcuts.Recorder` controls for all three shortcuts (⌘⇧V, ⌘⌃V, ⌘⇧B); `#Preview`
 - [x] `PreferencesView` — tab shell; `#Preview`
+- [x] `SnippetsPrefsView` — migrated snippets settings/editor surface (folder/snippet CRUD + enable toggles + content editing); `#Preview`
 - [x] `LegacyMigration` — snippet import from `Snippets.xml` added (Core Data XML → SwiftData)
 - [x] `SnippetService.paste(snippet:)` — implemented (write to pasteboard + `PasteService.paste()`)
 - [x] `ActionService` — builtin actions (`removeAction`, `pasteAsPlainText`, `pasteAsFilePath`, `pasteAsHFSFilePath`); JS script dispatch via `ScriptEngine`
@@ -80,6 +81,10 @@ No tasks currently in progress.
 - [x] Added structured hotkey diagnostics logging (`Logger`) across registration, trigger handling, status-item lookup retries, menu-open detection, and fallback-popup presentation to accelerate runtime troubleshooting
 - [x] Fixed hotkey retry exhaustion path: when no status-item button is found after all retries, `HotkeyService` now calls completion with failure so fallback panel presentation always executes
 - [x] Fallback panel presentation polished: replaced collapsed non-activating panel layout with a fixed-size utility panel and wrapped SwiftUI root (`FallbackPanelRootView`) so hotkey fallback UI renders at readable width/height
+- [x] Snippets menu discoverability parity: added `Edit Snippets…` entry to both SwiftUI status menu and hotkey popup menu, opening Preferences directly on the Snippets tab
+- [x] Preferences window UX improved: custom AppKit preferences window is now resizable and opens at a larger default size with enforced minimum content size
+- [x] Snippets menu structure parity: snippet folders now always render as submenus (including single-snippet folders) in both status menu and hotkey popup menu
+- [x] Snippets settings UX improved: selected folder can now be renamed directly in `SnippetsPrefsView`
 
 ---
 

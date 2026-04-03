@@ -20,11 +20,12 @@ final class AppRuntime {
     }
 
     @MainActor
-    func showPreferences() {
+    func showPreferences(tab: PreferencesTab = .general) {
         preferencesWindowController.show(
             settings: settings,
             loginItemService: loginItemService,
-            modelContainer: modelContainer
+            modelContainer: modelContainer,
+            initialTab: tab
         )
     }
 }
@@ -34,13 +35,15 @@ private final class PreferencesWindowController: NSWindowController, NSWindowDel
     func show(
         settings: ClipMenuSettings,
         loginItemService: LoginItemService,
-        modelContainer: ModelContainer?
+        modelContainer: ModelContainer?,
+        initialTab: PreferencesTab
     ) {
         let window = window ?? makeWindow()
         let rootView = makePreferencesView(
             settings: settings,
             loginItemService: loginItemService,
-            modelContainer: modelContainer
+            modelContainer: modelContainer,
+            initialTab: initialTab
         )
         window.contentViewController = NSHostingController(rootView: rootView)
 
@@ -56,12 +59,13 @@ private final class PreferencesWindowController: NSWindowController, NSWindowDel
 
     private func makeWindow() -> NSWindow {
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 640, height: 520),
-            styleMask: [.titled, .closable, .miniaturizable],
+            contentRect: NSRect(x: 0, y: 0, width: 820, height: 620),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
         )
         window.title = "Preferences"
+        window.contentMinSize = NSSize(width: 680, height: 500)
         window.setFrameAutosaveName("Preferences")
         window.isReleasedWhenClosed = false
         window.delegate = self
@@ -72,9 +76,10 @@ private final class PreferencesWindowController: NSWindowController, NSWindowDel
     private func makePreferencesView(
         settings: ClipMenuSettings,
         loginItemService: LoginItemService,
-        modelContainer: ModelContainer?
+        modelContainer: ModelContainer?,
+        initialTab: PreferencesTab
     ) -> AnyView {
-        let rootView = PreferencesView()
+        let rootView = PreferencesView(initialTab: initialTab)
             .environment(settings)
             .environment(\.loginItemService, loginItemService)
 

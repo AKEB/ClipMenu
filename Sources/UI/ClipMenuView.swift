@@ -38,6 +38,9 @@ struct ClipMenuView: View {
 
         Divider()
 
+        Button("Edit Snippets…") {
+            runtime.showPreferences(tab: .snippets)
+        }
         Button("Preferences…") { runtime.showPreferences() }
         Button("Quit ClipMenu") { NSApp.terminate(nil) }
     }

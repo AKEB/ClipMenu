@@ -165,6 +165,10 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
         }
 
         menu.addItem(.separator())
+        let editSnippets = NSMenuItem(title: "Edit Snippets…", action: #selector(HotkeyPopupActionTarget.openSnippetsEditor(_:)), keyEquivalent: "")
+        editSnippets.target = actionTarget
+        menu.addItem(editSnippets)
+
         let prefs = NSMenuItem(title: "Preferences…", action: #selector(HotkeyPopupActionTarget.openPreferences(_:)), keyEquivalent: "")
         prefs.target = actionTarget
         menu.addItem(prefs)
@@ -193,24 +197,17 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
 
             guard !snippets.isEmpty else { continue }
 
-            if snippets.count == 1, let snippet = snippets.first {
+            let folderItem = NSMenuItem(title: folder.title, action: nil, keyEquivalent: "")
+            folderItem.image = NSImage(named: NSImage.folderName)
+            let submenu = NSMenu(title: folder.title)
+            for snippet in snippets {
                 let item = NSMenuItem(title: snippet.title, action: #selector(HotkeyPopupActionTarget.selectSnippet(_:)), keyEquivalent: "")
                 item.target = actionTarget
                 item.representedObject = snippet
-                menu.addItem(item)
-            } else {
-                let folderItem = NSMenuItem(title: folder.title, action: nil, keyEquivalent: "")
-                folderItem.image = NSImage(named: NSImage.folderName)
-                let submenu = NSMenu(title: folder.title)
-                for snippet in snippets {
-                    let item = NSMenuItem(title: snippet.title, action: #selector(HotkeyPopupActionTarget.selectSnippet(_:)), keyEquivalent: "")
-                    item.target = actionTarget
-                    item.representedObject = snippet
-                    submenu.addItem(item)
-                }
-                folderItem.submenu = submenu
-                menu.addItem(folderItem)
+                submenu.addItem(item)
             }
+            folderItem.submenu = submenu
+            menu.addItem(folderItem)
         }
     }
 
@@ -323,6 +320,13 @@ private final class HotkeyPopupActionTarget: NSObject {
         guard let runtime else { return }
         Task { @MainActor in
             runtime.showPreferences()
+        }
+    }
+
+    @objc func openSnippetsEditor(_ sender: NSMenuItem) {
+        guard let runtime else { return }
+        Task { @MainActor in
+            runtime.showPreferences(tab: .snippets)
         }
     }
 

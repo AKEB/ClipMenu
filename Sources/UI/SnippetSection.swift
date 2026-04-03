@@ -17,13 +17,9 @@ struct SnippetSection: View {
                 .filter(\.isEnabled)
                 .sorted { $0.sortIndex < $1.sortIndex }
             if !enabled.isEmpty {
-                if enabled.count == 1 {
-                    snippetButton(enabled[0])
-                } else {
-                    Menu(folder.title) {
-                        ForEach(enabled) { snippet in
-                            snippetButton(snippet)
-                        }
+                Menu(folder.title) {
+                    ForEach(enabled) { snippet in
+                        snippetButton(snippet)
                     }
                 }
             }
