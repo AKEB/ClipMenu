@@ -22,7 +22,7 @@ actor PasteService {
     }
 
     func paste() async {
-        guard requestAccessibilityIfNeeded() else { return }
+        guard isAccessibilityTrusted() else { return }
         guard let keyCode = vKeyCode() else { return }
         guard let source = CGEventSource(stateID: .combinedSessionState) else { return }
 
@@ -36,13 +36,8 @@ actor PasteService {
         keyUp?.post(tap: .cghidEventTap)
     }
 
-    private func requestAccessibilityIfNeeded() -> Bool {
-        if AXIsProcessTrusted() {
-            return true
-        }
-
-        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
-        return AXIsProcessTrustedWithOptions(options)
+    private func isAccessibilityTrusted() -> Bool {
+        AXIsProcessTrusted()
     }
 
     private func invalidateCachedKeyCode() {

@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import UniformTypeIdentifiers
 
 /// A single row in the clipboard history menu.
 ///
@@ -96,7 +97,8 @@ struct ClipMenuItem: View {
         // Use NSWorkspace to resolve a file-type icon for the primary pasteboard type.
         let ext = iconFileExtension(for: entry.types.first ?? "")
         guard !ext.isEmpty else { return nil }
-        let icon = NSWorkspace.shared.icon(forFileType: ext)
+        let contentType = UTType(filenameExtension: ext) ?? .data
+        let icon = NSWorkspace.shared.icon(for: contentType)
         return scaledImage(icon, to: NSSize(width: CGFloat(settings.menuIconSize),
                                              height: CGFloat(settings.menuIconSize)))
     }
