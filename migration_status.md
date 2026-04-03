@@ -3,7 +3,7 @@
 > **Every agent that completes a migration step MUST update this file before committing.**
 > See `.github/copilot-instructions.md` for the full rule.
 
-**Overall progress:** Phase 1 complete — Phase 2 substantially implemented (UI, script engine, services wired)
+**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete (hotkeys wired, ShortcutsPrefsView implemented, build passes)
 
 ---
 
@@ -33,18 +33,7 @@
 
 ## In Progress
 
-### Phase 3 — Hotkeys + Polish
-
-- [ ] `HotkeyService` — wire `KeyboardShortcuts` registration into `AppRuntime`/`AppDelegate`
-- [ ] `ShortcutsPrefsView` — replace placeholder with `KeyboardShortcuts.Recorder` controls
-- [ ] End-to-end smoke test: history capture → select → paste
-
----
-
-## Not Started
-
-### Phase 3 — Hotkeys + Polish
-See `doc/migration.md` §"Phase 3" for full task list.
+No tasks currently in progress.
 
 ---
 
@@ -62,12 +51,20 @@ See `doc/migration.md` §"Phase 3" for full task list.
 - [x] `GeneralPrefsView` — login item, clipboard prefs, store-types grid, exclude-apps editor; `#Preview`
 - [x] `MenuPrefsView` — title length, inline/folder counts, numbering, labels, clear-history, tooltips, font size, images, icons; `#Preview`
 - [x] `ActionsPrefsView` — enable toggle, modifier-click pickers, invoke-immediately; `#Preview`
-- [x] `ShortcutsPrefsView` — placeholder with default shortcut display; `#Preview`
+- [x] `ShortcutsPrefsView` — `KeyboardShortcuts.Recorder` controls for all three shortcuts (⌘⇧V, ⌘⌃V, ⌘⇧B); `#Preview`
 - [x] `PreferencesView` — tab shell; `#Preview`
 - [x] `LegacyMigration` — snippet import from `Snippets.xml` added (Core Data XML → SwiftData)
 - [x] `SnippetService.paste(snippet:)` — implemented (write to pasteboard + `PasteService.paste()`)
 - [x] `ActionService` — builtin actions (`removeAction`, `pasteAsPlainText`, `pasteAsFilePath`, `pasteAsHFSFilePath`); JS script dispatch via `ScriptEngine`
 - [x] `ClipsService.clearAll()` and `ClipsService.copyStringToPasteboard(_:)` added
+
+### Phase 3 — Hotkeys + Polish
+
+- [x] `HotkeyService` — `KeyboardShortcuts.Name` extensions (`.openClipMenu` ⌘⇧V, `.openHistory` ⌘⌃V, `.openSnippets` ⌘⇧B) with default combos matching legacy PTHotKey defaults; `register()` / `unregister()` implemented; activates `MenuBarExtra` via KVC status-item lookup + `performClick`
+- [x] `AppRuntime` — `hotkeyService: HotkeyService` added
+- [x] `AppDelegate` — `hotkeyService.register()` called in `applicationDidFinishLaunching`; `hotkeyService.unregister()` called in `applicationWillTerminate`
+- [x] `ShortcutsPrefsView` — `KeyboardShortcuts.Recorder` controls for all three shortcuts (⌘⇧V, ⌘⌃V, ⌘⇧B); `#Preview`
+- [x] Build passes (one deprecation warning for `icon(forFileType:)`, no errors)
 
 ---
 

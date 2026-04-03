@@ -8,6 +8,7 @@ final class AppRuntime {
     let snippetService = SnippetService()
     let actionService = ActionService()
     let loginItemService = LoginItemService()
+    let hotkeyService = HotkeyService()
 
     var modelContainer: ModelContainer?
 

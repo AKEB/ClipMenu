@@ -21,6 +21,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             await runtime.actionService.start(context: modelContext)
         }
 
+        runtime.hotkeyService.register()
+
         do {
             try runtime.loginItemService.setEnabled(runtime.settings.launchAtLogin)
         } catch {
@@ -29,6 +31,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        runtime.hotkeyService.unregister()
         Task {
             await runtime.clipsService.stop()
         }

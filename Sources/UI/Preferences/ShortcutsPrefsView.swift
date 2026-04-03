@@ -1,28 +1,20 @@
 import SwiftUI
+import KeyboardShortcuts
 
 /// Shortcuts tab in the Preferences window.
 ///
-/// Phase 3 will replace the placeholder text with KeyboardShortcuts.Recorder
-/// controls once the HotkeyService is wired in.
-/// Reference: `legacy/English.lproj/Preferences.strings` (key "Shortcuts").
+/// Displays `KeyboardShortcuts.Recorder` controls for each global shortcut
+/// defined in `HotkeyService`. Defaults match legacy PTHotKey defaults from
+/// `legacy/Source/AppController.m +_defaultHotKeyCombos`.
 struct ShortcutsPrefsView: View {
     var body: some View {
         Form {
             Section {
-                LabeledContent("Clipboard menu") {
-                    Text("Cmd+Shift+V")
-                        .foregroundStyle(.secondary)
-                }
-                LabeledContent("History menu") {
-                    Text("Cmd+Ctrl+V")
-                        .foregroundStyle(.secondary)
-                }
-                LabeledContent("Snippets menu") {
-                    Text("Cmd+Shift+B")
-                        .foregroundStyle(.secondary)
-                }
+                KeyboardShortcuts.Recorder("Clipboard menu", name: .openClipMenu)
+                KeyboardShortcuts.Recorder("History menu", name: .openHistory)
+                KeyboardShortcuts.Recorder("Snippets menu", name: .openSnippets)
             } footer: {
-                Text("Shortcut customisation is available in Phase 3.")
+                Text("These shortcuts open the ClipMenu status-bar menu. Defaults: ⌘⇧V, ⌘⌃V, ⌘⇧B.")
                     .foregroundStyle(.secondary)
                     .font(.footnote)
             }
@@ -38,3 +30,4 @@ struct ShortcutsPrefsView: View {
     ShortcutsPrefsView()
         .frame(width: 520)
 }
+
