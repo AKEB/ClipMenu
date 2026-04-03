@@ -9,6 +9,10 @@ struct ClipMenuView: View {
 
     @Query(sort: \ClipEntry.lastUsedAt, order: .reverse) private var clips: [ClipEntry]
     @Query(sort: \SnippetFolder.sortIndex) private var folders: [SnippetFolder]
+    @Query(
+        filter: #Predicate<ActionNode> { $0.parent == nil },
+        sort: \ActionNode.sortIndex
+    ) private var rootActions: [ActionNode]
 
     @Environment(ClipMenuSettings.self) private var settings
     @Environment(\.clipsService) private var clipsService
@@ -28,6 +32,24 @@ struct ClipMenuView: View {
         if settings.positionOfSnippets == 1 {
             Divider()
             SnippetSection(folders: folders.filter(\.isEnabled))
+        }
+
+        if settings.enableAction {
+            Divider()
+            Menu {
+                if let targetClip = clips.first {
+                    let enabledRoots = rootActions.filter(\.isEnabled)
+                    if enabledRoots.isEmpty {
+                        Text("No actions configured")
+                    } else {
+                        ActionSection(nodes: enabledRoots, target: targetClip)
+                    }
+                } else {
+                    Text("No clips available")
+                }
+            } label: {
+                Label("Actions", systemImage: "bolt")
+            }
         }
 
         // Clear History

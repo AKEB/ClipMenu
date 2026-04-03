@@ -48,10 +48,14 @@ struct PreferencesView: View {
                     Button {
                         selection = tab
                     } label: {
-                        Label(tab.title, systemImage: tab.symbolName)
-                            .font(.system(size: 13, weight: .medium))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
+                        HStack {
+                            Spacer(minLength: 0)
+                            Label(tab.title, systemImage: tab.symbolName)
+                                .font(.system(size: 13, weight: .medium))
+                            Spacer(minLength: 0)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 32)
+                        .contentShape(Rectangle())
                     }
                     .frame(maxWidth: .infinity)
                     .buttonStyle(.plain)
@@ -61,9 +65,9 @@ struct PreferencesView: View {
                         RoundedRectangle(cornerRadius: 8)
                             .fill(selection == tab ? Color.accentColor : Color.clear)
                     )
-                    .contentShape(Rectangle())
                 }
             }
+            .frame(maxWidth: .infinity)
             .padding(6)
             .background(
                 RoundedRectangle(cornerRadius: 10)
