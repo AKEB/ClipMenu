@@ -3,11 +3,13 @@
 > **Every agent that completes a migration step MUST update this file before committing.**
 > See `.github/copilot-instructions.md` for the full rule.
 
-**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete (hotkeys wired, snippets settings/menu parity improved, preferences window made larger/resizable, settings persistence/startup hydration hardened, history-cap/paste crash regressions fixed, permission prompt behavior refined, build passes)
+**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete (hotkeys wired, snippets settings/menu parity improved, preferences window made larger/resizable, settings persistence/startup hydration hardened, history-cap/paste crash regressions fixed, permission prompt behavior refined, app category/assets build-phase fixes applied, signing-team persistence added, build passes)
 
 ---
 
 ## Completed
+ - [x] Signing configuration persistence: copied `DEVELOPMENT_TEAM` (`WTWBLR82TY`) from generated project back into `project.yml` so `xcodegen generate` preserves team-based signing settings
+ - [x] Project packaging fix: set `INFOPLIST_KEY_LSApplicationCategoryType` to `public.app-category.utilities` and moved `Assets.xcassets` into explicit `sources` entry with `buildPhase: resources` so asset catalog is compiled into the app (`Assets.car` present in built bundle)
  - [x] Permission prompt behavior refined: `PasteService` no longer invokes `AXIsProcessTrustedWithOptions` re-prompts each app session; it now checks trust only and logs missing permission once per session, avoiding repeated prompt popups on app open
  - [x] Regression fix: history menus now honor configured history cap in both SwiftUI status menu and native hotkey popup (capped to `maxHistorySize`), and startup now enforces trimming immediately
  - [x] Regression fix: `ClipsService` moved to `@MainActor` isolation so pasteboard + SwiftData `mainContext` operations execute on the correct thread, preventing menu-selection paste crash path
