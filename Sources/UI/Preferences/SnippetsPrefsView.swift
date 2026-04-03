@@ -7,11 +7,16 @@ import SwiftData
 /// in the Snippets menu.
 struct SnippetsPrefsView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(ClipMenuSettings.self) private var settings
 
     @Query(sort: \SnippetFolder.sortIndex) private var folders: [SnippetFolder]
 
     @State private var selectedFolderID: PersistentIdentifier?
     @State private var selectedSnippetID: PersistentIdentifier?
+    @State private var editingFolderID: PersistentIdentifier?
+    @State private var editingFolderTitle: String = ""
+
+    @FocusState private var isFolderNameFocused: Bool
 
     private var selectedFolder: SnippetFolder? {
         folders.first { $0.persistentModelID == selectedFolderID }
@@ -27,9 +32,26 @@ struct SnippetsPrefsView: View {
     }
 
     var body: some View {
-        HStack(spacing: 12) {
-            foldersPane
-            snippetsPane
+        @Bindable var s = settings
+
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("The position to show snippets in ClipMenu:")
+                Spacer()
+                Picker("Snippet position", selection: $s.positionOfSnippets) {
+                    Text("Above the clipboard history").tag(0)
+                    Text("Below the clipboard history").tag(1)
+                    Text("Hidden").tag(2)
+                }
+                .labelsHidden()
+                .frame(width: 260)
+            }
+
+            HStack(alignment: .top, spacing: 12) {
+                foldersPane
+                snippetsPane
+                contentPane
+            }
         }
         .padding()
         .onAppear { ensureSelection() }
@@ -53,68 +75,70 @@ struct SnippetsPrefsView: View {
             List {
                 ForEach(folders) { folder in
                     HStack {
-                        Image(systemName: "folder")
-                        Text(folder.title)
-                        Spacer()
-                        if !folder.isEnabled {
-                            Text("Disabled")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                        Toggle("", isOn: Binding(
+                            get: { folder.isEnabled },
+                            set: { newValue in
+                                folder.isEnabled = newValue
+                                persist()
+                            }
+                        ))
+                        .toggleStyle(.checkbox)
+                        .labelsHidden()
+
+                        Image(systemName: "folder.fill")
+
+                        if editingFolderID == folder.persistentModelID {
+                            TextField("Folder", text: $editingFolderTitle)
+                                .textFieldStyle(.plain)
+                                .focused($isFolderNameFocused)
+                                .onSubmit { commitFolderRename(folder) }
+                        } else {
+                            Text(folder.title)
                         }
+
+                        Spacer()
                     }
                     .contentShape(Rectangle())
                     .onTapGesture {
                         selectedFolderID = folder.persistentModelID
                     }
+                    .onTapGesture(count: 2) {
+                        beginFolderRename(folder)
+                    }
                     .listRowBackground(folder.persistentModelID == selectedFolderID ? Color.accentColor.opacity(0.15) : Color.clear)
                 }
             }
-            .frame(minWidth: 240)
+            .frame(minWidth: 250)
 
             HStack {
                 Button("Add Folder") { addFolder() }
                 Button("Remove") { removeSelectedFolder() }
                     .disabled(selectedFolder == nil)
             }
-
-            Toggle("Enable selected folder", isOn: Binding(
-                get: { selectedFolder?.isEnabled ?? true },
-                set: { newValue in
-                    guard let selectedFolder else { return }
-                    selectedFolder.isEnabled = newValue
-                    persist()
-                }
-            ))
-            .disabled(selectedFolder == nil)
-
-            TextField("Folder name", text: Binding(
-                get: { selectedFolder?.title ?? "" },
-                set: { newValue in
-                    guard let selectedFolder else { return }
-                    selectedFolder.title = newValue
-                    persist()
-                }
-            ))
-            .disabled(selectedFolder == nil)
         }
     }
 
     private var snippetsPane: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Snippets")
+            Text("Title")
                 .font(.headline)
 
             if let selectedFolder {
                 List {
                     ForEach(selectedSnippets) { snippet in
                         HStack {
+                            Toggle("", isOn: Binding(
+                                get: { snippet.isEnabled },
+                                set: { newValue in
+                                    snippet.isEnabled = newValue
+                                    persist()
+                                }
+                            ))
+                            .toggleStyle(.checkbox)
+                            .labelsHidden()
+
                             Text(snippet.title)
                             Spacer()
-                            if !snippet.isEnabled {
-                                Text("Disabled")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
                         }
                         .contentShape(Rectangle())
                         .onTapGesture {
@@ -123,52 +147,45 @@ struct SnippetsPrefsView: View {
                         .listRowBackground(snippet.persistentModelID == selectedSnippetID ? Color.accentColor.opacity(0.15) : Color.clear)
                     }
                 }
-                .frame(minWidth: 320)
+                .frame(minWidth: 250)
 
                 HStack {
                     Button("Add Snippet") { addSnippet(to: selectedFolder) }
                     Button("Remove") { removeSelectedSnippet() }
                         .disabled(selectedSnippet == nil)
                 }
-
-                GroupBox("Editor") {
-                    VStack(alignment: .leading, spacing: 8) {
-                        TextField("Title", text: Binding(
-                            get: { selectedSnippet?.title ?? "" },
-                            set: { newValue in
-                                guard let selectedSnippet else { return }
-                                selectedSnippet.title = newValue
-                                persist()
-                            }
-                        ))
-                        .disabled(selectedSnippet == nil)
-
-                        Toggle("Enabled", isOn: Binding(
-                            get: { selectedSnippet?.isEnabled ?? true },
-                            set: { newValue in
-                                guard let selectedSnippet else { return }
-                                selectedSnippet.isEnabled = newValue
-                                persist()
-                            }
-                        ))
-                        .disabled(selectedSnippet == nil)
-
-                        TextEditor(text: Binding(
-                            get: { selectedSnippet?.content ?? "" },
-                            set: { newValue in
-                                guard let selectedSnippet else { return }
-                                selectedSnippet.content = newValue
-                                persist()
-                            }
-                        ))
-                        .frame(minHeight: 180)
-                        .disabled(selectedSnippet == nil)
-                    }
-                }
             } else {
                 ContentUnavailableView("No Folder Selected", systemImage: "text.badge.plus", description: Text("Create a folder to start adding snippets."))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+        }
+    }
+
+    private var contentPane: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Content")
+                .font(.headline)
+
+            TextEditor(text: Binding(
+                get: { selectedSnippet?.content ?? "" },
+                set: { newValue in
+                    guard let selectedSnippet else { return }
+                    selectedSnippet.content = newValue
+                    persist()
+                }
+            ))
+            .frame(minWidth: 320, minHeight: 280)
+            .disabled(selectedSnippet == nil)
+
+            TextField("Title", text: Binding(
+                get: { selectedSnippet?.title ?? "" },
+                set: { newValue in
+                    guard let selectedSnippet else { return }
+                    selectedSnippet.title = newValue
+                    persist()
+                }
+            ))
+            .disabled(selectedSnippet == nil)
         }
     }
 
@@ -179,6 +196,7 @@ struct SnippetsPrefsView: View {
         persist()
         selectedFolderID = folder.persistentModelID
         selectedSnippetID = nil
+        beginFolderRename(folder)
     }
 
     private func removeSelectedFolder() {
@@ -224,6 +242,20 @@ struct SnippetsPrefsView: View {
 
     private func persist() {
         try? modelContext.save()
+    }
+
+    private func beginFolderRename(_ folder: SnippetFolder) {
+        selectedFolderID = folder.persistentModelID
+        editingFolderID = folder.persistentModelID
+        editingFolderTitle = folder.title
+        isFolderNameFocused = true
+    }
+
+    private func commitFolderRename(_ folder: SnippetFolder) {
+        let trimmed = editingFolderTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        folder.title = trimmed.isEmpty ? folder.title : trimmed
+        editingFolderID = nil
+        persist()
     }
 }
 
