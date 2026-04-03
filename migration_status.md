@@ -3,11 +3,13 @@
 > **Every agent that completes a migration step MUST update this file before committing.**
 > See `.github/copilot-instructions.md` for the full rule.
 
-**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete (hotkeys wired, snippets settings/menu parity improved, preferences window made larger/resizable, settings persistence/startup hydration hardened, history-cap/paste crash regressions fixed, permission prompt behavior refined, app category/assets build-phase fixes applied, signing-team persistence added, build passes)
+**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete (hotkeys wired, snippets settings/menu parity improved, preferences window made larger/resizable, settings persistence/startup hydration hardened, history-cap/paste crash regressions fixed, permission prompt behavior refined, app category/assets build-phase fixes applied, signing-team persistence added, snippets editor visual restyle applied, macOS-style add/remove controls updated, build passes)
 
 ---
 
 ## Completed
+ - [x] Snippets editor controls aligned to macOS conventions: folder/snippet add/remove actions now use compact `+`/`−` controls positioned under each list instead of text buttons
+ - [x] Snippets editor visual refresh: removed harsh split dividers and restyled the three-column editor into rounded, darker panel cards for folders, snippet titles, and content while preserving existing rename/selection/edit behaviors
  - [x] Signing configuration persistence: copied `DEVELOPMENT_TEAM` (`WTWBLR82TY`) from generated project back into `project.yml` so `xcodegen generate` preserves team-based signing settings
  - [x] Project packaging fix: set `INFOPLIST_KEY_LSApplicationCategoryType` to `public.app-category.utilities` and moved `Assets.xcassets` into explicit `sources` entry with `buildPhase: resources` so asset catalog is compiled into the app (`Assets.car` present in built bundle)
  - [x] Permission prompt behavior refined: `PasteService` no longer invokes `AXIsProcessTrustedWithOptions` re-prompts each app session; it now checks trust only and logs missing permission once per session, avoiding repeated prompt popups on app open

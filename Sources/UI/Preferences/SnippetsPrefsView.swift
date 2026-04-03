@@ -63,7 +63,7 @@ struct SnippetsPrefsView: View {
                 }
             }
 
-            HSplitView {
+            HStack(alignment: .top, spacing: 12) {
                 foldersPane
                     .frame(minWidth: 180, idealWidth: 240, maxWidth: .infinity)
                 snippetsPane
@@ -71,7 +71,7 @@ struct SnippetsPrefsView: View {
                 contentPane
                     .frame(minWidth: 220, idealWidth: 360, maxWidth: .infinity)
             }
-            .padding(.vertical, 8)
+            .frame(maxHeight: .infinity)
         }
         .padding()
         .onAppear { ensureSelection() }
@@ -93,49 +93,64 @@ struct SnippetsPrefsView: View {
             Text("Folders")
                 .font(.headline)
 
-            List {
-                ForEach(folders) { folder in
-                    HStack {
-                        Toggle("", isOn: Binding(
-                            get: { folder.isEnabled },
-                            set: { newValue in
-                                folder.isEnabled = newValue
-                                persist()
+            VStack(spacing: 8) {
+                List {
+                    ForEach(folders) { folder in
+                        HStack {
+                            Toggle("", isOn: Binding(
+                                get: { folder.isEnabled },
+                                set: { newValue in
+                                    folder.isEnabled = newValue
+                                    persist()
+                                }
+                            ))
+                            .toggleStyle(.checkbox)
+                            .labelsHidden()
+
+                            Image(systemName: "folder.fill")
+
+                            if editingFolderID == folder.persistentModelID {
+                                TextField("Folder", text: $editingFolderTitle)
+                                    .textFieldStyle(.plain)
+                                    .focused($isFolderNameFocused)
+                                    .onSubmit { commitFolderRename(folder) }
+                            } else {
+                                Text(folder.title)
                             }
-                        ))
-                        .toggleStyle(.checkbox)
-                        .labelsHidden()
 
-                        Image(systemName: "folder.fill")
-
-                        if editingFolderID == folder.persistentModelID {
-                            TextField("Folder", text: $editingFolderTitle)
-                                .textFieldStyle(.plain)
-                                .focused($isFolderNameFocused)
-                                .onSubmit { commitFolderRename(folder) }
-                        } else {
-                            Text(folder.title)
+                            Spacer()
                         }
-
-                        Spacer()
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            selectedFolderID = folder.persistentModelID
+                        }
+                        .onTapGesture(count: 2) {
+                            beginFolderRename(folder)
+                        }
+                        .listRowBackground(folder.persistentModelID == selectedFolderID ? Color.accentColor.opacity(0.15) : Color.clear)
                     }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        selectedFolderID = folder.persistentModelID
-                    }
-                    .onTapGesture(count: 2) {
-                        beginFolderRename(folder)
-                    }
-                    .listRowBackground(folder.persistentModelID == selectedFolderID ? Color.accentColor.opacity(0.15) : Color.clear)
                 }
-            }
-            .frame(maxWidth: .infinity)
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            HStack {
-                Button("Add Folder") { addFolder() }
-                Button("Remove") { removeSelectedFolder() }
+                ControlGroup {
+                    Button(action: addFolder) {
+                        Image(systemName: "plus")
+                    }
+                    .help("Add Folder")
+
+                    Button(action: removeSelectedFolder) {
+                        Image(systemName: "minus")
+                    }
+                    .help("Remove Folder")
                     .disabled(selectedFolder == nil)
+                }
+                .controlSize(.small)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .padding(10)
+            .background(panelBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
     }
 
@@ -145,49 +160,66 @@ struct SnippetsPrefsView: View {
                 .font(.headline)
 
             if let selectedFolder {
-                List {
-                    ForEach(selectedSnippets) { snippet in
-                        HStack {
-                            Toggle("", isOn: Binding(
-                                get: { snippet.isEnabled },
-                                set: { newValue in
-                                    snippet.isEnabled = newValue
-                                    persist()
+                VStack(spacing: 8) {
+                    List {
+                        ForEach(selectedSnippets) { snippet in
+                            HStack {
+                                Toggle("", isOn: Binding(
+                                    get: { snippet.isEnabled },
+                                    set: { newValue in
+                                        snippet.isEnabled = newValue
+                                        persist()
+                                    }
+                                ))
+                                .toggleStyle(.checkbox)
+                                .labelsHidden()
+
+                                if editingSnippetID == snippet.persistentModelID {
+                                    TextField("Title", text: $editingSnippetTitle)
+                                        .textFieldStyle(.plain)
+                                        .focused($isSnippetNameFocused)
+                                        .onSubmit { commitSnippetRename(snippet) }
+                                } else {
+                                    Text(snippet.title)
                                 }
-                            ))
-                            .toggleStyle(.checkbox)
-                            .labelsHidden()
-
-                            if editingSnippetID == snippet.persistentModelID {
-                                TextField("Title", text: $editingSnippetTitle)
-                                    .textFieldStyle(.plain)
-                                    .focused($isSnippetNameFocused)
-                                    .onSubmit { commitSnippetRename(snippet) }
-                            } else {
-                                Text(snippet.title)
+                                Spacer()
                             }
-                            Spacer()
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                selectedSnippetID = snippet.persistentModelID
+                            }
+                            .onTapGesture(count: 2) {
+                                beginSnippetRename(snippet)
+                            }
+                            .listRowBackground(snippet.persistentModelID == selectedSnippetID ? Color.accentColor.opacity(0.15) : Color.clear)
                         }
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            selectedSnippetID = snippet.persistentModelID
-                        }
-                        .onTapGesture(count: 2) {
-                            beginSnippetRename(snippet)
-                        }
-                        .listRowBackground(snippet.persistentModelID == selectedSnippetID ? Color.accentColor.opacity(0.15) : Color.clear)
                     }
-                }
-                .frame(maxWidth: .infinity)
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                HStack {
-                    Button("Add Snippet") { addSnippet(to: selectedFolder) }
-                    Button("Remove") { removeSelectedSnippet() }
+                    ControlGroup {
+                        Button(action: { addSnippet(to: selectedFolder) }) {
+                            Image(systemName: "plus")
+                        }
+                        .help("Add Snippet")
+
+                        Button(action: removeSelectedSnippet) {
+                            Image(systemName: "minus")
+                        }
+                        .help("Remove Snippet")
                         .disabled(selectedSnippet == nil)
+                    }
+                    .controlSize(.small)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                .padding(10)
+                .background(panelBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             } else {
                 ContentUnavailableView("No Folder Selected", systemImage: "text.badge.plus", description: Text("Create a folder to start adding snippets."))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(10)
+                    .background(panelBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
         }
     }
@@ -205,9 +237,15 @@ struct SnippetsPrefsView: View {
                     persist()
                 }
             ))
-            .frame(minHeight: 280)
+            .frame(minHeight: 280, maxHeight: .infinity)
+            .padding(8)
+            .background(panelBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             .disabled(selectedSnippet == nil)
         }
+    }
+
+    private var panelBackground: Color {
+        Color.black.opacity(0.16)
     }
 
     private func addFolder() {

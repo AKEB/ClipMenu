@@ -389,7 +389,7 @@ private final class HotkeyPopupActionTarget: NSObject {
     private func reactivateTargetAppIfNeeded() {
         guard let targetAppForPaste else { return }
         HotkeyService.log.debug("Re-activating target app pid=\(targetAppForPaste.processIdentifier, privacy: .public)")
-        targetAppForPaste.activate(options: [.activateIgnoringOtherApps])
+        targetAppForPaste.activate(options: [])
     }
 
     @objc func selectClip(_ sender: NSMenuItem) {

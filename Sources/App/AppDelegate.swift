@@ -39,7 +39,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         Task {
-            await runtime.clipsService.start(context: modelContext)
+            runtime.clipsService.start(context: modelContext)
             await runtime.snippetService.start(context: modelContext)
             await runtime.actionService.start(context: modelContext)
         }
@@ -48,7 +48,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         runtime.hotkeyService.unregister()
         Task {
-            await runtime.clipsService.stop()
+            runtime.clipsService.stop()
         }
     }
 }
