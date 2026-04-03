@@ -3,7 +3,7 @@
 > **Every agent that completes a migration step MUST update this file before committing.**
 > See `.github/copilot-instructions.md` for the full rule.
 
-**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete — Phase 4 in progress (actions execution path implemented: default action seeding, bundled scripts resources, modifier-click popup dispatch, JS require path compatibility, numeric key equivalents in native popup; build passes)
+**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete — Phase 4 in progress (actions execution path implemented: default action seeding, bundled scripts resources, modifier-click popup dispatch, JS require path compatibility, numeric key equivalents in native popup, and Actions preferences CRUD editor; build passes)
 
 ---
 
@@ -13,6 +13,7 @@
  - [x] Phase 4 action invocation path: `ClipMenuItem` now evaluates modifier-click behavior, shows a native action popup menu (`ActionMenuBuilder`) when configured, supports direct configured action dispatch, and invokes action immediately when enabled with a single root leaf
  - [x] Phase 4 script resources + lookup parity: copied legacy `resource/script` tree into `Resources/scripts`, wired it in `project.yml` resources, updated `ScriptEngine` library lookup to support both `script/lib` and `scripts/lib`, regenerated project, and validated build success
  - [x] Phase 4 numeric key equivalents parity: native hotkey popup history items now assign numeric key equivalents (0-9) when enabled in settings
+ - [x] Phase 4 Actions preferences editor expanded: `ActionsPrefsView` now includes a live SwiftData action-tree editor with root/folder hierarchy display, enable toggles, catalog-based insertion (Built-in / JavaScript / User scripts), folder creation, rename, delete, and sibling reordering controls
  - [x] Snippets styling refinement: panel backgrounds normalized to `black.opacity(0.1)` and content editor made visually unified with the same card background by hiding the default scroll/content fill
  - [x] Snippets editor controls aligned to macOS conventions: folder/snippet add/remove actions now use compact `+`/`−` controls positioned under each list instead of text buttons
  - [x] Snippets editor visual refresh: removed harsh split dividers and restyled the three-column editor into rounded, darker panel cards for folders, snippet titles, and content while preserving existing rename/selection/edit behaviors
@@ -54,7 +55,7 @@
 
 ## In Progress
 
-- [ ] Phase 4 Actions preferences editor parity: current Actions tab still lacks full CRUD tree editing/reorder UI for action nodes; only enable/invoke/modifier behavior controls are currently available
+- [ ] Phase 4 Actions preferences parity polish: drag-and-drop reordering and direct drag-into-folder interactions are still not implemented (current reordering uses Up/Down controls)
 
 ---
 
