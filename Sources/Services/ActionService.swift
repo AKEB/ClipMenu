@@ -53,8 +53,8 @@ actor ActionService {
     }
 
     /// Dispatches an action node against a clip entry.
-    /// The selected clip is replaced with the action result before the result
-    /// is copied to pasteboard. Paste synthesis happens only in paste context.
+    /// The action result is inserted as a new top clipboard item and copied to
+    /// pasteboard. Paste synthesis happens only in paste context.
     func perform(action node: ActionNode, on entry: ClipEntry, executionContext: ActionExecutionContext = .pasteContext) async {
         guard node.isEnabled else { return }
 
@@ -113,15 +113,13 @@ actor ActionService {
         guard let context else { return }
 
         await MainActor.run {
-            entry.types = [NSPasteboard.PasteboardType.string.rawValue]
-            entry.stringValue = string
-            entry.rtfData = nil
-            entry.isRTFD = false
-            entry.pdfData = nil
-            entry.filenames = nil
-            entry.urlStrings = nil
-            entry.imageData = nil
-            entry.lastUsedAt = .now
+            let transformed = ClipEntry()
+            transformed.types = [NSPasteboard.PasteboardType.string.rawValue]
+            transformed.stringValue = string
+            transformed.createdAt = .now
+            transformed.lastUsedAt = .now
+
+            context.insert(transformed)
 
             try? context.save()
 

@@ -1,5 +1,6 @@
 import JavaScriptCore
 import Foundation
+import AppKit
 
 /// Executes JavaScript action scripts inside a `JSContext`.
 ///
@@ -50,15 +51,23 @@ final class ScriptEngine {
             print("[ScriptEngine] exception: \(exception?.toString() ?? "?")")
         }
 
-        // ClipMenu.require(relativePath) — loads a lib script
-        let requireBlock: @convention(block) (String) -> Void = { [weak self] relativePath in
-            guard let self, !relativePath.isEmpty else { return }
-            if let source = self.libSource(for: relativePath) {
-                self.context.evaluateScript(source)
+        // ClipMenu.require(relativePath) — loads a lib script and returns success.
+        let requireBlock: @convention(block) (String) -> Bool = { [weak self] relativePath in
+            guard let self, !relativePath.isEmpty else { return false }
+            guard let source = self.libSource(for: relativePath) else { return false }
+            self.context.evaluateScript(source)
+            return true
+        }
+
+        // ClipMenu.activate() — compatibility hook for scripts that prompt.
+        let activateBlock: @convention(block) () -> Void = {
+            DispatchQueue.main.async {
+                NSApp.activate(ignoringOtherApps: true)
             }
         }
         let namespace = JSValue(newObjectIn: context)
         namespace?.setObject(requireBlock, forKeyedSubscript: "require" as NSString)
+        namespace?.setObject(activateBlock, forKeyedSubscript: "activate" as NSString)
         context.setObject(namespace, forKeyedSubscript: "ClipMenu" as NSString)
     }
 
