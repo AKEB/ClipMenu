@@ -64,15 +64,17 @@ struct ClipMenuView: View {
 
     private var inlineClips: [ClipEntry] {
         let n = settings.numberOfItemsInline
+        let capped = Array(clips.prefix(max(settings.maxHistorySize, 0)))
         // Legacy: n == 0 → all items go into folder submenus (mirrors ObjC behaviour).
-        return n == 0 ? [] : Array(clips.prefix(n))
+        return n == 0 ? [] : Array(capped.prefix(n))
     }
 
     /// Groups of clips that appear inside folder submenus.
     private var folderGroups: [[ClipEntry]] {
         let n = settings.numberOfItemsInline
         let groupSize = max(settings.numberOfItemsInsideFolder, 1)
-        let remaining = n == 0 ? clips : Array(clips.dropFirst(n))
+        let capped = Array(clips.prefix(max(settings.maxHistorySize, 0)))
+        let remaining = n == 0 ? capped : Array(capped.dropFirst(n))
         guard !remaining.isEmpty else { return [] }
         return stride(from: 0, to: remaining.count, by: groupSize).map {
             Array(remaining[$0..<min($0 + groupSize, remaining.count)])

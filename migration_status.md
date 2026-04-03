@@ -3,11 +3,13 @@
 > **Every agent that completes a migration step MUST update this file before committing.**
 > See `.github/copilot-instructions.md` for the full rule.
 
-**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete (hotkeys wired, snippets settings/menu parity improved, preferences window made larger/resizable, settings persistence/startup hydration hardened, build passes)
+**Overall progress:** Phase 1 complete — Phase 2 complete — Phase 3 complete (hotkeys wired, snippets settings/menu parity improved, preferences window made larger/resizable, settings persistence/startup hydration hardened, history-cap/paste crash regressions fixed, build passes)
 
 ---
 
 ## Completed
+ - [x] Regression fix: history menus now honor configured history cap in both SwiftUI status menu and native hotkey popup (capped to `maxHistorySize`), and startup now enforces trimming immediately
+ - [x] Regression fix: `ClipsService` moved to `@MainActor` isolation so pasteboard + SwiftData `mainContext` operations execute on the correct thread, preventing menu-selection paste crash path
  - [x] Image clip rendering parity improved: image-only clips now use `(Image)` fallback title and show scaled thumbnails in both SwiftUI menu rows and native hotkey popup history menus
 - [x] Image thumbnail robustness improved: thumbnail decoding now falls back to `NSBitmapImageRep` and uses fixed-canvas aspect-fit scaling, improving preview rendering for edge-case image clipboard data
 - [x] App-menu image preview parity fix: SwiftUI clip rows now prioritize thumbnail rendering over type icons, resolving cases where app menu showed only a document icon instead of the image preview
@@ -108,7 +110,7 @@ No tasks currently in progress.
 
 | Decision | Value | Rationale |
 |---|---|---|
-| Bundle ID | `com.naotaka.ClipMenu` | Required for UserDefaults migration from legacy app |
+| Bundle ID | `app.eetr.ClipMenu` | Updated app identity for downstream signing/distribution; existing defaults migration remains key-based |
 | Deployment target | macOS 14.0 | Minimum required for SwiftData |
 | Swift version | 5.9+ | SwiftData, @Observable, structured concurrency |
 | Sandboxing | **No sandbox** | CGEvent paste requires Accessibility; incompatible with sandbox |

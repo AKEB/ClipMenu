@@ -7,7 +7,8 @@ import os
 /// enforces the max-history limit, and writes ClipEntry records to SwiftData.
 ///
 /// Reference: `legacy/Source/ClipsController.{h,m}` and `Clip.{h,m}`.
-actor ClipsService {
+@MainActor
+final class ClipsService {
     private static let log = Logger(subsystem: "com.naotaka.ClipMenu", category: "ClipsService")
 
     private let monitor    = ClipboardMonitor()
@@ -25,6 +26,9 @@ actor ClipsService {
     func start(context: ModelContext) {
         self.context = context
         exclusion.update(from: settings)
+        Task {
+            await enforceHistoryLimitNow()
+        }
         monitor.start(interval: min(settings.pollingInterval, 1.0))
         monitor.pasteboardChanged
             .sink { [weak self] pasteboard in
@@ -97,7 +101,7 @@ actor ClipsService {
         }
     }
 
-    private func handlePasteboardChange(_ pboard: NSPasteboard) {
+    private func handlePasteboardChange(_ pboard: NSPasteboard) async {
         exclusion.update(from: settings)
         if exclusion.shouldExclude() {
             return
@@ -127,6 +131,12 @@ actor ClipsService {
             Self.log.error("Failed handling pasteboard change: \(error.localizedDescription, privacy: .public)")
             return
         }
+    }
+
+    private func enforceHistoryLimitNow() async {
+        guard let context else { return }
+        trimHistoryIfNeeded(context: context)
+        try? context.save()
     }
 
     private func trimHistoryIfNeeded(context: ModelContext) {
@@ -224,7 +234,7 @@ actor ClipsService {
         }
     }
 
-    func clearAll() throws {
+    func clearAll() async throws {
         guard let context else { return }
         let all = try context.fetch(FetchDescriptor<ClipEntry>())
         for entry in all { context.delete(entry) }

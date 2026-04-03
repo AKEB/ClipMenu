@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - ClipsService
 
 private struct ClipsServiceKey: EnvironmentKey {
-    static let defaultValue: ClipsService = ClipsService(settings: ClipMenuSettings())
+    static let defaultValue: ClipsService = AppRuntime.shared.clipsService
 }
 
 extension EnvironmentValues {

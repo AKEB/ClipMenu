@@ -5,7 +5,7 @@ import SwiftUI
 final class AppRuntime {
     static let shared = AppRuntime()
 
-    let settings = ClipMenuSettings()
+    let settings: ClipMenuSettings
     let clipsService: ClipsService
     let snippetService = SnippetService()
     let actionService = ActionService()
@@ -16,7 +16,11 @@ final class AppRuntime {
     var modelContainer: ModelContainer?
 
     private init() {
-        clipsService = ClipsService(settings: settings)
+        let settings = ClipMenuSettings()
+        self.settings = settings
+        clipsService = MainActor.assumeIsolated {
+            ClipsService(settings: settings)
+        }
     }
 
     @MainActor

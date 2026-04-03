@@ -50,7 +50,7 @@
 		137B169B289424AA2C053F6E /* ShortcutsPrefsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsPrefsView.swift; sourceTree = "<group>"; };
 		179AF605EB49F693BF4AD85E /* migration.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = migration.md; sourceTree = "<group>"; };
 		19473B9E42EE0B4041018F4D /* SnippetsPrefsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetsPrefsView.swift; sourceTree = "<group>"; };
-		1AAA8A2C77102B5966216536 /* LICENSE */ = {isa = PBXFileReference; path = LICENSE; sourceTree = "<group>"; };
+		1AAA8A2C77102B5966216536 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		2761ACB3529E51DE835B8478 /* GeneralPrefsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralPrefsView.swift; sourceTree = "<group>"; };
 		29576F23AAFF791919F37AA2 /* ClipMenuSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipMenuSettings.swift; sourceTree = "<group>"; };
 		30E03F362BFE6F8406DB1DEB /* ScriptEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptEngine.swift; sourceTree = "<group>"; };
@@ -67,6 +67,7 @@
 		83A17B48EFB6F8C9C5953E6C /* SnippetSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetSection.swift; sourceTree = "<group>"; };
 		8480717B6E5E00346D1A2B51 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		9075790B975D02A5039621CB /* ClipboardMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipboardMonitor.swift; sourceTree = "<group>"; };
+		926EE1522F7FADA200CB9A45 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9E6321E93388B5BFB5F35292 /* ActionSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionSection.swift; sourceTree = "<group>"; };
 		A663BD7362E0C5445528C4F1 /* ActionNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionNode.swift; sourceTree = "<group>"; };
 		A83BE5811A4FB6A1DB019AC2 /* ClipsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipsService.swift; sourceTree = "<group>"; };
@@ -75,7 +76,7 @@
 		AEC26F1A30437471626D2578 /* VersionHistory-ja.yaml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "VersionHistory-ja.yaml"; sourceTree = "<group>"; };
 		AFC2785BEDC95DB32BD21552 /* ClipMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipMenuView.swift; sourceTree = "<group>"; };
 		B11A04D2CD51A76FE707BEA1 /* project.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = project.yml; sourceTree = "<group>"; };
-		B4070C5C34CA29D0646E6606 /* ClipMenu website.webloc */ = {isa = PBXFileReference; path = "ClipMenu website.webloc"; sourceTree = "<group>"; };
+		B4070C5C34CA29D0646E6606 /* ClipMenu website.webloc */ = {isa = PBXFileReference; lastKnownFileType = file.bplist; path = "ClipMenu website.webloc"; sourceTree = "<group>"; };
 		B48E46B042ACC84B0F6F1766 /* LoginItemService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemService.swift; sourceTree = "<group>"; };
 		B60996BF476330FFB6501381 /* Snippet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Snippet.swift; sourceTree = "<group>"; };
 		BA400EEACE736B3818DA8A3E /* ReadMe.rtfd */ = {isa = PBXFileReference; lastKnownFileType = wrapper.rtfd; path = ReadMe.rtfd; sourceTree = "<group>"; };
@@ -180,6 +181,7 @@
 		6859B965AEE7F3DFF1841686 = {
 			isa = PBXGroup;
 			children = (
+				926EE1522F7FADA200CB9A45 /* Assets.xcassets */,
 				BF6C0BE229E6930FA608401B /* ClipMenu.entitlements */,
 				1AAA8A2C77102B5966216536 /* LICENSE */,
 				B11A04D2CD51A76FE707BEA1 /* project.yml */,

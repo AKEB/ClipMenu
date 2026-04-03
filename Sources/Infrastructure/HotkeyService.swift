@@ -139,9 +139,10 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
         let menu = NSMenu(title: "ClipMenu")
         let settings = runtime.settings
 
-        let clips = (try? context.fetch(FetchDescriptor<ClipEntry>(
+        let fetchedClips = (try? context.fetch(FetchDescriptor<ClipEntry>(
             sortBy: [SortDescriptor(\ClipEntry.lastUsedAt, order: .reverse)]
         ))) ?? []
+        let clips = Array(fetchedClips.prefix(max(settings.maxHistorySize, 0)))
 
         let folders = (try? context.fetch(FetchDescriptor<SnippetFolder>(
             sortBy: [SortDescriptor(\SnippetFolder.sortIndex, order: .forward)]
