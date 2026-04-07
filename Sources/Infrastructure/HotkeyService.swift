@@ -50,6 +50,11 @@ final class HotkeyService {
         KeyboardShortcuts.removeAllHandlers()
     }
 
+    @MainActor
+    func makeStatusMenu() -> NSMenu? {
+        popupMenu.statusMenu(using: AppRuntime.shared)
+    }
+
     // MARK: - Private
 
     private func ensureDefaultShortcutsIfMissing() {
@@ -126,6 +131,21 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
 
         anchorWindow.orderOut(nil)
         HotkeyService.log.notice("Presented fallback NSMenu popup")
+    }
+
+    @MainActor
+    func statusMenu(using runtime: AppRuntime) -> NSMenu? {
+        guard let context = runtime.modelContainer?.mainContext else {
+            HotkeyService.log.error("Status menu requested but modelContext is nil")
+            return nil
+        }
+
+        let menu = buildMenu(runtime: runtime, context: context, kind: .main)
+        actionTarget.runtime = runtime
+        targetAppForPaste = currentTargetApplication()
+        actionTarget.targetAppForPaste = targetAppForPaste
+        menu.delegate = self
+        return menu
     }
 
     func menuDidClose(_ menu: NSMenu) {
@@ -355,7 +375,7 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
                 item.keyEquivalentModifierMask = []
             }
             if let thumbnail = thumbnailImage(for: clip, settings: settings) {
-                item.image = thumbnail
+                item.attributedTitle = imageClipTitle(title: item.title, thumbnail: thumbnail)
                 HotkeyService.log.debug("Attached inline popup thumbnail for clip index=\(idx, privacy: .public)")
             } else if clip.imageData != nil {
                 HotkeyService.log.debug("Inline popup clip has imageData but no thumbnail index=\(idx, privacy: .public) bytes=\(clip.imageData?.count ?? 0, privacy: .public)")
@@ -387,7 +407,7 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
                     item.keyEquivalentModifierMask = []
                 }
                 if let thumbnail = thumbnailImage(for: clip, settings: settings) {
-                    item.image = thumbnail
+                    item.attributedTitle = imageClipTitle(title: item.title, thumbnail: thumbnail)
                     HotkeyService.log.debug("Attached grouped popup thumbnail group=\(groupIndex, privacy: .public) idx=\(idx, privacy: .public)")
                 } else if clip.imageData != nil {
                     HotkeyService.log.debug("Grouped popup clip has imageData but no thumbnail group=\(groupIndex, privacy: .public) idx=\(idx, privacy: .public) bytes=\(clip.imageData?.count ?? 0, privacy: .public)")
@@ -427,15 +447,23 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
         if firstLine.count > maxLen {
             trimmed = String(firstLine.prefix(max(maxLen - 3, 0))) + "..."
         } else if firstLine.isEmpty, clip.imageData != nil {
-            trimmed = "(Image)"
+            trimmed = ""
         } else {
             trimmed = firstLine.isEmpty ? "(binary)" : firstLine
         }
 
         if settings.numberedMenuItems {
-            return "\(listNumber). \(trimmed)"
+            return trimmed.isEmpty ? "\(listNumber)." : "\(listNumber). \(trimmed)"
         }
         return trimmed
+    }
+
+    private func imageClipTitle(title: String, thumbnail: NSImage) -> NSAttributedString {
+        let result = NSMutableAttributedString(string: title.isEmpty ? "" : "\(title) ")
+        let attachment = NSTextAttachment()
+        attachment.image = thumbnail
+        result.append(NSAttributedString(attachment: attachment))
+        return result
     }
 
     private func thumbnailImage(for clip: ClipEntry, settings: ClipMenuSettings) -> NSImage? {

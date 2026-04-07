@@ -121,6 +121,7 @@
 		C47B7A1E32A72B3C15931D0E /* Title Case.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Title Case.js"; sourceTree = "<group>"; };
 		C53F23FA57EE7251E7DC8C6E /* MenuPrefsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuPrefsView.swift; sourceTree = "<group>"; };
 		C6107A96E18C02167CD2BF95 /* { }.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "{ }.js"; sourceTree = "<group>"; };
+		C9B637882F84E67A001D2282 /* thingsToDo.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = thingsToDo.md; sourceTree = "<group>"; };
 		CC0D05E32BADC3B23BA7F652 /* ' '.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "' '.js"; sourceTree = "<group>"; };
 		CDB67016D05B5750B90F5809 /* ‘ ’.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "‘ ’.js"; sourceTree = "<group>"; };
 		D2071986765235444ED5C4B6 /* ActionMenuBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionMenuBuilder.swift; sourceTree = "<group>"; };
@@ -285,6 +286,7 @@
 		6859B965AEE7F3DFF1841686 = {
 			isa = PBXGroup;
 			children = (
+				C9B637882F84E67A001D2282 /* thingsToDo.md */,
 				B9F2FC9E1D536A30571DAAAB /* Assets.xcassets */,
 				BF6C0BE229E6930FA608401B /* ClipMenu.entitlements */,
 				1AAA8A2C77102B5966216536 /* LICENSE */,

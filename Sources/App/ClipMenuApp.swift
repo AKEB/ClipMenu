@@ -22,22 +22,6 @@ struct ClipMenuApp: App {
     }
 
     var body: some Scene {
-        MenuBarExtra {
-            ClipMenuView()
-                .modelContainer(modelContainer)
-                .environment(runtime.settings)
-                .environment(\.clipsService, runtime.clipsService)
-                .environment(\.snippetService, runtime.snippetService)
-                .environment(\.actionService, runtime.actionService)
-        } label: {
-            Image(systemName: "clipboard.fill")
-                .symbolRenderingMode(.monochrome)
-                .font(.system(size: 13, weight: .semibold))
-                .accessibilityLabel("ClipMenu")
-        }
-        .menuBarExtraStyle(.menu)
-        .modelContainer(modelContainer)
-
         Settings {
             PreferencesView()
                 .modelContainer(modelContainer)
@@ -47,4 +31,3 @@ struct ClipMenuApp: App {
         .modelContainer(modelContainer)
     }
 }
-
