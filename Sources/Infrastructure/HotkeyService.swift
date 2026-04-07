@@ -317,7 +317,7 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
             guard !snippets.isEmpty else { continue }
 
             let folderItem = NSMenuItem(title: folder.title, action: nil, keyEquivalent: "")
-            folderItem.image = NSImage(named: NSImage.folderName)
+            folderItem.image = folderMenuIcon(settings: settings)
             let submenu = NSMenu(title: folder.title)
             for snippet in snippets {
                 let item = NSMenuItem(title: snippet.title, action: #selector(HotkeyPopupActionTarget.selectSnippet(_:)), keyEquivalent: "")
@@ -452,6 +452,12 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
         let targetSize = NSSize(width: CGFloat(settings.thumbnailWidth),
                                 height: CGFloat(settings.thumbnailHeight))
         return scaledImage(image, to: targetSize)
+    }
+
+    private func folderMenuIcon(settings: ClipMenuSettings) -> NSImage? {
+        guard let image = NSImage(named: NSImage.folderName) else { return nil }
+        let size = CGFloat(max(settings.menuIconSize, 1))
+        return scaledImage(image, to: NSSize(width: size, height: size))
     }
 
     private func scaledImage(_ image: NSImage, to size: NSSize) -> NSImage {
