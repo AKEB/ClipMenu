@@ -58,7 +58,7 @@
 		179AF605EB49F693BF4AD85E /* migration.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = migration.md; sourceTree = "<group>"; };
 		19473B9E42EE0B4041018F4D /* SnippetsPrefsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetsPrefsView.swift; sourceTree = "<group>"; };
 		19B808EFAA8952BC9BA1CA8D /* string.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = string.js; sourceTree = "<group>"; };
-		1AAA8A2C77102B5966216536 /* LICENSE */ = {isa = PBXFileReference; path = LICENSE; sourceTree = "<group>"; };
+		1AAA8A2C77102B5966216536 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		1C7B6FEA8365FA24B2DBB906 /* Convert Character to Decimal.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Convert Character to Decimal.js"; sourceTree = "<group>"; };
 		1E56AEC45D95D95509478467 /* util.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = util.js; sourceTree = "<group>"; };
 		1FD73C6C287485CB59A08FEE /* Calculate MD5 hash.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "Calculate MD5 hash.js"; sourceTree = "<group>"; };
@@ -488,12 +488,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
-				TargetAttributes = {
-					FB571C1A5EC141AC9E873616 = {
-						DevelopmentTeam = WTWBLR82TY;
-						ProvisioningStyle = Automatic;
-					};
-				};
 			};
 			buildConfigurationList = 0B71DAA28DD07193080501BD /* Build configuration list for PBXProject "ClipMenu" */;
 			developmentRegion = en;
@@ -634,12 +628,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = ClipMenu.entitlements;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = WTWBLR82TY;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ClipMenu;
@@ -655,6 +649,7 @@
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.eetr.ClipMenu;
 				PRODUCT_NAME = ClipMenu;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.9;
@@ -730,11 +725,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = ClipMenu.entitlements;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = WTWBLR82TY;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ClipMenu;
@@ -750,6 +745,7 @@
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.eetr.ClipMenu;
 				PRODUCT_NAME = ClipMenu;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
