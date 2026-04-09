@@ -141,7 +141,7 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
         menu.delegate = self
 
         let mouse = NSEvent.mouseLocation
-        anchorWindow.setFrameOrigin(mouse)
+        anchorWindow.setFrameOrigin(popupAnchorOrigin(for: menu, mouse: mouse))
         anchorWindow.orderFront(nil)
 
         if let contentView = anchorWindow.contentView {
@@ -152,6 +152,33 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
 
         anchorWindow.orderOut(nil)
         HotkeyService.log.notice("Presented fallback NSMenu popup")
+    }
+
+    private func popupAnchorOrigin(for menu: NSMenu, mouse: NSPoint) -> NSPoint {
+        guard let screen = NSScreen.screens.first(where: { NSMouseInRect(mouse, $0.frame, false) }) else {
+            return mouse
+        }
+
+        let screenMidY = screen.frame.midY
+        guard mouse.y < screenMidY else {
+            return mouse
+        }
+
+        let menuHeight = estimatedMenuHeight(for: menu)
+        let liftedY = min(mouse.y + menuHeight, screen.frame.maxY - 1)
+        return NSPoint(x: mouse.x, y: liftedY)
+    }
+
+    private func estimatedMenuHeight(for menu: NSMenu) -> CGFloat {
+        let visibleItems = menu.items.filter { !$0.isHidden }
+        guard !visibleItems.isEmpty else { return 0 }
+
+        let rowHeight: CGFloat = 22
+        let separatorHeight: CGFloat = 10
+
+        return visibleItems.reduce(CGFloat(0)) { total, item in
+            total + (item.isSeparatorItem ? separatorHeight : rowHeight)
+        }
     }
 
     @MainActor
