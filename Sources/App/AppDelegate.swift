@@ -1,15 +1,23 @@
 import AppKit
+import SwiftData
+import SwiftUI
 
 /// Lifecycle hooks that must live in an NSApplicationDelegate rather than the
 /// SwiftUI App struct (e.g. applicationWillTerminate, Sparkle delegate).
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let runtime = AppRuntime.shared
     private var statusItemController: StatusItemController?
+    private let pasteHarnessWindowController = PasteHarnessWindowController()
+    private let isPasteUITestMode = ProcessInfo.processInfo.environment["CLIPMENU_UI_TEST_MODE"] == "1"
 
     @MainActor
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Ensure persisted settings are hydrated and normalized before services read them.
         runtime.settings.reload()
+        if isPasteUITestMode {
+            pasteHarnessWindowController.show(modelContainer: runtime.modelContainer)
+            return
+        }
         let statusItemController = StatusItemController(runtime: runtime)
         statusItemController.install(runtime: runtime)
         self.statusItemController = statusItemController
@@ -54,6 +62,49 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Task {
             runtime.clipsService.stop()
         }
+    }
+}
+
+@MainActor
+private final class PasteHarnessWindowController: NSWindowController, NSWindowDelegate {
+    func show(modelContainer: ModelContainer?) {
+        let window = window ?? makeWindow()
+        let rootView = makeHarnessView(modelContainer: modelContainer)
+        window.contentViewController = NSHostingController(rootView: rootView)
+
+        NSRunningApplication.current.activate(options: [.activateAllWindows])
+        window.center()
+        window.makeKeyAndOrderFront(nil)
+        window.orderFrontRegardless()
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        window?.contentViewController = nil
+    }
+
+    private func makeWindow() -> NSWindow {
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 420, height: 180),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = "Paste Integration"
+        window.contentMinSize = NSSize(width: 420, height: 180)
+        window.isReleasedWhenClosed = false
+        window.delegate = self
+        self.window = window
+        return window
+    }
+
+    private func makeHarnessView(modelContainer: ModelContainer?) -> AnyView {
+        let rootView = PasteIntegrationHarnessView()
+
+        if let modelContainer {
+            return AnyView(rootView.modelContainer(modelContainer))
+        }
+
+        return AnyView(rootView)
     }
 }
 
