@@ -412,7 +412,7 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
                                   keyEquivalent: "")
             item.target = actionTarget
             item.representedObject = clip
-            if settings.numericKeyEquivalents {
+            if shouldShowTrailingNumericShortcut(settings: settings) {
                 item.keyEquivalent = String(itemNumber % 10)
                 item.keyEquivalentModifierMask = []
             }
@@ -444,7 +444,7 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
                                       keyEquivalent: "")
                 item.target = actionTarget
                 item.representedObject = clip
-                if settings.numericKeyEquivalents {
+                if shouldShowTrailingNumericShortcut(settings: settings) {
                     item.keyEquivalent = String(itemNumber % 10)
                     item.keyEquivalentModifierMask = []
                 }
@@ -468,6 +468,10 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
         }
         let n = index + 1
         return n > 10 ? n % 10 : n
+    }
+
+    private func shouldShowTrailingNumericShortcut(settings: ClipMenuSettings) -> Bool {
+        settings.numericKeyEquivalents && !settings.numberedMenuItems
     }
 
     private func clipTitle(for clip: ClipEntry, settings: ClipMenuSettings, listNumber: Int) -> String {
