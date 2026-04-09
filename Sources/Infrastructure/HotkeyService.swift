@@ -433,7 +433,7 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
             let start = inlineCount + groupIndex * perFolder + 1
             let end = start + group.count - 1
             let folderItem = NSMenuItem(title: "\(start) - \(end)", action: nil, keyEquivalent: "")
-            folderItem.image = NSImage(named: NSImage.folderName)
+            folderItem.image = folderMenuIcon(settings: settings)
 
             let submenu = NSMenu(title: folderItem.title)
             for (idx, clip) in group.enumerated() {
