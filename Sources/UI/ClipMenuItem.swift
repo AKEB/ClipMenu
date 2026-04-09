@@ -24,7 +24,7 @@ struct ClipMenuItem: View {
         }
         .help(tooltip)
         .modifier(NumericShortcut(number: listNumber % 10,
-                                  enabled: settings.numericKeyEquivalents && !settings.numberedMenuItems))
+                                  enabled: false))
     }
 
     // MARK: - Label

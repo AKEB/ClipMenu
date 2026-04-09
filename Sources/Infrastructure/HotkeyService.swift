@@ -498,7 +498,7 @@ private final class HotkeyPopupMenuPresenter: NSObject, NSMenuDelegate {
     }
 
     private func shouldShowTrailingNumericShortcut(settings: ClipMenuSettings) -> Bool {
-        settings.numericKeyEquivalents && !settings.numberedMenuItems
+        false
     }
 
     private func clipTitle(for clip: ClipEntry, settings: ClipMenuSettings, listNumber: Int) -> String {
