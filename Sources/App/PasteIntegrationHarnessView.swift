@@ -144,16 +144,19 @@ struct PasteIntegrationHarnessView: View {
         stepStatus = "Seeding popup clip"
 
         do {
-            let existing = try modelContext.fetch(FetchDescriptor<ClipEntry>())
-            for clip in existing {
-                modelContext.delete(clip)
-            }
+            let descriptor = FetchDescriptor<ClipEntry>(
+                predicate: #Predicate<ClipEntry> { entry in
+                    entry.stringValue == sampleText
+                }
+            )
 
-            let entry = ClipEntry()
-            entry.stringValue = sampleText
-            entry.types = [NSPasteboard.PasteboardType.string.rawValue]
-            modelContext.insert(entry)
-            try modelContext.save()
+            if try modelContext.fetchCount(descriptor) == 0 {
+                let entry = ClipEntry()
+                entry.stringValue = sampleText
+                entry.types = [NSPasteboard.PasteboardType.string.rawValue]
+                modelContext.insert(entry)
+                try modelContext.save()
+            }
             stepStatus = "Popup clip ready"
         } catch {
             stepStatus = "Failed to seed popup clip"
