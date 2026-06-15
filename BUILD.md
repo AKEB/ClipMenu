@@ -19,12 +19,52 @@ xcodegen generate
 
 ## Build (Debug)
 
+For local development, keep code signing enabled so macOS Accessibility/TCC
+continues to recognize ClipMenu as the same app across rebuilds.
+
 ```sh
-xcodebuild -project ClipMenu.xcodeproj -scheme ClipMenu -configuration Debug build \
-  CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+xcodebuild -project ClipMenu.xcodeproj -scheme ClipMenu -configuration Debug build
 ```
 
 ## Build (Release)
+
+Release builds are signed with Developer ID team `T3658G5P9V` and bundle id
+`app.eetr.ClipMenu`.
+
+```sh
+xcodebuild -project ClipMenu.xcodeproj -scheme ClipMenu -configuration Release build
+```
+
+## Release DMG (signed + notarized)
+
+`scripts/release_mac.sh` archives, exports with `developer-id`, notarizes the
+app and DMG, staples tickets, and writes artifacts to `dist/`.
+
+Set up local credentials once:
+
+```sh
+cp .env.example .env
+# place App Store Connect API key next to .env as key.p8
+```
+
+Release build:
+
+```sh
+chmod +x scripts/release_mac.sh scripts/verify_mac_signing.sh
+./scripts/release_mac.sh
+```
+
+Verify artifacts:
+
+```sh
+./scripts/verify_mac_signing.sh dist/ClipMenu.dmg build/export/ClipMenu.app
+```
+
+## Unsigned Build (CI / diagnostics only)
+
+Disabling code signing is useful for CI or quick artifact generation, but those
+builds can lose Accessibility approval because TCC treats ad-hoc/unsigned
+artifacts as a different app identity.
 
 ```sh
 xcodebuild -project ClipMenu.xcodeproj -scheme ClipMenu -configuration Release build \
@@ -44,11 +84,11 @@ ClipMenu is a menu bar app (`LSUIElement = YES`), so it does not appear in the D
 Paste simulation uses CGEvent and requires Accessibility permission:
 
 - System Settings -> Privacy & Security -> Accessibility
-
-## Release Direction
-
-- Legacy Sparkle/appcast release scripts were removed during repository cleanup.
-- Packaging/notarization should be implemented through a modern, explicit archive/export pipeline when needed.
+- Grant permission to the signed app you actually launch from a stable path
+  such as `/Applications/ClipMenu.app` or `dist/ClipMenu.app`, not a transient
+  DerivedData copy.
+- Keep bundle id `app.eetr.ClipMenu` and install path stable across updates so
+  the permission checkbox does not reset.
 
 ## Troubleshooting
 
@@ -59,6 +99,12 @@ brew install xcodegen
 ```
 
 Code signing errors in local/CI builds
+
+- Confirm `Developer ID Application: ... (T3658G5P9V)` exists:
+  `security find-identity -v -p codesigning`
+- Regenerate project after `project.yml` edits: `xcodegen generate`
+
+Unsigned CI builds
 
 - Use `CODE_SIGN_IDENTITY=""`
 - Use `CODE_SIGNING_REQUIRED=NO`

@@ -166,6 +166,7 @@
 		B9F2FC9E1D536A30571DAAAB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BAD0F7706C0E03012259C58E /* SnippetFolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetFolder.swift; sourceTree = "<group>"; };
 		BB3D24622C12C3B43F770963 /* ｛ ｝.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "｛ ｝.js"; sourceTree = "<group>"; };
+		BBF2103551D94F69A80DEC03 /* ExportOptions.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = ExportOptions.plist; sourceTree = "<group>"; };
 		BF6C0BE229E6930FA608401B /* ClipMenu.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ClipMenu.entitlements; sourceTree = "<group>"; };
 		BFFC088DE2CD462BD34AB520 /* 《 》.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "《 》.js"; sourceTree = "<group>"; };
 		C0C2DEA9193BEC16FD145658 /* 【 】.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "【 】.js"; sourceTree = "<group>"; };
@@ -355,6 +356,7 @@
 			children = (
 				B9F2FC9E1D536A30571DAAAB /* Assets.xcassets */,
 				BF6C0BE229E6930FA608401B /* ClipMenu.entitlements */,
+				BBF2103551D94F69A80DEC03 /* ExportOptions.plist */,
 				1AAA8A2C77102B5966216536 /* LICENSE */,
 				B11A04D2CD51A76FE707BEA1 /* project.yml */,
 				8480717B6E5E00346D1A2B51 /* README.md */,
@@ -599,8 +601,16 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
+					203D223DBDFB9A95A5BAFF4C = {
+						DevelopmentTeam = T3658G5P9V;
+						ProvisioningStyle = Automatic;
+					};
 					ED27A59E17B1815AC52E1333 = {
 						TestTargetID = 203D223DBDFB9A95A5BAFF4C;
+					};
+					FB571C1A5EC141AC9E873616 = {
+						DevelopmentTeam = T3658G5P9V;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -760,7 +770,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = WTWBLR82TY;
+				DEVELOPMENT_TEAM = T3658G5P9V;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ClipMenuTest;
@@ -844,12 +854,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = ClipMenu.entitlements;
-				CODE_SIGN_IDENTITY = "-";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = T3658G5P9V;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ClipMenuTest;
@@ -865,7 +874,6 @@
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.eetr.ClipMenuTest;
 				PRODUCT_NAME = ClipMenuTest;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -902,7 +910,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = WTWBLR82TY;
+				DEVELOPMENT_TEAM = T3658G5P9V;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ClipMenu;
@@ -1011,12 +1019,11 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = ClipMenu.entitlements;
-				CODE_SIGN_IDENTITY = "-";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = T3658G5P9V;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ClipMenu;
@@ -1032,7 +1039,6 @@
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.eetr.ClipMenu;
 				PRODUCT_NAME = ClipMenu;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
