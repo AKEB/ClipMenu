@@ -137,8 +137,14 @@ actor ActionService {
 
     private func scriptSource(for node: ActionNode) -> String? {
         if let inline = node.scriptContent, !inline.isEmpty { return inline }
-        if let path = node.scriptPath { return try? String(contentsOfFile: path, encoding: .utf8) }
+        if let path = node.scriptPath {
+            return try? String(contentsOfFile: expandedScriptPath(path), encoding: .utf8)
+        }
         return nil
+    }
+
+    private func expandedScriptPath(_ path: String) -> String {
+        (path as NSString).expandingTildeInPath
     }
 
     private func seedDefaultActionsIfNeeded() {

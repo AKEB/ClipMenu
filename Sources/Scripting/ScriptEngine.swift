@@ -69,6 +69,15 @@ final class ScriptEngine {
         namespace?.setObject(requireBlock, forKeyedSubscript: "require" as NSString)
         namespace?.setObject(activateBlock, forKeyedSubscript: "activate" as NSString)
         context.setObject(namespace, forKeyedSubscript: "ClipMenu" as NSString)
+
+        // Legacy action scripts were often authored for WebKit-backed JS and
+        // expect browser globals. JavaScriptCore's bare JSContext does not
+        // provide them unless we alias the global object explicitly.
+        if let global = context.globalObject {
+            context.setObject(global, forKeyedSubscript: "window" as NSString)
+            context.setObject(global, forKeyedSubscript: "self" as NSString)
+            context.setObject(global, forKeyedSubscript: "globalThis" as NSString)
+        }
     }
 
     private func libSource(for relativePath: String) -> String? {

@@ -700,7 +700,7 @@ struct ActionsPrefsView: View {
             dict["name"] = name
         }
         if let path = node.scriptPath, !path.isEmpty {
-            dict["path"] = path
+            dict["path"] = (path as NSString).abbreviatingWithTildeInPath
         }
         if let content = node.scriptContent, !content.isEmpty {
             dict["content"] = content
