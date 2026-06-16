@@ -36,6 +36,7 @@
 		6A9FBD0E7674740848F7DA2A /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = A665B545F09CB77A65913253 /* scripts */; };
 		6F1C323AB9B0297F0E353CCF /* ClipMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0016B43E0CACE631C4CC81B1 /* ClipMenuItem.swift */; };
 		76969A92D3459A30D0C7A6E2 /* AppRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E215E86DBA662D409E0C3E8 /* AppRuntime.swift */; };
+		78BB766153FC192A0E2D9667 /* SwiftDataStoreLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319408FC89687887FB71B909 /* SwiftDataStoreLocation.swift */; };
 		7A1B438249CE74198A1CA0C7 /* GeneralPrefsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2761ACB3529E51DE835B8478 /* GeneralPrefsView.swift */; };
 		7A7416876ADB8BAB01EAD0F4 /* MenuPrefsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C53F23FA57EE7251E7DC8C6E /* MenuPrefsView.swift */; };
 		7DC654982E118401EBAC78DA /* LegacyMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42B59EEB0DCCE6D695636F67 /* LegacyMigration.swift */; };
@@ -73,6 +74,7 @@
 		DD5D54D34CF0D365875C8B1F /* PasteIntegrationHarnessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B9F12072DC8BC14BB901E66 /* PasteIntegrationHarnessView.swift */; };
 		E1DFEA8B6C7669DFC34FBC0C /* HotkeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBDD749FF754FE72E7DB47E6 /* HotkeyService.swift */; };
 		E3A5BEAC6D55B0DBE1B56388 /* ActionSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6321E93388B5BFB5F35292 /* ActionSection.swift */; };
+		E715B447F5EEDB154E525D91 /* SwiftDataStoreLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319408FC89687887FB71B909 /* SwiftDataStoreLocation.swift */; };
 		EAA8E570AEAA9695CC422081 /* ActionMenuBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2071986765235444ED5C4B6 /* ActionMenuBuilder.swift */; };
 		ED4510E017E6C2AF79884815 /* ClipMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0016B43E0CACE631C4CC81B1 /* ClipMenuItem.swift */; };
 		F89987AC92544F66743A4CC7 /* ActionsPrefsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F33CC09804F1E54781E0EBD /* ActionsPrefsView.swift */; };
@@ -118,6 +120,7 @@
 		2FC43A69E4D022001DD1564A /* 『 』.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "『 』.js"; sourceTree = "<group>"; };
 		30E03F362BFE6F8406DB1DEB /* ScriptEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScriptEngine.swift; sourceTree = "<group>"; };
 		30F9D13D4936E1E652C416E4 /* enhancements.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = enhancements.md; sourceTree = "<group>"; };
+		319408FC89687887FB71B909 /* SwiftDataStoreLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataStoreLocation.swift; sourceTree = "<group>"; };
 		3E9CBA111ACE835F326FE6AE /* showdown.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = showdown.js; sourceTree = "<group>"; };
 		419D60462A50E9A91E55BF47 /* [ ].js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = "[ ].js"; sourceTree = "<group>"; };
 		42B59EEB0DCCE6D695636F67 /* LegacyMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyMigration.swift; sourceTree = "<group>"; };
@@ -505,6 +508,7 @@
 				EBDD749FF754FE72E7DB47E6 /* HotkeyService.swift */,
 				B48E46B042ACC84B0F6F1766 /* LoginItemService.swift */,
 				D443B0D12EBBA794375C2643 /* PasteService.swift */,
+				319408FC89687887FB71B909 /* SwiftDataStoreLocation.swift */,
 			);
 			path = Infrastructure;
 			sourceTree = "<group>";
@@ -697,6 +701,7 @@
 				0A60516026B4A6A28329CA35 /* SnippetSection.swift in Sources */,
 				4E7E67414971E44BE8B5C6E2 /* SnippetService.swift in Sources */,
 				B1C180C830FA7B03FEF8CD50 /* SnippetsPrefsView.swift in Sources */,
+				E715B447F5EEDB154E525D91 /* SwiftDataStoreLocation.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -737,6 +742,7 @@
 				A50FD9C591A6F8E6E86F6075 /* SnippetSection.swift in Sources */,
 				BDE2E92131BD9586D21FB6FD /* SnippetService.swift in Sources */,
 				4611B4DE54886E009EE9970F /* SnippetsPrefsView.swift in Sources */,
+				78BB766153FC192A0E2D9667 /* SwiftDataStoreLocation.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

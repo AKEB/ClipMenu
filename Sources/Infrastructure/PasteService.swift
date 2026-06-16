@@ -48,7 +48,7 @@ actor PasteService {
             Self.log.error("Paste aborted: Accessibility permission not granted")
             return
         }
-        guard let keyCode = vKeyCode() else {
+        guard let keyCode = await vKeyCode() else {
             Self.log.error("Paste aborted: could not resolve V key code")
             return
         }
@@ -99,22 +99,28 @@ actor PasteService {
         cachedVKeyCode = nil
     }
 
-    private func vKeyCode() -> CGKeyCode? {
+    private func vKeyCode() async -> CGKeyCode? {
         if let cachedVKeyCode {
             return cachedVKeyCode
         }
 
+        let resolvedKeyCode = await MainActor.run {
+            Self.resolveVKeyCode()
+        }
+        cachedVKeyCode = resolvedKeyCode
+        return resolvedKeyCode
+    }
+
+    private nonisolated static func resolveVKeyCode() -> CGKeyCode? {
         guard let source = TISCopyCurrentKeyboardLayoutInputSource()?.takeRetainedValue(),
               let layoutData = TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData)
         else {
-            cachedVKeyCode = 9
-            return cachedVKeyCode
+            return 9
         }
 
         let layout = unsafeBitCast(layoutData, to: CFData.self)
         guard let bytes = CFDataGetBytePtr(layout) else {
-            cachedVKeyCode = 9
-            return cachedVKeyCode
+            return 9
         }
 
         let keyboardLayout = UnsafePointer<UCKeyboardLayout>(OpaquePointer(bytes))
@@ -140,12 +146,10 @@ actor PasteService {
             guard status == noErr, length > 0 else { continue }
             let mapped = String(utf16CodeUnits: chars, count: Int(length))
             if mapped.caseInsensitiveCompare("v") == .orderedSame {
-                cachedVKeyCode = CGKeyCode(keyCode)
-                return cachedVKeyCode
+                return CGKeyCode(keyCode)
             }
         }
 
-        cachedVKeyCode = 9
-        return cachedVKeyCode
+        return 9
     }
 }
