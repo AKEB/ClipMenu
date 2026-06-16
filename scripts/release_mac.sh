@@ -147,26 +147,145 @@ verify_artifact() {
 	xcrun stapler validate "$target"
 }
 
+create_dmg_background() {
+	local background_path="$1"
+	mkdir -p "$(dirname "$background_path")" "$ROOT_DIR/.build/SwiftModuleCache"
+
+	xcrun swift -module-cache-path "$ROOT_DIR/.build/SwiftModuleCache" - "$background_path" >/dev/null <<'SWIFT'
+import AppKit
+
+let outputPath = CommandLine.arguments[1]
+let width: CGFloat = 640
+let height: CGFloat = 420
+let image = NSImage(size: NSSize(width: width, height: height))
+
+func color(_ red: CGFloat, _ green: CGFloat, _ blue: CGFloat, _ alpha: CGFloat) -> NSColor {
+    NSColor(calibratedRed: red / 255, green: green / 255, blue: blue / 255, alpha: alpha)
+}
+
+func fillRounded(_ rect: NSRect, radius: CGFloat, color: NSColor) {
+    color.setFill()
+    NSBezierPath(roundedRect: rect, xRadius: radius, yRadius: radius).fill()
+}
+
+func strokePolyline(_ points: [NSPoint], width: CGFloat, color: NSColor) {
+    guard let first = points.first else { return }
+    color.setStroke()
+    let path = NSBezierPath()
+    path.lineWidth = width
+    path.lineCapStyle = .round
+    path.lineJoinStyle = .round
+    path.move(to: first)
+    for point in points.dropFirst() {
+        path.line(to: point)
+    }
+    path.stroke()
+}
+
+image.lockFocus()
+NSGradient(
+    starting: color(31, 48, 69, 1),
+    ending: color(35, 99, 113, 1)
+)!.draw(in: NSRect(x: 0, y: 0, width: width, height: height), angle: -18)
+
+fillRounded(NSRect(x: 56, y: 84, width: 216, height: 224), radius: 30, color: NSColor(calibratedWhite: 1, alpha: 0.16))
+fillRounded(NSRect(x: 368, y: 84, width: 216, height: 224), radius: 30, color: NSColor(calibratedWhite: 1, alpha: 0.16))
+fillRounded(NSRect(x: 79, y: 107, width: 170, height: 178), radius: 26, color: NSColor(calibratedWhite: 1, alpha: 0.12))
+fillRounded(NSRect(x: 391, y: 107, width: 170, height: 178), radius: 26, color: NSColor(calibratedWhite: 1, alpha: 0.12))
+
+let arrowColor = NSColor(calibratedWhite: 1, alpha: 0.55)
+strokePolyline([NSPoint(x: 296, y: 196), NSPoint(x: 345, y: 196)], width: 7, color: arrowColor)
+strokePolyline([NSPoint(x: 329, y: 214), NSPoint(x: 348, y: 196), NSPoint(x: 329, y: 178)], width: 7, color: arrowColor)
+
+image.unlockFocus()
+
+let bitmap = NSBitmapImageRep(data: image.tiffRepresentation!)!
+let png = bitmap.representation(using: .png, properties: [:])!
+try png.write(to: URL(fileURLWithPath: outputPath))
+SWIFT
+}
+
+configure_dmg_finder() {
+	local mount_path="$1"
+
+	osascript >/dev/null <<APPLESCRIPT
+set dmgFolder to POSIX file "$mount_path" as alias
+set backgroundImage to POSIX file "$mount_path/.background/background.png" as alias
+
+tell application "Finder"
+	tell folder dmgFolder
+		open
+		set current view of container window to icon view
+		set toolbar visible of container window to false
+		set statusbar visible of container window to false
+		set bounds of container window to {120, 120, 760, 540}
+		set theViewOptions to icon view options of container window
+		set arrangement of theViewOptions to not arranged
+		set icon size of theViewOptions to 128
+		set background picture of theViewOptions to backgroundImage
+		set position of item "ClipMenu.app" of container window to {164, 214}
+		set position of item "Applications" of container window to {476, 214}
+		if exists item ".background" of container window then
+			set position of item ".background" of container window to {88, 900}
+		end if
+		if exists item ".fseventsd" of container window then
+			set position of item ".fseventsd" of container window to {210, 900}
+		end if
+		update without registering applications
+		delay 1
+		close
+	end tell
+end tell
+APPLESCRIPT
+}
+
 create_dmg() {
 	local app_path="$1"
 	local version
 	version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_path/Contents/Info.plist")"
 	local dmg_staging="$ROOT_DIR/build/dmg"
+	local dmg_mount="$ROOT_DIR/build/dmg-mount"
+	local rw_dmg="$ROOT_DIR/build/ClipMenu-${version}-rw.dmg"
 	local dmg_path="$DIST_DIR/ClipMenu-${version}.dmg"
 	local dmg_alias="$DIST_DIR/ClipMenu.dmg"
+	local volume_name="ClipMenu"
+	local background_path="$dmg_staging/.background/background.png"
 
-	rm -rf "$dmg_staging"
+	rm -rf "$dmg_staging" "$dmg_mount" "$rw_dmg"
 	mkdir -p "$dmg_staging" "$DIST_DIR"
 	cp -R "$app_path" "$dmg_staging/"
 	ln -s /Applications "$dmg_staging/Applications"
+	create_dmg_background "$background_path"
 
 	rm -f "$dmg_path" "$dmg_alias"
 	hdiutil create \
-		-volname "ClipMenu" \
+		-volname "$volume_name" \
 		-srcfolder "$dmg_staging" \
 		-ov \
+		-fs HFS+ \
+		-format UDRW \
+		"$rw_dmg" >&2
+
+	mkdir -p "$dmg_mount"
+	local device
+	device="$(hdiutil attach "$rw_dmg" -mountpoint "$dmg_mount" -nobrowse -noverify -noautoopen | awk '/Apple_HFS/ { print $1; exit }')"
+	mkdir -p "$dmg_mount/.fseventsd"
+	touch "$dmg_mount/.fseventsd/no_log"
+	chflags hidden "$dmg_mount/.background" "$dmg_mount/.fseventsd" 2>/dev/null || true
+	SetFile -a V "$dmg_mount/.background" "$dmg_mount/.fseventsd" 2>/dev/null || true
+	if ! configure_dmg_finder "$dmg_mount"; then
+		hdiutil detach "$device" -force >&2 || true
+		rm -rf "$dmg_mount" "$rw_dmg"
+		return 1
+	fi
+	sync
+	hdiutil detach "$device" >&2
+
+	hdiutil convert "$rw_dmg" \
 		-format UDZO \
-		"$dmg_path"
+		-imagekey zlib-level=9 \
+		-o "$dmg_path" >&2
+	rm -rf "$dmg_mount" "$rw_dmg"
 
 	ln -sf "$(basename "$dmg_path")" "$dmg_alias"
 	echo "$dmg_path"
@@ -211,7 +330,7 @@ main() {
 	verify_artifact "$app_path"
 
 	local dmg_path
-	dmg_path="$(create_dmg "$app_path")"
+	dmg_path="$(create_dmg "$app_path" | awk 'NF { line=$0 } END { print line }')"
 
 	echo "[sign] $dmg_path"
 	codesign --force --sign "$identity" --timestamp "$dmg_path"
